@@ -99,7 +99,7 @@ const CodeSnippetEditor: React.FC = () => {
       });
       
       toast.success("Code snippet saved successfully");
-      navigate(`/code-snippet/${newSnippet.id}`, { replace: true });
+      navigate(`/code-snippets/${newSnippet.id}`, { replace: true });
     } else if (id) {
       // Get existing snippets
       const snippets = getCodeSnippets();

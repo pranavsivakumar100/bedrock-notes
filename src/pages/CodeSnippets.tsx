@@ -3,16 +3,11 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Plus, Code } from 'lucide-react';
+import { getCodeSnippets } from '@/lib/storage';
 
 const CodeSnippets: React.FC = () => {
   const navigate = useNavigate();
-
-  // Sample code snippets for illustration
-  const snippets = [
-    { id: '1', title: 'Quick Sort Algorithm', language: 'javascript', createdAt: new Date(2023, 5, 15) },
-    { id: '2', title: 'Binary Search Implementation', language: 'python', createdAt: new Date(2023, 6, 20) },
-    { id: '3', title: 'Graph Traversal', language: 'java', createdAt: new Date(2023, 7, 5) },
-  ];
+  const snippets = getCodeSnippets();
 
   return (
     <div className="container mx-auto px-4 py-6 animate-fade-in">
@@ -48,7 +43,7 @@ const CodeSnippets: React.FC = () => {
                   {snippet.language}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  {snippet.createdAt.toLocaleDateString()}
+                  {new Date(snippet.createdAt).toLocaleDateString()}
                 </span>
               </div>
               <h3 className="font-medium">{snippet.title}</h3>
