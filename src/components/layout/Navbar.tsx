@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Menu, Search, Settings, UserCircle } from 'lucide-react';
+
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Menu, Search, Settings, UserCircle, Tags } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ThemeToggle from '@/components/ui/ThemeToggle';
@@ -17,6 +18,7 @@ import { getUser, removeUser } from '@/lib/storage';
 import { toast } from 'sonner';
 import AuthDialog from '@/components/auth/AuthDialog';
 import TagSelect from '@/components/tags/TagSelect';
+import { getTags } from '@/lib/tags-storage';
 
 interface NavbarProps {
   toggleSidebar: () => void;
@@ -29,9 +31,19 @@ const Navbar: React.FC<NavbarProps> = ({
   isSidebarOpen,
   className 
 }) => {
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const navigate = useNavigate();
   const user = getUser();
+
+  // Get tags for display in the badge indicators
+  const [tags, setTags] = useState(getTags());
+  
+  useEffect(() => {
+    // Refresh tags when selectedTags changes
+    setTags(getTags());
+  }, [selectedTags]);
 
   const handleLogout = () => {
     removeUser();
@@ -45,7 +57,23 @@ const Navbar: React.FC<NavbarProps> = ({
         ? prev.filter(id => id !== tagId)
         : [...prev, tagId]
     );
+    
+    // Here you would typically update your filter state or URL parameters
+    toast.success(`Tag filter ${prev.includes(tagId) ? 'removed' : 'applied'}`);
   };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}&tags=${selectedTags.join(',')}`);
+    }
+  };
+
+  // Get tag names for selected tags
+  const selectedTagNames = tags
+    .filter(tag => selectedTags.includes(tag.id))
+    .map(tag => tag.name);
 
   return (
     <header className={cn(
@@ -72,29 +100,44 @@ const Navbar: React.FC<NavbarProps> = ({
         </div>
         
         <div className="flex-1 max-w-md mx-4 hidden md:flex items-center gap-2">
-          <div className="relative flex-1">
+          <form onSubmit={handleSearch} className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
               placeholder="Search notes..."
               className="w-full pl-8 bg-muted/50 border-none focus-visible:ring-1"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-          </div>
+          </form>
           <TagSelect 
             selectedTags={selectedTags}
             onToggleTag={handleToggleTag}
           />
         </div>
         
+        {selectedTagNames.length > 0 && (
+          <div className="absolute top-16 left-0 right-0 bg-background border-b border-border/40 p-2 flex items-center gap-2">
+            <Tags className="h-4 w-4 text-muted-foreground" />
+            <div className="flex flex-wrap gap-1">
+              {selectedTagNames.map(name => (
+                <span key={name} className="text-xs bg-muted px-2 py-1 rounded">
+                  {name}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
             asChild
-            className="text-foreground/80 hover:text-foreground transition-colors"
+            className="text-foreground/80 hover:text-foreground transition-colors md:hidden"
           >
             <Link to="/search">
-              <Search className="h-5 w-5 md:hidden" />
+              <Search className="h-5 w-5" />
               <span className="sr-only">Search</span>
             </Link>
           </Button>

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Check, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -7,7 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { getTags, saveTag, deleteTag, TAG_COLORS } from '@/lib/tags-storage';
+import { getTags, saveTag, deleteTag, TAG_COLORS, Tag } from '@/lib/tags-storage';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
@@ -18,10 +18,15 @@ interface TagSelectProps {
 }
 
 const TagSelect: React.FC<TagSelectProps> = ({ selectedTags, onToggleTag }) => {
-  const [tags, setTags] = useState(getTags());
+  const [tags, setTags] = useState<Tag[]>([]);
   const [isCreating, setIsCreating] = useState(false);
   const [newTagName, setNewTagName] = useState('');
   const [selectedColor, setSelectedColor] = useState(TAG_COLORS[0]);
+  
+  // Load tags when component mounts
+  useEffect(() => {
+    setTags(getTags());
+  }, []);
   
   const handleCreateTag = () => {
     if (!newTagName.trim()) {
@@ -29,21 +34,34 @@ const TagSelect: React.FC<TagSelectProps> = ({ selectedTags, onToggleTag }) => {
       return;
     }
     
-    const newTag = saveTag({
-      name: newTagName.trim(),
-      color: selectedColor
-    });
-    
-    setTags([...tags, newTag]);
-    setNewTagName('');
-    setIsCreating(false);
-    toast.success('Tag created successfully');
+    try {
+      const newTag = saveTag({
+        name: newTagName.trim(),
+        color: selectedColor
+      });
+      
+      setTags([...tags, newTag]);
+      setNewTagName('');
+      setSelectedColor(TAG_COLORS[0]);
+      setIsCreating(false);
+      toast.success('Tag created successfully');
+    } catch (error) {
+      console.error('Error creating tag:', error);
+      toast.error('Failed to create tag');
+    }
   };
   
-  const handleDeleteTag = (id: string) => {
-    if (deleteTag(id)) {
-      setTags(tags.filter(tag => tag.id !== id));
-      toast.success('Tag deleted successfully');
+  const handleDeleteTag = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the tag toggle
+    
+    try {
+      if (deleteTag(id)) {
+        setTags(tags.filter(tag => tag.id !== id));
+        toast.success('Tag deleted successfully');
+      }
+    } catch (error) {
+      console.error('Error deleting tag:', error);
+      toast.error('Failed to delete tag');
     }
   };
 
@@ -75,6 +93,7 @@ const TagSelect: React.FC<TagSelectProps> = ({ selectedTags, onToggleTag }) => {
                 value={newTagName}
                 onChange={(e) => setNewTagName(e.target.value)}
                 className="h-8"
+                autoFocus
               />
               
               <div className="grid grid-cols-8 gap-1">
@@ -102,7 +121,11 @@ const TagSelect: React.FC<TagSelectProps> = ({ selectedTags, onToggleTag }) => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => setIsCreating(false)}
+                  onClick={() => {
+                    setIsCreating(false);
+                    setNewTagName('');
+                    setSelectedColor(TAG_COLORS[0]);
+                  }}
                 >
                   Cancel
                 </Button>
@@ -111,31 +134,37 @@ const TagSelect: React.FC<TagSelectProps> = ({ selectedTags, onToggleTag }) => {
           )}
           
           <div className="space-y-2">
-            {tags.map((tag) => (
-              <div key={tag.id} className="flex items-center gap-2">
-                <button
-                  onClick={() => onToggleTag(tag.id)}
-                  className={cn(
-                    'flex-1 flex items-center gap-2 px-2 py-1 rounded hover:bg-muted transition-colors',
-                    selectedTags.includes(tag.id) && 'bg-muted'
-                  )}
-                >
-                  <div className={cn('w-3 h-3 rounded-full', tag.color)} />
-                  <span>{tag.name}</span>
-                  {selectedTags.includes(tag.id) && (
-                    <Check className="h-4 w-4 ml-auto" />
-                  )}
-                </button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                  onClick={() => handleDeleteTag(tag.id)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+            {tags.length === 0 ? (
+              <div className="text-center py-2 text-muted-foreground">
+                No tags created yet
               </div>
-            ))}
+            ) : (
+              tags.map((tag) => (
+                <div key={tag.id} className="flex items-center gap-2">
+                  <button
+                    onClick={() => onToggleTag(tag.id)}
+                    className={cn(
+                      'flex-1 flex items-center gap-2 px-2 py-1 rounded hover:bg-muted transition-colors',
+                      selectedTags.includes(tag.id) && 'bg-muted'
+                    )}
+                  >
+                    <div className={cn('w-3 h-3 rounded-full', tag.color)} />
+                    <span>{tag.name}</span>
+                    {selectedTags.includes(tag.id) && (
+                      <Check className="h-4 w-4 ml-auto" />
+                    )}
+                  </button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    onClick={(e) => handleDeleteTag(tag.id, e)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </PopoverContent>

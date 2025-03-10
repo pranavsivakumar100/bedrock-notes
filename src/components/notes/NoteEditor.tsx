@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Check } from 'lucide-react';
@@ -8,6 +9,7 @@ import { addNote, getNotes, updateNote } from '@/lib/storage';
 import EditorHeader from './EditorHeader';
 import EditorArea from './EditorArea';
 import useEditorFormatting from '@/hooks/useEditorFormatting';
+import { getTags } from '@/lib/tags-storage';
 
 interface NoteEditorProps {
   noteId?: string;
@@ -19,6 +21,9 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
   const [content, setContent] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.SPLIT);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Load tags to display in the header
+  const tags = getTags();
   
   useEffect(() => {
     if (noteId && noteId !== 'new') {
@@ -100,6 +105,29 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
     setNote(updatedNote);
   };
   
+  const toggleTag = (tagId: string) => {
+    if (!note) return;
+    
+    const hasTag = note.tags.includes(tagId);
+    const updatedTags = hasTag
+      ? note.tags.filter(id => id !== tagId)
+      : [...note.tags, tagId];
+    
+    const updatedNote = {
+      ...note,
+      tags: updatedTags
+    };
+    
+    setNote(updatedNote);
+    
+    // Only update in storage if it's not a new note
+    if (note.id !== 'new') {
+      updateNote(updatedNote);
+    }
+    
+    toast.success(hasTag ? "Tag removed from note" : "Tag added to note");
+  };
+  
   const scrollToHeading = (headingId: string) => {
     const previewContainer = document.querySelector('.markdown-preview');
     if (previewContainer) {
@@ -154,6 +182,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
         toggleFavorite={toggleFavorite}
         saveNote={saveNote}
         isSaving={isSaving}
+        availableTags={tags}
+        onToggleTag={toggleTag}
       />
       
       <EditorArea 

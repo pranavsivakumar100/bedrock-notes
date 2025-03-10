@@ -1,7 +1,7 @@
 
 import { toast } from 'sonner';
 
-const TAGS_STORAGE_KEY = 'codechime_tags';
+const TAGS_STORAGE_KEY = 'bedrock_tags';
 
 export interface Tag {
   id: string;
@@ -23,9 +23,16 @@ export function getTags(): Tag[] {
 export function saveTag(tag: Omit<Tag, 'id'>): Tag {
   try {
     const tags = getTags();
+    
+    // Check for duplicate tag names
+    if (tags.some(t => t.name.toLowerCase() === tag.name.toLowerCase())) {
+      toast.error('A tag with this name already exists');
+      throw new Error('Duplicate tag name');
+    }
+    
     const newTag = {
       ...tag,
-      id: `tag-${Date.now()}`
+      id: `tag-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
     };
     
     tags.push(newTag);
@@ -33,7 +40,9 @@ export function saveTag(tag: Omit<Tag, 'id'>): Tag {
     return newTag;
   } catch (error) {
     console.error('Error saving tag:', error);
-    toast.error('Error saving tag');
+    if (!(error instanceof Error) || error.message !== 'Duplicate tag name') {
+      toast.error('Error saving tag');
+    }
     throw error;
   }
 }
@@ -54,6 +63,11 @@ export function deleteTag(id: string): boolean {
     toast.error('Error deleting tag');
     return false;
   }
+}
+
+export function updateTagsForNote(noteId: string, tagIds: string[]): void {
+  // This function will be implemented when we add tags to notes
+  console.log('Updating tags for note:', noteId, tagIds);
 }
 
 export const TAG_COLORS = [
