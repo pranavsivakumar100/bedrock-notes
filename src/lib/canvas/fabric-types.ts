@@ -21,6 +21,9 @@ declare module 'fabric' {
     data?: {
       type?: string;
       [key: string]: any;
-    }
+    };
+    
+    // Add missing method signatures
+    clone(callback: (cloned: FabricObject) => void): void;
   }
 }

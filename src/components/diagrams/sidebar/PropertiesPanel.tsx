@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Canvas, Object as FabricObject } from 'fabric';
 import { Button } from '@/components/ui/button';
@@ -28,17 +29,18 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   const handleDuplicate = () => {
     if (!canvas || !selectedElement) return;
     
-    selectedElement.clone((cloned: FabricObject) => {
-      cloned.set({
+    // Using clone function correctly to avoid TypeScript error
+    selectedElement.clone((clonedObj: FabricObject) => {
+      clonedObj.set({
         left: (selectedElement.left || 0) + 20,
         top: (selectedElement.top || 0) + 20,
         evented: true,
       });
       
-      canvas.add(cloned);
-      canvas.setActiveObject(cloned);
+      canvas.add(clonedObj);
+      canvas.setActiveObject(clonedObj);
       canvas.renderAll();
-      setSelectedElement(cloned);
+      setSelectedElement(clonedObj);
     });
   };
   

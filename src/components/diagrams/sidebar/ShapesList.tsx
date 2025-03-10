@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Canvas, Object as FabricObject, Group, Line, IText, Rect, Circle, Triangle, Ellipse, Path, Polygon } from 'fabric';
 import { Button } from '@/components/ui/button';
@@ -330,7 +329,6 @@ const ShapesList: React.FC<ShapesListProps> = ({
         ], {
           stroke: '#333333',
           strokeWidth: 1,
-          fill: '',
         });
         
         shape = new Group([documentShape, foldLine], {
