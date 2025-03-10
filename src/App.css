@@ -33,6 +33,11 @@ html {
   height: 100%;
 }
 
+/* Smooth scrolling for code sections */
+pre {
+  scroll-behavior: smooth;
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

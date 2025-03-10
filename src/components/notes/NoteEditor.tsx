@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -9,7 +10,9 @@ import {
   ArrowLeft, 
   Tag as TagIcon,
   AlertCircle,
-  Check
+  Check,
+  FileCode,
+  Image
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Note, ViewMode, ContextMenuPosition } from '@/lib/types';
@@ -220,6 +223,16 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
   const handleFormatNumberedList = () => insertAtCursor('1. ');
   const handleFormatBlockquote = () => insertAtCursor('> ');
   
+  const handleInsertCodeSnippet = () => {
+    insertAtCursor('```javascript\n// Your code here\n```');
+  };
+  
+  const handleInsertDiagram = () => {
+    toast.info("Diagram insertion will open the diagram editor in a future update");
+    // In a real implementation, this would open a diagram modal or navigate to the diagram editor
+    closeContextMenu();
+  };
+  
   const scrollToHeading = (headingId: string) => {
     if (previewRef.current) {
       const headingElement = previewRef.current.querySelector(`#${headingId}`);
@@ -392,6 +405,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
             onFormatBulletList={handleFormatBulletList}
             onFormatNumberedList={handleFormatNumberedList}
             onFormatBlockquote={handleFormatBlockquote}
+            onInsertCodeSnippet={handleInsertCodeSnippet}
+            onInsertDiagram={handleInsertDiagram}
           >
             <textarea
               ref={textareaRef}
@@ -426,6 +441,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
               onFormatBulletList={handleFormatBulletList}
               onFormatNumberedList={handleFormatNumberedList}
               onFormatBlockquote={handleFormatBlockquote}
+              onInsertCodeSnippet={handleInsertCodeSnippet}
+              onInsertDiagram={handleInsertDiagram}
             >
               <textarea
                 ref={textareaRef}
