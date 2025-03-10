@@ -146,4 +146,23 @@ pre {
   border-left: 1px solid #e0e0e0;
 }
 
+/* Custom resize handle styles */
+.resizable-handle {
+  background-color: transparent;
+  position: absolute;
+  transition: background-color 0.2s;
+}
+
+.resizable-handle:hover,
+.resizable-handle:active {
+  background-color: rgba(0, 122, 255, 0.5);
+}
+
+.resizable-handle-horizontal {
+  width: 5px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 10;
+}
+
 /* ... keep existing code */
