@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Canvas, util } from 'fabric';
@@ -75,6 +76,8 @@ const DiagramEditor: React.FC = () => {
   const [lastSavedState, setLastSavedState] = useState<string | null>(null);
   const [templateData, setTemplateData] = useState<any | null>(null);
   const [activeTab, setActiveTab] = useState<"diagram" | "style" | "outline">("diagram");
+  const [showGrid, setShowGrid] = useState(true);
+  const [showPage, setShowPage] = useState(true);
   
   const { undo: handleUndo, redo: handleRedo } = useCanvasHistory(canvas);
   
@@ -188,7 +191,7 @@ const DiagramEditor: React.FC = () => {
     const activeObject = canvas.getActiveObject();
     if (!activeObject) return;
     
-    canvas.getActiveObject()?.clone().then((clonedObj: any) => {
+    activeObject.clone((clonedObj: any) => {
       localStorage.setItem('cs-diagram-clipboard', JSON.stringify(clonedObj.toJSON()));
       toast.success("Copied to clipboard");
     });
@@ -204,7 +207,7 @@ const DiagramEditor: React.FC = () => {
     }
     
     try {
-      util.enlivenObjects([JSON.parse(clipboard)]).then((objects: any[]) => {
+      fabric.util.enlivenObjects([JSON.parse(clipboard)]).then((objects: any[]) => {
         objects.forEach(obj => {
           obj.set({
             left: obj.left + 20,
@@ -245,7 +248,7 @@ const DiagramEditor: React.FC = () => {
         return;
       }
       
-      const diagramId = id || `diagram-${Date.now()}`;
+      const diagramId = id === 'new' ? `diagram-${Date.now()}` : id;
       
       saveDiagram(diagramId, {
         title,
@@ -337,9 +340,19 @@ const DiagramEditor: React.FC = () => {
     setRightSidebarOpen(!rightSidebarOpen);
   };
   
+  const toggleGrid = () => {
+    setShowGrid(!showGrid);
+    // Logic to show/hide grid would go here using canvas
+  };
+  
+  const togglePage = () => {
+    setShowPage(!showPage);
+    // Logic to show/hide page would go here using canvas
+  };
+  
   return (
     <div className="diagram-editor-container">
-      <header className="border-b border-border/40 p-2 flex items-center justify-between glass-morphism relative z-10">
+      <header className="border-b border-border/40 p-2 flex items-center justify-between relative z-10 bg-white">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
             <a href="/diagrams">
@@ -435,7 +448,7 @@ const DiagramEditor: React.FC = () => {
         </div>
         
         {rightSidebarOpen && (
-          <div className="w-64 border-l border-border/40 flex flex-col">
+          <div className="w-64 border-l border-border/40 flex flex-col bg-white">
             <Tabs defaultValue="diagram" value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
               <TabsList className="w-full rounded-none border-b">
                 <TabsTrigger value="diagram" className="flex-1">Diagram</TabsTrigger>
@@ -448,11 +461,23 @@ const DiagramEditor: React.FC = () => {
                   <h3 className="text-sm font-medium">View</h3>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="grid" className="checkbox" checked />
+                      <input 
+                        type="checkbox" 
+                        id="grid" 
+                        className="checkbox" 
+                        checked={showGrid}
+                        onChange={toggleGrid}
+                      />
                       <label htmlFor="grid" className="text-sm">Grid</label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="page-view" className="checkbox" checked />
+                      <input 
+                        type="checkbox" 
+                        id="page-view" 
+                        className="checkbox" 
+                        checked={showPage}
+                        onChange={togglePage}
+                      />
                       <label htmlFor="page-view" className="text-sm">Page View</label>
                     </div>
                   </div>
@@ -471,19 +496,19 @@ const DiagramEditor: React.FC = () => {
                   <h3 className="text-sm font-medium">Options</h3>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="connection-arrows" className="checkbox" checked />
+                      <input type="checkbox" id="connection-arrows" className="checkbox" defaultChecked />
                       <label htmlFor="connection-arrows" className="text-sm">Connection Arrows</label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="connection-points" className="checkbox" checked />
+                      <input type="checkbox" id="connection-points" className="checkbox" defaultChecked />
                       <label htmlFor="connection-points" className="text-sm">Connection Points</label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="guides" className="checkbox" checked />
+                      <input type="checkbox" id="guides" className="checkbox" defaultChecked />
                       <label htmlFor="guides" className="text-sm">Guides</label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="autosave" className="checkbox" checked />
+                      <input type="checkbox" id="autosave" className="checkbox" defaultChecked />
                       <label htmlFor="autosave" className="text-sm">Autosave</label>
                     </div>
                   </div>
@@ -499,7 +524,7 @@ const DiagramEditor: React.FC = () => {
                   
                   <div className="flex gap-2 mt-2">
                     <div className="flex items-center space-x-2">
-                      <input type="radio" id="portrait" name="orientation" className="radio" checked />
+                      <input type="radio" id="portrait" name="orientation" className="radio" defaultChecked />
                       <label htmlFor="portrait" className="text-sm">Portrait</label>
                     </div>
                     <div className="flex items-center space-x-2">
