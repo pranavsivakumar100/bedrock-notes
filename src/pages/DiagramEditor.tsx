@@ -1,6 +1,7 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Canvas, util, Object as FabricObject } from 'fabric';
+import { Canvas, util } from 'fabric';
 import { 
   Database, 
   Server, 
@@ -23,7 +24,6 @@ import {
   Download,
   Trash2,
   PanelLeft,
-  PanelRight,
   ArrowLeft,
   Layers,
   Undo,
@@ -61,12 +61,6 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@/components/ui/resizable";
-import { useCanvasHistory } from '@/hooks/useCanvasHistory';
 
 const DiagramEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -78,21 +72,19 @@ const DiagramEditor: React.FC = () => {
   const [selectedElement, setSelectedElement] = useState<any | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
+  const [undoStack, setUndoStack] = useState<any[]>([]);
+  const [redoStack, setRedoStack] = useState<any[]>([]);
   const [lastSavedState, setLastSavedState] = useState<string | null>(null);
   const [templateData, setTemplateData] = useState<any | null>(null);
   const [activeTab, setActiveTab] = useState<"diagram" | "style" | "outline">("diagram");
-  const [showGrid, setShowGrid] = useState(true);
-  const [showPage, setShowPage] = useState(true);
-  const [leftPanelSize, setLeftPanelSize] = useState(20); // Default 20%
-  const [rightPanelSize, setRightPanelSize] = useState(20); // Default 20%
-  
-  const { undo: handleUndo, redo: handleRedo } = useCanvasHistory(canvas);
   
   useEffect(() => {
     document.title = `${title} - Diagram Editor`;
     
+    // Apply a class to the body to ensure full viewport usage
     document.body.classList.add('overflow-hidden');
     
+    // Check for template data
     const storedTemplateData = localStorage.getItem('diagram_template');
     
     if (id === 'new' && storedTemplateData) {
@@ -107,8 +99,10 @@ const DiagramEditor: React.FC = () => {
           setTemplateData(template.json);
         }
         
+        // Show a toast notification
         toast.success('Template applied!');
         
+        // Clear the template data to prevent applying it again on refresh
         localStorage.removeItem('diagram_template');
       } catch (error) {
         console.error('Error parsing template data:', error);
@@ -129,12 +123,16 @@ const DiagramEditor: React.FC = () => {
     };
   }, [id, title, canvas]);
   
+  // Apply template to canvas when canvas and template data are available
   useEffect(() => {
     if (canvas && templateData) {
       try {
         canvas.loadFromJSON(templateData, () => {
           canvas.renderAll();
-          setTemplateData(null);
+          // Capture initial state for undo
+          const jsonState = JSON.stringify(canvas.toJSON());
+          setUndoStack([jsonState]);
+          setTemplateData(null); // Clear template data after applying
         });
       } catch (error) {
         console.error('Error applying template to canvas:', error);
@@ -145,6 +143,14 @@ const DiagramEditor: React.FC = () => {
   
   useEffect(() => {
     if (!canvas) return;
+    
+    const captureCanvasState = () => {
+      if (canvas) {
+        const jsonState = JSON.stringify(canvas.toJSON());
+        setUndoStack(prev => [...prev, jsonState]);
+        setRedoStack([]);
+      }
+    };
     
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey) {
@@ -176,16 +182,90 @@ const DiagramEditor: React.FC = () => {
           e.preventDefault();
           canvas.remove(canvas.getActiveObject());
           canvas.renderAll();
+          captureCanvasState();
         }
       }
     };
     
+    canvas.on('object:modified', captureCanvasState);
+    canvas.on('object:added', captureCanvasState);
+    canvas.on('object:removed', captureCanvasState);
+    
     window.addEventListener('keydown', handleKeyDown);
     
     return () => {
+      canvas.off('object:modified', captureCanvasState);
+      canvas.off('object:added', captureCanvasState);
+      canvas.off('object:removed', captureCanvasState);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [canvas, handleUndo, handleRedo]);
+  }, [canvas, undoStack, redoStack]);
+  
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.ctrlKey || e.metaKey) {
+      if (e.key === 'z') {
+        e.preventDefault();
+        handleUndo();
+      } else if (e.key === 'y' || (e.shiftKey && e.key === 'z')) {
+        e.preventDefault();
+        handleRedo();
+      } else if (e.key === 's') {
+        e.preventDefault();
+        handleSaveDiagram();
+      } else if (e.key === 'c') {
+        e.preventDefault();
+        if (canvas?.getActiveObject()) {
+          handleCopy();
+        }
+      } else if (e.key === 'v') {
+        e.preventDefault();
+        handlePaste();
+      } else if (e.key === 'x') {
+        e.preventDefault();
+        if (canvas?.getActiveObject()) {
+          handleCut();
+        }
+      }
+    } else if (e.key === 'Delete' || e.key === 'Backspace') {
+      if (canvas?.getActiveObject() && document.activeElement === document.body) {
+        e.preventDefault();
+        canvas.remove(canvas.getActiveObject());
+        canvas.renderAll();
+        if (canvas) {
+          const jsonState = JSON.stringify(canvas.toJSON());
+          setUndoStack(prev => [...prev, jsonState]);
+          setRedoStack([]);
+        }
+      }
+    }
+  };
+  
+  const handleUndo = () => {
+    if (undoStack.length <= 1 || !canvas) return;
+    
+    const currentState = undoStack[undoStack.length - 1];
+    const previousState = undoStack[undoStack.length - 2];
+    
+    setRedoStack(prev => [...prev, currentState]);
+    setUndoStack(prev => prev.slice(0, -1));
+    
+    canvas.loadFromJSON(previousState, () => {
+      canvas.renderAll();
+    });
+  };
+  
+  const handleRedo = () => {
+    if (redoStack.length === 0 || !canvas) return;
+    
+    const nextState = redoStack[redoStack.length - 1];
+    
+    setUndoStack(prev => [...prev, nextState]);
+    setRedoStack(prev => prev.slice(0, -1));
+    
+    canvas.loadFromJSON(nextState, () => {
+      canvas.renderAll();
+    });
+  };
   
   const handleCopy = () => {
     if (!canvas) return;
@@ -193,20 +273,10 @@ const DiagramEditor: React.FC = () => {
     const activeObject = canvas.getActiveObject();
     if (!activeObject) return;
     
-    try {
-      activeObject.clone()
-        .then((clonedObj: FabricObject) => {
-          localStorage.setItem('cs-diagram-clipboard', JSON.stringify(clonedObj.toJSON()));
-          toast.success("Copied to clipboard");
-        })
-        .catch((error: any) => {
-          console.error("Clone error:", error);
-          toast.error("Failed to copy to clipboard");
-        });
-    } catch (error) {
-      console.error("Clone error:", error);
-      toast.error("Failed to copy to clipboard");
-    }
+    canvas.getActiveObject()?.clone().then((clonedObj: any) => {
+      localStorage.setItem('cs-diagram-clipboard', JSON.stringify(clonedObj.toJSON()));
+      toast.success("Copied to clipboard");
+    });
   };
   
   const handlePaste = () => {
@@ -219,11 +289,11 @@ const DiagramEditor: React.FC = () => {
     }
     
     try {
-      util.enlivenObjects([JSON.parse(clipboard)]).then((objects: FabricObject[]) => {
+      util.enlivenObjects([JSON.parse(clipboard)]).then((objects: any[]) => {
         objects.forEach(obj => {
           obj.set({
-            left: obj.left! + 20,
-            top: obj.top! + 20,
+            left: obj.left + 20,
+            top: obj.top + 20,
           });
           canvas.add(obj);
           canvas.setActiveObject(obj);
@@ -260,7 +330,7 @@ const DiagramEditor: React.FC = () => {
         return;
       }
       
-      const diagramId = id === 'new' ? `diagram-${Date.now()}` : id;
+      const diagramId = id || `diagram-${Date.now()}`;
       
       saveDiagram(diagramId, {
         title,
@@ -352,17 +422,9 @@ const DiagramEditor: React.FC = () => {
     setRightSidebarOpen(!rightSidebarOpen);
   };
   
-  const toggleGrid = () => {
-    setShowGrid(!showGrid);
-  };
-  
-  const togglePage = () => {
-    setShowPage(!showPage);
-  };
-  
   return (
     <div className="diagram-editor-container">
-      <header className="border-b border-border/40 p-2 flex items-center justify-between relative z-10 bg-white">
+      <header className="border-b border-border/40 p-2 flex items-center justify-between glass-morphism relative z-10">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
             <a href="/diagrams">
@@ -389,16 +451,6 @@ const DiagramEditor: React.FC = () => {
           >
             <PanelLeft className="h-4 w-4 mr-1" />
             {sidebarOpen ? 'Hide' : 'Show'} Sidebar
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="h-8 gap-1"
-            onClick={toggleRightSidebar}
-          >
-            <PanelRight className="h-4 w-4 mr-1" />
-            {rightSidebarOpen ? 'Hide' : 'Show'} Properties
           </Button>
           
           <Button 
@@ -448,154 +500,118 @@ const DiagramEditor: React.FC = () => {
       </header>
       
       <div className="flex flex-1 h-[calc(100vh-48px)] relative">
-        <ResizablePanelGroup direction="horizontal" className="w-full h-full">
-          {sidebarOpen && (
-            <>
-              <ResizablePanel 
-                defaultSize={leftPanelSize} 
-                minSize={15} 
-                maxSize={40}
-                onResize={(size) => setLeftPanelSize(size)}
-                className="border-r border-border/40"
-              >
-                <DiagramSidebar 
-                  canvas={canvas} 
-                  selectedElement={selectedElement} 
-                  setSelectedElement={setSelectedElement}
-                />
-              </ResizablePanel>
-              <ResizableHandle className="w-1 bg-border/40 hover:bg-primary/50 transition-colors" />
-            </>
-          )}
-          
-          <ResizablePanel defaultSize={sidebarOpen && rightSidebarOpen ? 100 - leftPanelSize - rightPanelSize : rightSidebarOpen ? 100 - rightPanelSize : 100}>
-            <div className="flex-1 flex flex-col relative h-full">
-              <DiagramToolbar canvas={canvas} />
-              <div className="flex-1 relative">
-                <DiagramCanvas 
-                  setCanvas={setCanvas} 
-                  diagramId={id} 
-                  setSelectedElement={setSelectedElement}
-                />
-              </div>
-            </div>
-          </ResizablePanel>
-          
-          {rightSidebarOpen && (
-            <>
-              <ResizableHandle className="w-1 bg-border/40 hover:bg-primary/50 transition-colors" />
-              <ResizablePanel 
-                defaultSize={rightPanelSize} 
-                minSize={15} 
-                maxSize={40}
-                onResize={(size) => setRightPanelSize(size)}
-                className="border-l border-border/40"
-              >
-                <div className="w-full h-full flex flex-col bg-white">
-                  <Tabs defaultValue="diagram" value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-                    <TabsList className="w-full rounded-none border-b">
-                      <TabsTrigger value="diagram" className="flex-1">Diagram</TabsTrigger>
-                      <TabsTrigger value="style" className="flex-1">Style</TabsTrigger>
-                      <TabsTrigger value="outline" className="flex-1">Outline</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="diagram" className="p-4 space-y-4">
-                      <div className="space-y-2">
-                        <h3 className="text-sm font-medium">View</h3>
-                        <div className="space-y-2">
-                          <div className="flex items-center space-x-2">
-                            <input 
-                              type="checkbox" 
-                              id="grid" 
-                              className="checkbox" 
-                              checked={showGrid}
-                              onChange={toggleGrid}
-                            />
-                            <label htmlFor="grid" className="text-sm">Grid</label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <input 
-                              type="checkbox" 
-                              id="page-view" 
-                              className="checkbox" 
-                              checked={showPage}
-                              onChange={togglePage}
-                            />
-                            <label htmlFor="page-view" className="text-sm">Page View</label>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <h3 className="text-sm font-medium">Background</h3>
-                        <Button variant="outline" size="sm" className="w-full">Change...</Button>
-                        <div className="flex items-center space-x-2">
-                          <input type="checkbox" id="background-color" className="checkbox" />
-                          <label htmlFor="background-color" className="text-sm">Background Color</label>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <h3 className="text-sm font-medium">Options</h3>
-                        <div className="space-y-2">
-                          <div className="flex items-center space-x-2">
-                            <input type="checkbox" id="connection-arrows" className="checkbox" defaultChecked />
-                            <label htmlFor="connection-arrows" className="text-sm">Connection Arrows</label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <input type="checkbox" id="connection-points" className="checkbox" defaultChecked />
-                            <label htmlFor="connection-points" className="text-sm">Connection Points</label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <input type="checkbox" id="guides" className="checkbox" defaultChecked />
-                            <label htmlFor="guides" className="text-sm">Guides</label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <input type="checkbox" id="autosave" className="checkbox" defaultChecked />
-                            <label htmlFor="autosave" className="text-sm">Autosave</label>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <h3 className="text-sm font-medium">Paper Size</h3>
-                        <select className="w-full p-2 bg-background border rounded">
-                          <option>US-Letter (8.5" x 11")</option>
-                          <option>A4 (210mm x 297mm)</option>
-                          <option>A3 (297mm x 420mm)</option>
-                        </select>
-                        
-                        <div className="flex gap-2 mt-2">
-                          <div className="flex items-center space-x-2">
-                            <input type="radio" id="portrait" name="orientation" className="radio" defaultChecked />
-                            <label htmlFor="portrait" className="text-sm">Portrait</label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <input type="radio" id="landscape" name="orientation" className="radio" />
-                            <label htmlFor="landscape" className="text-sm">Landscape</label>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="pt-4 space-y-2">
-                        <Button variant="outline" size="sm" className="w-full">Edit Data...</Button>
-                        <Button variant="outline" size="sm" className="w-full">Clear Default Style</Button>
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="style" className="p-4">
-                      <p className="text-muted-foreground text-sm">Select an element to view style options</p>
-                    </TabsContent>
-                    
-                    <TabsContent value="outline" className="p-4">
-                      <p className="text-muted-foreground text-sm">Layer structure will appear here</p>
-                    </TabsContent>
-                  </Tabs>
+        {sidebarOpen && (
+          <DiagramSidebar 
+            canvas={canvas} 
+            selectedElement={selectedElement} 
+            setSelectedElement={setSelectedElement}
+          />
+        )}
+        
+        <div className="flex-1 flex flex-col relative h-full">
+          <DiagramToolbar canvas={canvas} />
+          <div className="flex-1 relative">
+            <DiagramCanvas 
+              setCanvas={setCanvas} 
+              diagramId={id} 
+              setSelectedElement={setSelectedElement}
+            />
+          </div>
+        </div>
+        
+        {rightSidebarOpen && (
+          <div className="w-64 border-l border-border/40 flex flex-col">
+            <Tabs defaultValue="diagram" value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+              <TabsList className="w-full rounded-none border-b">
+                <TabsTrigger value="diagram" className="flex-1">Diagram</TabsTrigger>
+                <TabsTrigger value="style" className="flex-1">Style</TabsTrigger>
+                <TabsTrigger value="outline" className="flex-1">Outline</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="diagram" className="p-4 space-y-4">
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">View</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" id="grid" className="checkbox" checked />
+                      <label htmlFor="grid" className="text-sm">Grid</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" id="page-view" className="checkbox" checked />
+                      <label htmlFor="page-view" className="text-sm">Page View</label>
+                    </div>
+                  </div>
                 </div>
-              </ResizablePanel>
-            </>
-          )}
-        </ResizablePanelGroup>
+                
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Background</h3>
+                  <Button variant="outline" size="sm" className="w-full">Change...</Button>
+                  <div className="flex items-center space-x-2">
+                    <input type="checkbox" id="background-color" className="checkbox" />
+                    <label htmlFor="background-color" className="text-sm">Background Color</label>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Options</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" id="connection-arrows" className="checkbox" checked />
+                      <label htmlFor="connection-arrows" className="text-sm">Connection Arrows</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" id="connection-points" className="checkbox" checked />
+                      <label htmlFor="connection-points" className="text-sm">Connection Points</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" id="guides" className="checkbox" checked />
+                      <label htmlFor="guides" className="text-sm">Guides</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" id="autosave" className="checkbox" checked />
+                      <label htmlFor="autosave" className="text-sm">Autosave</label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Paper Size</h3>
+                  <select className="w-full p-2 bg-background border rounded">
+                    <option>US-Letter (8.5" x 11")</option>
+                    <option>A4 (210mm x 297mm)</option>
+                    <option>A3 (297mm x 420mm)</option>
+                  </select>
+                  
+                  <div className="flex gap-2 mt-2">
+                    <div className="flex items-center space-x-2">
+                      <input type="radio" id="portrait" name="orientation" className="radio" checked />
+                      <label htmlFor="portrait" className="text-sm">Portrait</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input type="radio" id="landscape" name="orientation" className="radio" />
+                      <label htmlFor="landscape" className="text-sm">Landscape</label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="pt-4 space-y-2">
+                  <Button variant="outline" size="sm" className="w-full">Edit Data...</Button>
+                  <Button variant="outline" size="sm" className="w-full">Clear Default Style</Button>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="style" className="p-4">
+                {/* Style options would go here */}
+                <p className="text-muted-foreground text-sm">Select an element to view style options</p>
+              </TabsContent>
+              
+              <TabsContent value="outline" className="p-4">
+                {/* Outline/layers view would go here */}
+                <p className="text-muted-foreground text-sm">Layer structure will appear here</p>
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
       </div>
       
       <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
