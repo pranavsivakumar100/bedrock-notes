@@ -30,13 +30,16 @@
 
 /* Invisible scroll styles */
 .invisible-scroll {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE and Edge */
   scroll-behavior: smooth;
+  overflow-y: auto !important;
 }
 
 .invisible-scroll::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none !important; /* Chrome, Safari, Opera */
+  width: 0 !important;
+  height: 0 !important;
 }
 
 .logo {

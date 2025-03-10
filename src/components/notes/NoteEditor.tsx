@@ -365,25 +365,25 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
             onFormatNumberedList={handleFormatNumberedList}
             onFormatBlockquote={handleFormatBlockquote}
           >
-            <ScrollArea invisible className="h-full">
+            <div className="h-full overflow-auto invisible-scroll">
               <textarea
                 ref={textareaRef}
                 value={content}
                 onChange={handleContentChange}
                 placeholder="Start writing..."
-                className="markdown-editor invisible-scroll"
+                className="markdown-editor w-full h-full outline-none resize-none bg-transparent p-4"
                 onContextMenu={handleContextMenu}
               />
-            </ScrollArea>
+            </div>
           </EditorContextMenu>
         )}
         
         {viewMode === ViewMode.PREVIEW && (
-          <ScrollArea invisible className="h-full">
+          <div className="h-full overflow-auto invisible-scroll p-4">
             <div ref={previewRef}>
               {renderPreview()}
             </div>
-          </ScrollArea>
+          </div>
         )}
         
         {viewMode === ViewMode.SPLIT && (
@@ -403,23 +403,23 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
               onFormatNumberedList={handleFormatNumberedList}
               onFormatBlockquote={handleFormatBlockquote}
             >
-              <ScrollArea invisible className="h-full">
+              <div className="h-full overflow-auto invisible-scroll">
                 <textarea
                   ref={textareaRef}
                   value={content}
                   onChange={handleContentChange}
                   placeholder="Start writing..."
-                  className="markdown-editor invisible-scroll"
+                  className="markdown-editor w-full h-full outline-none resize-none bg-transparent p-4"
                   onContextMenu={handleContextMenu}
                 />
-              </ScrollArea>
+              </div>
             </EditorContextMenu>
             
-            <ScrollArea invisible className="h-full">
+            <div className="h-full overflow-auto invisible-scroll p-4">
               <div ref={previewRef}>
                 {renderPreview()}
               </div>
-            </ScrollArea>
+            </div>
           </div>
         )}
       </div>
