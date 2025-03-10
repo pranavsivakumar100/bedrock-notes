@@ -17,6 +17,14 @@ declare module 'fabric' {
     }
   }
   
+  // Extend FabricObjectProps to include our custom data property
+  interface FabricObjectProps {
+    data?: {
+      type?: string;
+      [key: string]: any;
+    };
+  }
+  
   interface Object {
     data?: {
       type?: string;

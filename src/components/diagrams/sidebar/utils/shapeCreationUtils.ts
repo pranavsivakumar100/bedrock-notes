@@ -41,7 +41,8 @@ export const handleAddShape = ({ canvas, shapeType, setSelectedElement }: ShapeC
       shape = createActor();
       break;
     case 'text':
-      shape = createText();
+      // Use as FabricObject to fix type compatibility issues
+      shape = createText() as unknown as FabricObject;
       break;
     case 'line':
       shape = createLine();
