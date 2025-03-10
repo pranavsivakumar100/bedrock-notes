@@ -57,11 +57,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useCanvasHistory } from '@/hooks/useCanvasHistory';
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle
-} from "@/components/ui/resizable";
 
 const DiagramEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -332,7 +327,7 @@ const DiagramEditor: React.FC = () => {
   };
   
   return (
-    <div className="diagram-editor-container">
+    <div className="diagram-editor-container h-screen flex flex-col">
       <header className="border-b border-border/40 p-2 flex items-center justify-between glass-morphism relative z-10">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
@@ -408,43 +403,30 @@ const DiagramEditor: React.FC = () => {
         </div>
       </header>
       
-      <ResizablePanelGroup 
-        direction="horizontal" 
-        className="flex-1 h-[calc(100vh-48px)] relative"
-      >
-        {/* Canvas Panel (First) */}
-        <ResizablePanel defaultSize={sidebarOpen ? 80 : 100}>
-          <div className="flex-1 flex flex-col relative h-full">
-            <DiagramToolbar canvas={canvas} />
-            <div className="flex-1 relative bg-white">
-              <DiagramCanvas 
-                setCanvas={setCanvas} 
-                diagramId={id} 
-                setSelectedElement={setSelectedElement}
-              />
-            </div>
+      <div className="relative flex-1 h-[calc(100vh-48px)]">
+        {/* Main Canvas Area */}
+        <div className="w-full h-full">
+          <DiagramToolbar canvas={canvas} />
+          <div className="flex-1 relative h-[calc(100vh-90px)] bg-white">
+            <DiagramCanvas 
+              setCanvas={setCanvas} 
+              diagramId={id} 
+              setSelectedElement={setSelectedElement}
+            />
           </div>
-        </ResizablePanel>
+        </div>
         
-        {/* Sidebar Panel (Second) */}
+        {/* Right Sidebar */}
         {sidebarOpen && (
-          <>
-            <ResizableHandle withHandle />
-            <ResizablePanel 
-              defaultSize={20} 
-              minSize={15}
-              maxSize={40}
-              className="border-l border-border/40"
-            >
-              <DiagramSidebar 
-                canvas={canvas} 
-                selectedElement={selectedElement} 
-                setSelectedElement={setSelectedElement}
-              />
-            </ResizablePanel>
-          </>
+          <div className="absolute top-[42px] right-0 bottom-0 w-[300px] border-l border-border/40 bg-background z-10 shadow-lg">
+            <DiagramSidebar 
+              canvas={canvas} 
+              selectedElement={selectedElement} 
+              setSelectedElement={setSelectedElement}
+            />
+          </div>
         )}
-      </ResizablePanelGroup>
+      </div>
       
       <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <DialogContent>
