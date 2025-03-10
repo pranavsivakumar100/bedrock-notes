@@ -102,6 +102,7 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
     const handleResize = () => {
       if (!containerRef.current) return;
       
+      // Get the full available space
       const newWidth = containerRef.current.clientWidth;
       const newHeight = containerRef.current.clientHeight;
       
@@ -205,10 +206,10 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
   return (
     <div 
       ref={containerRef} 
-      className="flex-1 overflow-auto p-4 bg-gray-50 dark:bg-gray-900 h-full"
+      className="flex-1 w-full h-full overflow-hidden bg-gray-50 dark:bg-gray-900" 
     >
-      <div className="canvas-container drop-shadow-md h-full w-full">
-        <canvas ref={canvasRef} />
+      <div className="w-full h-full">
+        <canvas ref={canvasRef} className="w-full h-full" />
       </div>
     </div>
   );

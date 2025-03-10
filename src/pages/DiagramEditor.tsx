@@ -322,7 +322,7 @@ const DiagramEditor: React.FC = () => {
   };
   
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-screen w-screen overflow-hidden diagram-editor-container">
       <header className="border-b border-border/40 p-4 flex items-center justify-between glass-morphism">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>

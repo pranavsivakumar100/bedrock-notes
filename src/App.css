@@ -1,8 +1,19 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+}
+
+/* Remove max-width and padding for diagram pages */
+.diagram-editor-container {
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  text-align: left;
 }
 
 .logo {
