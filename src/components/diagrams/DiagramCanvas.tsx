@@ -1,6 +1,5 @@
-
 import React, { useEffect, useRef } from 'react';
-import { Canvas, Object as FabricObject, Line, util } from 'fabric';
+import { Canvas, Object as FabricObject, Line, util, Point } from 'fabric';
 import { getDiagram } from '@/lib/diagram-storage';
 import { toast } from 'sonner';
 
@@ -10,7 +9,6 @@ interface DiagramCanvasProps {
   setSelectedElement: (element: any | null) => void;
 }
 
-// Add custom data property to Canvas
 declare module 'fabric' {
   interface Canvas {
     _objects: FabricObject[];
@@ -40,12 +38,10 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
 
-    // Get container dimensions for responsive canvas
     const container = containerRef.current;
     const containerWidth = container.clientWidth;
     const containerHeight = container.clientHeight;
 
-    // Initialize Fabric Canvas with proper dimensions
     const canvas = new Canvas(canvasRef.current, {
       width: containerWidth,
       height: containerHeight,
@@ -54,22 +50,17 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       preserveObjectStacking: true,
     });
     
-    // Initialize custom data property
     canvas.customData = {};
     
     fabricCanvasRef.current = canvas;
     setCanvas(canvas);
 
-    // Add grid
     createGrid(canvas);
 
-    // Enable snap-to-grid
     enableSnapToGrid(canvas);
 
-    // Setup mouse wheel zoom
     setupZoomWithMouseWheel(canvas, container);
 
-    // Load diagram if ID is provided
     if (diagramId && diagramId !== 'new') {
       try {
         const diagram = getDiagram(diagramId);
@@ -84,7 +75,6 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       }
     }
 
-    // Handle selection events
     canvas.on('selection:created', (e) => {
       if (e.selected && e.selected.length > 0) {
         setSelectedElement(e.selected[0]);
@@ -101,7 +91,6 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       setSelectedElement(null);
     });
 
-    // Handle window resize
     const handleResize = () => {
       if (!containerRef.current || !canvas) return;
       
@@ -112,48 +101,36 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       canvas.setHeight(newHeight);
       canvas.renderAll();
       
-      // Recreate grid when canvas is resized
       createGrid(canvas);
     };
 
     window.addEventListener('resize', handleResize);
 
-    // Ensure initial sizing is correct
     setTimeout(() => {
       handleResize();
     }, 100);
 
-    // Clean up
     return () => {
       window.removeEventListener('resize', handleResize);
       canvas.dispose();
     };
   }, [diagramId, setCanvas, setSelectedElement]);
 
-  // Setup zoom with mouse wheel
   const setupZoomWithMouseWheel = (canvas: Canvas, container: HTMLDivElement) => {
     container.addEventListener('wheel', (e) => {
-      // Only zoom if Ctrl key is pressed
       if (e.ctrlKey) {
         e.preventDefault();
         
         const delta = e.deltaY;
         let zoom = canvas.getZoom();
         
-        // Calculate point under mouse in canvas coordinates
-        const point = {
-          x: e.offsetX,
-          y: e.offsetY
-        };
+        const point = new Point(e.offsetX, e.offsetY);
         
-        // Calculate zoom factor - decrease for scroll down, increase for scroll up
         zoom = delta > 0 ? zoom * 0.95 : zoom * 1.05;
         
-        // Limit zoom levels
         if (zoom > 20) zoom = 20;
         if (zoom < 0.1) zoom = 0.1;
         
-        // Set zoom centered on mouse position
         canvas.zoomToPoint(point, zoom);
         
         canvas.renderAll();
@@ -163,9 +140,7 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
     }, { passive: false });
   };
 
-  // Create a grid pattern on the canvas
   const createGrid = (canvas: Canvas) => {
-    // Clear any existing grid
     const existingGrids = canvas.getObjects().filter(obj => obj.data?.type === 'grid');
     existingGrids.forEach(grid => canvas.remove(grid));
     
@@ -173,7 +148,6 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
     const width = canvas.width || 1000;
     const height = canvas.height || 800;
     
-    // Create vertical lines
     for (let i = 0; i < width / gridSize; i++) {
       const line = new Line([i * gridSize, 0, i * gridSize, height], {
         stroke: '#e0e0e0',
@@ -186,7 +160,6 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       canvas.sendObjectToBack(line);
     }
     
-    // Create horizontal lines
     for (let i = 0; i < height / gridSize; i++) {
       const line = new Line([0, i * gridSize, width, i * gridSize], {
         stroke: '#e0e0e0',
@@ -202,20 +175,17 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
     canvas.renderAll();
   };
 
-  // Enable snap to grid functionality
   const enableSnapToGrid = (canvas: Canvas) => {
     const gridSize = 20;
     
     canvas.on('object:moving', (e) => {
       if (!e.target) return;
       
-      // Skip grid snapping if Shift key is pressed (for free movement)
       const evt = e.e as MouseEvent;
       if (evt && evt.shiftKey) return;
       
       const target = e.target;
       
-      // Snap to grid
       target.set({
         left: Math.round(target.left! / gridSize) * gridSize,
         top: Math.round(target.top! / gridSize) * gridSize
@@ -225,7 +195,6 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
     canvas.on('object:scaling', (e) => {
       if (!e.target) return;
       
-      // Skip grid snapping if Shift key is pressed
       const evt = e.e as MouseEvent;
       if (evt && evt.shiftKey) return;
       
