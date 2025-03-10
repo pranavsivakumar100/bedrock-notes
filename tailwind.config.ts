@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -131,8 +130,47 @@ export default {
 				'scale-in': 'scale-in 0.3s ease-out',
 				'scale-out': 'scale-out 0.3s ease-out',
 				'float': 'float 6s ease-in-out infinite',
-			}
+			},
+			typography: {
+				DEFAULT: {
+					css: {
+						maxWidth: 'none',
+						color: 'hsl(var(--foreground))',
+						a: {
+							color: 'hsl(var(--primary))',
+							textDecoration: 'underline',
+							fontWeight: '500',
+						},
+						h1: {
+							color: 'hsl(var(--foreground))',
+						},
+						h2: {
+							color: 'hsl(var(--foreground))',
+						},
+						h3: {
+							color: 'hsl(var(--foreground))',
+						},
+						h4: {
+							color: 'hsl(var(--foreground))',
+						},
+						code: {
+							color: 'hsl(var(--foreground))',
+						},
+						pre: {
+							backgroundColor: 'hsl(var(--muted))',
+							color: 'hsl(var(--foreground))',
+						},
+						strong: {
+							color: 'hsl(var(--foreground))',
+						},
+						blockquote: {
+							color: 'hsl(var(--foreground))',
+							borderLeftColor: 'hsl(var(--border))',
+						},
+					},
+				},
+			},
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 } satisfies Config;
