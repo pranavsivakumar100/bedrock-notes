@@ -105,7 +105,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
           content,
           tags: note?.tags || [],
           isFavorite: note?.isFavorite || false,
-          folderId: note?.folderId
+          folderId: note?.folderId,
+          type: 'note'
         });
         
         setNote(newNote);
@@ -265,7 +266,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
       tags: [],
       createdAt: new Date(),
       updatedAt: new Date(),
-      isFavorite: false
+      isFavorite: false,
+      type: 'note'
     });
   }
   

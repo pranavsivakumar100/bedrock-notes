@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -232,7 +233,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
       content: '# New Note\n\nStart writing here...',
       tags: [],
       isFavorite: false,
-      folderId
+      folderId,
+      type: 'note'
     });
     
     setNotes([...notes, newNote]);
