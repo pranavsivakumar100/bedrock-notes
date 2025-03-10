@@ -1,13 +1,13 @@
 
 import React, { useState } from 'react';
-import { fabric } from 'fabric';
+import { Canvas, Rect, Circle, Triangle, Path, IText } from 'fabric';
 import { 
   MousePointer, 
   Pencil, 
   Type, 
   Square, 
-  Circle, 
-  Triangle,
+  Circle as CircleIcon, 
+  Triangle as TriangleIcon,
   ArrowRight,
   Database,
   Server,
@@ -27,7 +27,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 
 interface DiagramToolbarProps {
-  canvas: fabric.Canvas | null;
+  canvas: Canvas | null;
 }
 
 type Tool = 
@@ -86,11 +86,11 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
   const addShape = (shapeType: string) => {
     if (!canvas) return;
     
-    let shape: fabric.Object;
+    let shape: any;
     
     switch (shapeType) {
       case 'square':
-        shape = new fabric.Rect({
+        shape = new Rect({
           width: 100,
           height: 100,
           fill: 'transparent',
@@ -102,7 +102,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         break;
         
       case 'circle':
-        shape = new fabric.Circle({
+        shape = new Circle({
           radius: 50,
           fill: 'transparent',
           stroke: drawingColor,
@@ -113,7 +113,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         break;
         
       case 'triangle':
-        shape = new fabric.Triangle({
+        shape = new Triangle({
           width: 100,
           height: 100,
           fill: 'transparent',
@@ -126,7 +126,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         
       case 'database':
         // Create database shape using path
-        shape = new fabric.Path('M 0 20 Q 0 0 50 0 Q 100 0 100 20 L 100 80 Q 100 100 50 100 Q 0 100 0 80 Z M 0 20 Q 0 40 50 40 Q 100 40 100 20 M 0 40 Q 0 60 50 60 Q 100 60 100 40 M 0 60 Q 0 80 50 80 Q 100 80 100 60', {
+        shape = new Path('M 0 20 Q 0 0 50 0 Q 100 0 100 20 L 100 80 Q 100 100 50 100 Q 0 100 0 80 Z M 0 20 Q 0 40 50 40 Q 100 40 100 20 M 0 40 Q 0 60 50 60 Q 100 60 100 40 M 0 60 Q 0 80 50 80 Q 100 80 100 60', {
           fill: 'transparent',
           stroke: drawingColor,
           strokeWidth: 2,
@@ -138,7 +138,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         break;
         
       case 'server':
-        shape = new fabric.Rect({
+        shape = new Rect({
           width: 80,
           height: 120,
           fill: 'transparent',
@@ -174,7 +174,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         
       case 'arrow':
         // Create arrow
-        shape = new fabric.Path('M 0 10 L 180 10 L 170 0 L 180 10 L 170 20', {
+        shape = new Path('M 0 10 L 180 10 L 170 0 L 180 10 L 170 20', {
           fill: 'transparent',
           stroke: drawingColor,
           strokeWidth: 2,
@@ -184,7 +184,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         break;
         
       case 'text':
-        shape = new fabric.IText('Text', {
+        shape = new IText('Text', {
           left: 100,
           top: 100,
           fontFamily: 'Arial',
@@ -196,7 +196,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         
       case 'component':
         // Create component symbol
-        shape = new fabric.Rect({
+        shape = new Rect({
           width: 120,
           height: 80,
           fill: 'transparent',

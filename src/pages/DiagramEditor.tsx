@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fabric } from 'fabric';
+import { Canvas } from 'fabric';
 import { 
   Database, 
   Server, 
@@ -37,9 +37,9 @@ const DiagramEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
+  const [canvas, setCanvas] = useState<Canvas | null>(null);
   const [title, setTitle] = useState('Untitled Diagram');
-  const [selectedElement, setSelectedElement] = useState<fabric.Object | null>(null);
+  const [selectedElement, setSelectedElement] = useState<any | null>(null);
   
   const handleSaveDiagram = () => {
     if (!canvas) return;

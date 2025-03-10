@@ -1,13 +1,13 @@
 
 import React, { useEffect, useRef } from 'react';
-import { fabric } from 'fabric';
+import { Canvas } from 'fabric';
 import { getDiagram } from '@/lib/diagram-storage';
 import { toast } from 'sonner';
 
 interface DiagramCanvasProps {
-  setCanvas: (canvas: fabric.Canvas) => void;
+  setCanvas: (canvas: Canvas) => void;
   diagramId?: string;
-  setSelectedElement: (element: fabric.Object | null) => void;
+  setSelectedElement: (element: any | null) => void;
 }
 
 const DiagramCanvas: React.FC<DiagramCanvasProps> = ({ 
@@ -16,13 +16,13 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
   setSelectedElement
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fabricCanvasRef = useRef<fabric.Canvas | null>(null);
+  const fabricCanvasRef = useRef<Canvas | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
 
     // Initialize Fabric Canvas
-    const canvas = new fabric.Canvas(canvasRef.current, {
+    const canvas = new Canvas(canvasRef.current, {
       width: window.innerWidth - 300,
       height: window.innerHeight - 120,
       backgroundColor: '#ffffff',

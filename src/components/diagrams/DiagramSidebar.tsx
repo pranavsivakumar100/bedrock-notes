@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { fabric } from 'fabric';
+import { Canvas, Object as FabricObject } from 'fabric';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Palette,
@@ -21,9 +20,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 
 interface DiagramSidebarProps {
-  canvas: fabric.Canvas | null;
-  selectedElement: fabric.Object | null;
-  setSelectedElement: (element: fabric.Object | null) => void;
+  canvas: Canvas | null;
+  selectedElement: FabricObject | null;
+  setSelectedElement: (element: FabricObject | null) => void;
 }
 
 const DiagramSidebar: React.FC<DiagramSidebarProps> = ({ 
@@ -44,7 +43,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
   const handleDuplicate = () => {
     if (!canvas || !selectedElement) return;
     
-    selectedElement.clone((cloned: fabric.Object) => {
+    selectedElement.clone((cloned: FabricObject) => {
       // Position the clone slightly offset from the original
       cloned.set({
         left: selectedElement.left! + 20,
@@ -169,7 +168,6 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
     canvas.renderAll();
   };
   
-  // Calculate the real dimensions of the selected object
   const getObjectDimensions = () => {
     if (!selectedElement) return { width: 0, height: 0 };
     
@@ -179,7 +177,6 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
     };
   };
   
-  // Get the position of the selected object
   const getObjectPosition = () => {
     if (!selectedElement) return { x: 0, y: 0 };
     
