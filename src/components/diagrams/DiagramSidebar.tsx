@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Canvas, Object as FabricObject, Group, Line, IText, Rect, Circle, Triangle, Ellipse, Path, Polygon } from 'fabric';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -609,7 +608,13 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           strokeWidth: 1,
         });
         
-        const foldLine = new Line([80, 0, 100, 20, 80, 20, 80, 0], {
+        // Fix: Use arrays of numbers instead of strings for Line constructor
+        const foldLine = new Line([
+          80, 0, 
+          100, 20, 
+          80, 20, 
+          80, 0
+        ], {
           stroke: '#333333',
           strokeWidth: 1,
           fill: '',
@@ -625,46 +630,67 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'cloud':
-        // Create cloud path
-        const cloudPath = 'M25,60 Q10,60 10,50 Q10,35 25,35 Q25,10 50,10 Q80,10 80,35 Q95,35 95,50 Q95,60 80,60 Z';
-        shape = new Path(cloudPath, {
+        // Fix: Create cloud with Path object using points instead of SVG path string
+        shape = new Path([
+          { x: 25, y: 60 },
+          { x: 10, y: 60, control: { x: 10, y: 50 } },
+          { x: 25, y: 35, control: { x: 10, y: 35 } },
+          { x: 50, y: 10, control: { x: 25, y: 10 } },
+          { x: 80, y: 35, control: { x: 80, y: 10 } },
+          { x: 95, y: 50, control: { x: 95, y: 35 } },
+          { x: 80, y: 60, control: { x: 95, y: 60 } },
+          { x: 25, y: 60 }
+        ], {
           left: centerX - 50,
           top: centerY - 35,
           fill: '#f0f0f0',
           stroke: '#333333',
           strokeWidth: 1,
-          scaleX: 1,
-          scaleY: 1,
           objectCaching: false,
         });
         break;
         
       case 'speech-bubble':
-        // Create speech bubble path
-        const bubblePath = 'M10,0 Q0,0 0,10 L0,70 Q0,80 10,80 L50,80 L60,100 L70,80 L90,80 Q100,80 100,70 L100,10 Q100,0 90,0 Z';
-        shape = new Path(bubblePath, {
+        // Fix: Create speech bubble with Path object using points instead of SVG path string
+        shape = new Path([
+          { x: 10, y: 0 },
+          { x: 0, y: 10, control: { x: 0, y: 0 } },
+          { x: 0, y: 70 },
+          { x: 10, y: 80, control: { x: 0, y: 80 } },
+          { x: 50, y: 80 },
+          { x: 60, y: 100 },
+          { x: 70, y: 80 },
+          { x: 90, y: 80 },
+          { x: 100, y: 70, control: { x: 100, y: 80 } },
+          { x: 100, y: 10 },
+          { x: 90, y: 0, control: { x: 100, y: 0 } },
+          { x: 10, y: 0 }
+        ], {
           left: centerX - 50,
           top: centerY - 50,
           fill: '#f0f0f0',
           stroke: '#333333',
           strokeWidth: 1,
-          scaleX: 1,
-          scaleY: 1,
           objectCaching: false,
         });
         break;
         
       case 'note':
-        // Create note with folded corner
-        const notePath = 'M0,0 L70,0 L70,70 L85,55 L85,100 L0,100 Z';
-        shape = new Path(notePath, {
+        // Fix: Create note with Path object using points instead of SVG path string
+        shape = new Path([
+          { x: 0, y: 0 },
+          { x: 70, y: 0 },
+          { x: 70, y: 70 },
+          { x: 85, y: 55 },
+          { x: 85, y: 100 },
+          { x: 0, y: 100 },
+          { x: 0, y: 0 }
+        ], {
           left: centerX - 42.5,
           top: centerY - 50,
           fill: '#f0f0f0',
           stroke: '#333333',
           strokeWidth: 1,
-          scaleX: 1,
-          scaleY: 1,
           objectCaching: false,
         });
         break;
@@ -680,6 +706,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           strokeWidth: 1,
         });
         
+        // Fix: Use arrays of numbers for Line constructors
         const body = new Line([15, 30, 15, 70], {
           stroke: '#333333',
           strokeWidth: 2,
@@ -715,23 +742,22 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'arrow':
-        shape = new Line([centerX - 50, centerY, centerX + 50, centerY], {
+        // Fix: Use arrays of numbers for Line constructor
+        const arrowLine = new Line([0, 0, 100, 0], {
           stroke: '#333333',
           strokeWidth: 2,
           objectCaching: false,
         });
         
-        (shape as any).strokeLineCap = 'round';
-        (shape as any).strokeLineJoin = 'round';
-        (shape as any).arrow = true;
-        (shape as any).arrowHead = 'end';
+        (arrowLine as any).strokeLineCap = 'round';
+        (arrowLine as any).strokeLineJoin = 'round';
         
         // Add arrowhead
         const arrowHead = new Triangle({
           width: 16,
           height: 16,
-          left: centerX + 50,
-          top: centerY,
+          left: 100,
+          top: 0,
           angle: 90,
           fill: '#333333',
           originX: 'center',
@@ -739,9 +765,9 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         });
         
         // Group arrow with arrowhead
-        const arrowGroup = new Group([shape, arrowHead], {
+        const arrowGroup = new Group([arrowLine, arrowHead], {
           left: centerX - 50,
-          top: centerY - 8,
+          top: centerY,
           objectCaching: false,
         });
         
@@ -749,15 +775,22 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'line':
-        shape = new Line([centerX - 50, centerY, centerX + 50, centerY], {
+        // Fix: Use arrays of numbers for Line constructor
+        shape = new Line([0, 0, 100, 0], {
           stroke: '#333333',
           strokeWidth: 2,
+          left: centerX - 50,
+          top: centerY,
           objectCaching: false,
         });
         break;
         
       case 'curved-line':
-        const path = new Path('M 0 0 Q 50 -50 100 0', {
+        // Fix: Create curved line with Path object using points instead of SVG path string
+        shape = new Path([
+          { x: 0, y: 0 },
+          { x: 100, y: 0, control: { x: 50, y: -50 } }
+        ], {
           fill: '',
           stroke: '#333333',
           strokeWidth: 2,
@@ -765,7 +798,6 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           top: centerY,
           objectCaching: false,
         });
-        shape = path;
         break;
         
       case 'text':
@@ -893,668 +925,4 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
-                      onClick={() => handleAddShape('circle')}
-                    >
-                      <div className="border border-foreground w-full h-full rounded-full"></div>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
-                      onClick={() => handleAddShape('rectangle')}
-                    >
-                      <div className="border border-foreground w-full h-3/5"></div>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
-                      onClick={() => handleAddShape('diamond')}
-                    >
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="border border-foreground w-4/5 h-4/5" style={{ transform: 'rotate(45deg)' }}></div>
-                      </div>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
-                      onClick={() => handleAddShape('parallelogram')}
-                    >
-                      <div className="w-full h-full flex items-center justify-center">
-                        <div className="border border-foreground w-full h-4/5" style={{ transform: 'skew(-15deg)' }}></div>
-                      </div>
-                    </Button>
-                    
-                    {/* Third row */}
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
-                      onClick={() => handleAddShape('hexagon')}
-                    >
-                      <div className="w-full h-full flex items-center justify-center">
-                        <svg viewBox="0 0 100 100" className="w-full h-full">
-                          <polygon points="25,0 75,0 100,50 75,100 25,100 0,50" fill="none" stroke="currentColor" />
-                        </svg>
-                      </div>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
-                      onClick={() => handleAddShape('triangle')}
-                    >
-                      <div className="w-full h-full flex items-center justify-center">
-                        <svg viewBox="0 0 100 100" className="w-full h-full">
-                          <polygon points="50,10 90,90 10,90" fill="none" stroke="currentColor" />
-                        </svg>
-                      </div>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
-                      onClick={() => handleAddShape('cylinder')}
-                    >
-                      <div className="w-full h-full flex items-center justify-center">
-                        <svg viewBox="0 0 100 100" className="w-full h-full">
-                          <ellipse cx="50" cy="20" rx="30" ry="10" fill="none" stroke="currentColor" />
-                          <ellipse cx="50" cy="80" rx="30" ry="10" fill="none" stroke="currentColor" />
-                          <line x1="20" y1="20" x2="20" y2="80" stroke="currentColor" />
-                          <line x1="80" y1="20" x2="80" y2="80" stroke="currentColor" />
-                        </svg>
-                      </div>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
-                      onClick={() => handleAddShape('cloud')}
-                    >
-                      <div className="w-full h-full flex items-center justify-center">
-                        <svg viewBox="0 0 100 100" className="w-full h-full">
-                          <path d="M25,60 Q10,60 10,50 Q10,35 25,35 Q25,10 50,10 Q80,10 80,35 Q95,35 95,50 Q95,60 80,60 Z" fill="none" stroke="currentColor" />
-                        </svg>
-                      </div>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
-                      onClick={() => handleAddShape('speech-bubble')}
-                    >
-                      <div className="w-full h-full flex items-center justify-center">
-                        <svg viewBox="0 0 100 100" className="w-full h-full">
-                          <path d="M10,10 Q0,10 0,20 L0,70 Q0,80 10,80 L50,80 L60,100 L70,80 L90,80 Q100,80 100,70 L100,20 Q100,10 90,10 Z" fill="none" stroke="currentColor" />
-                        </svg>
-                      </div>
-                    </Button>
-                    
-                    {/* Fourth row */}
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
-                      onClick={() => handleAddShape('document')}
-                    >
-                      <div className="w-full h-full flex items-center justify-center">
-                        <svg viewBox="0 0 100 100" className="w-full h-full">
-                          <path d="M10,10 L70,10 L90,30 L90,90 L10,90 Z" fill="none" stroke="currentColor" />
-                          <path d="M70,10 L70,30 L90,30" fill="none" stroke="currentColor" />
-                        </svg>
-                      </div>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
-                      onClick={() => handleAddShape('note')}
-                    >
-                      <div className="w-full h-full flex items-center justify-center">
-                        <svg viewBox="0 0 100 100" className="w-full h-full">
-                          <path d="M10,10 L70,10 L70,70 L90,50 L90,90 L10,90 Z" fill="none" stroke="currentColor" />
-                        </svg>
-                      </div>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
-                      onClick={() => handleAddShape('person')}
-                    >
-                      <div className="w-full h-full flex items-center justify-center">
-                        <svg viewBox="0 0 100 100" className="w-full h-full">
-                          <circle cx="50" cy="25" r="15" fill="none" stroke="currentColor" />
-                          <line x1="50" y1="40" x2="50" y2="75" stroke="currentColor" />
-                          <line x1="30" y1="55" x2="70" y2="55" stroke="currentColor" />
-                          <line x1="35" y1="90" x2="50" y2="75" stroke="currentColor" />
-                          <line x1="65" y1="90" x2="50" y2="75" stroke="currentColor" />
-                        </svg>
-                      </div>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
-                      onClick={() => handleAddShape('arrow')}
-                    >
-                      <div className="w-full h-full flex items-center justify-center">
-                        <svg viewBox="0 0 100 50" className="w-full h-full">
-                          <line x1="10" y1="25" x2="80" y2="25" stroke="currentColor" strokeWidth="2" />
-                          <polygon points="80,25 70,15 70,35" fill="currentColor" />
-                        </svg>
-                      </div>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
-                      onClick={() => handleAddShape('curved-line')}
-                    >
-                      <div className="w-full h-full flex items-center justify-center">
-                        <svg viewBox="0 0 100 50" className="w-full h-full">
-                          <path d="M10,40 Q50,0 90,40" fill="none" stroke="currentColor" strokeWidth="2" />
-                        </svg>
-                      </div>
-                    </Button>
-                    
-                    {/* Fifth row */}
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
-                      onClick={() => handleAddShape('line')}
-                    >
-                      <div className="w-full h-full flex items-center justify-center">
-                        <svg viewBox="0 0 100 50" className="w-full h-full">
-                          <line x1="10" y1="25" x2="90" y2="25" stroke="currentColor" strokeWidth="2" />
-                        </svg>
-                      </div>
-                    </Button>
-                    
-                    {/* Add more shapes as needed */}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-              
-              <AccordionItem value="basic">
-                <AccordionTrigger className="px-2 py-1 text-sm">
-                  Basic
-                </AccordionTrigger>
-                <AccordionContent className="pt-0 pb-1">
-                  <div className="grid grid-cols-3 gap-1 px-2">
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center"
-                      onClick={() => handleAddShape('rectangle')}
-                    >
-                      <SquareIcon className="h-6 w-6" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center"
-                      onClick={() => handleAddShape('circle')}
-                    >
-                      <CircleIcon className="h-6 w-6" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center"
-                      onClick={() => handleAddShape('triangle')}
-                    >
-                      <TriangleIcon className="h-6 w-6" />
-                    </Button>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-              
-              <AccordionItem value="arrows">
-                <AccordionTrigger className="px-2 py-1 text-sm">
-                  Arrows
-                </AccordionTrigger>
-                <AccordionContent className="pt-0 pb-1">
-                  <div className="grid grid-cols-3 gap-1 px-2">
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center"
-                      onClick={() => handleAddShape('arrow')}
-                    >
-                      <ArrowRightIcon className="h-6 w-6" />
-                    </Button>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-              
-              <AccordionItem value="text">
-                <AccordionTrigger className="px-2 py-1 text-sm">
-                  Text
-                </AccordionTrigger>
-                <AccordionContent className="pt-0 pb-1">
-                  <div className="grid grid-cols-3 gap-1 px-2">
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center"
-                      onClick={() => handleAddShape('text')}
-                    >
-                      <Type className="h-6 w-6" />
-                    </Button>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-              
-              <AccordionItem value="flowchart">
-                <AccordionTrigger className="px-2 py-1 text-sm">
-                  Flowchart
-                </AccordionTrigger>
-                <AccordionContent className="pt-0 pb-1">
-                  <div className="grid grid-cols-3 gap-1 px-2">
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center"
-                      onClick={() => handleAddShape('rectangle')}
-                    >
-                      <div className="w-6 h-6 border-2 rounded-sm"></div>
-                    </Button>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-              
-              <AccordionItem value="entity-relation">
-                <AccordionTrigger className="px-2 py-1 text-sm">
-                  Entity Relation
-                </AccordionTrigger>
-                <AccordionContent className="pt-0 pb-1">
-                  <div className="grid grid-cols-3 gap-1 px-2">
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center"
-                      onClick={() => handleAddShape('rectangle')}
-                    >
-                      <div className="w-5 h-5 border-2 rounded-sm"></div>
-                    </Button>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-              
-              <AccordionItem value="uml">
-                <AccordionTrigger className="px-2 py-1 text-sm">
-                  UML
-                </AccordionTrigger>
-                <AccordionContent className="pt-0 pb-1">
-                  <div className="grid grid-cols-3 gap-1 px-2">
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center"
-                      onClick={() => handleAddShape('text')}
-                    >
-                      <div className="h-6 w-6 border-2 flex flex-col">
-                        <div className="border-b h-1/3 w-full"></div>
-                      </div>
-                    </Button>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-            
-            <div className="p-2">
-              <Button size="sm" className="w-full" variant="outline">
-                <Plus className="h-4 w-4 mr-2" />
-                More Shapes
-              </Button>
-            </div>
-          </ScrollArea>
-        </TabsContent>
-        
-        <TabsContent value="properties" className="flex-1 overflow-hidden p-0 m-0">
-          <ScrollArea className="h-full invisible-scrollbar">
-            <div className="space-y-2 p-4">
-              <div className="flex justify-between items-center">
-                <h3 className="text-sm font-medium">Element Properties</h3>
-                <div className="flex items-center gap-1">
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    onClick={handleDuplicate}
-                    disabled={!selectedElement}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="icon" 
-                    onClick={handleDelete}
-                    disabled={!selectedElement}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              
-              <Separator />
-              
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <Label htmlFor="position-x">X Position</Label>
-                    <Input 
-                      id="position-x" 
-                      type="number" 
-                      value={position.x}
-                      onChange={(e) => handlePositionChange('x', e.target.value)}
-                      disabled={!selectedElement}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="position-y">Y Position</Label>
-                    <Input 
-                      id="position-y" 
-                      type="number" 
-                      value={position.y}
-                      onChange={(e) => handlePositionChange('y', e.target.value)}
-                      disabled={!selectedElement}
-                    />
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <Label htmlFor="element-width">Width</Label>
-                    <Input 
-                      id="element-width" 
-                      type="number" 
-                      value={dimensions.width}
-                      onChange={(e) => handleSizeChange('width', e.target.value)}
-                      disabled={!selectedElement}
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label htmlFor="element-height">Height</Label>
-                    <Input 
-                      id="element-height" 
-                      type="number" 
-                      value={dimensions.height}
-                      onChange={(e) => handleSizeChange('height', e.target.value)}
-                      disabled={!selectedElement}
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Alignment</Label>
-                  <div className="flex items-center justify-between">
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      onClick={() => handleAlign('left')}
-                      disabled={!selectedElement}
-                    >
-                      <AlignLeft className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      onClick={() => handleAlign('center')}
-                      disabled={!selectedElement}
-                    >
-                      <AlignCenter className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      onClick={() => handleAlign('right')}
-                      disabled={!selectedElement}
-                    >
-                      <AlignRight className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="icon"
-                      onClick={() => handleAlign('top')}
-                      disabled={!selectedElement}
-                    >
-                      <AlignJustify className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Zoom</Label>
-                  <div className="flex gap-2 items-center">
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      onClick={() => handleZoom('out')}
-                    >
-                      <ZoomOut className="h-4 w-4" />
-                    </Button>
-                    <div className="flex-1 text-center text-sm">
-                      {scale}%
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="icon" 
-                      onClick={() => handleZoom('in')}
-                    >
-                      <ZoomIn className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-              
-              <Separator className="my-4" />
-              
-              <div className="space-y-4">
-                <h3 className="text-sm font-medium">View</h3>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="show-grid" 
-                    checked={showGrid} 
-                    onCheckedChange={(checked) => handleGridToggle(!!checked)}
-                  />
-                  <Label htmlFor="show-grid" className="cursor-pointer">Grid</Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox 
-                    id="page-view" 
-                    checked={showPageView} 
-                    onCheckedChange={(checked) => setShowPageView(!!checked)}
-                  />
-                  <Label htmlFor="page-view" className="cursor-pointer">Page View</Label>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="background-color">Background Color</Label>
-                  <div className="flex gap-2">
-                    <div className="h-8 w-8 overflow-hidden rounded border">
-                      <input 
-                        type="color" 
-                        id="background-color" 
-                        value={backgroundColor}
-                        onChange={handleBackgroundColorChange}
-                        className="h-10 w-10 transform -translate-x-1 -translate-y-1 cursor-pointer"
-                      />
-                    </div>
-                    <Input 
-                      value={backgroundColor}
-                      onChange={handleBackgroundColorChange}
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              <Separator className="my-4" />
-              
-              <div className="space-y-4">
-                <h3 className="text-sm font-medium">Paper Size</h3>
-                
-                <div className="space-y-2">
-                  <Select 
-                    value={paperSize} 
-                    onValueChange={setPaperSize}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select paper size" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="letter">US Letter (8.5" x 11")</SelectItem>
-                      <SelectItem value="legal">US Legal (8.5" x 14")</SelectItem>
-                      <SelectItem value="a4">A4 (210mm x 297mm)</SelectItem>
-                      <SelectItem value="a3">A3 (297mm x 420mm)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Orientation</Label>
-                  <RadioGroup 
-                    value={orientation} 
-                    onValueChange={setOrientation}
-                    className="flex gap-4"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="portrait" id="portrait" />
-                      <Label htmlFor="portrait">Portrait</Label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="landscape" id="landscape" />
-                      <Label htmlFor="landscape">Landscape</Label>
-                    </div>
-                  </RadioGroup>
-                </div>
-              </div>
-            </div>
-          </ScrollArea>
-        </TabsContent>
-        
-        <TabsContent value="style" className="flex-1 overflow-hidden p-0 m-0">
-          <ScrollArea className="h-full invisible-scrollbar">
-            <div className="space-y-2 p-4">
-              <h3 className="text-sm font-medium">Style Options</h3>
-              <Separator />
-              
-              <div className="space-y-3">
-                <div className="space-y-1">
-                  <Label htmlFor="element-color">Color</Label>
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 overflow-hidden rounded border">
-                      <input 
-                        type="color" 
-                        id="element-color"
-                        className="h-10 w-10 transform -translate-x-1 -translate-y-1 cursor-pointer"
-                        onChange={handleColorChange}
-                        disabled={!selectedElement}
-                      />
-                    </div>
-                    <Input 
-                      value={selectedElement && selectedElement.type === 'i-text' 
-                        ? (selectedElement.fill as string) 
-                        : (selectedElement?.stroke as string) || ''}
-                      onChange={handleColorChange}
-                      disabled={!selectedElement}
-                      className="flex-1"
-                    />
-                  </div>
-                </div>
-                
-                <div className="space-y-1">
-                  <div className="flex justify-between">
-                    <Label htmlFor="element-opacity">Opacity</Label>
-                    <span className="text-xs text-muted-foreground">{opacity}%</span>
-                  </div>
-                  <Slider 
-                    id="element-opacity"
-                    defaultValue={[100]} 
-                    max={100} 
-                    step={1}
-                    value={[opacity]}
-                    onValueChange={handleOpacityChange}
-                    disabled={!selectedElement}
-                  />
-                </div>
-                
-                <div className="space-y-1">
-                  <Label htmlFor="stroke-width">Stroke Width</Label>
-                  <Input 
-                    id="stroke-width" 
-                    type="number" 
-                    min="0" 
-                    max="20"
-                    value={selectedElement?.strokeWidth || 0}
-                    onChange={handleStrokeWidthChange}
-                    disabled={!selectedElement || selectedElement.type === 'i-text'}
-                  />
-                </div>
-                
-                {selectedElement && selectedElement.type === 'i-text' && (
-                  <div className="space-y-1">
-                    <Label htmlFor="font-family">Font</Label>
-                    <Select 
-                      defaultValue="Arial" 
-                      onValueChange={(value) => {
-                        if (canvas && selectedElement && selectedElement.type === 'i-text') {
-                          (selectedElement as IText).set({ fontFamily: value });
-                          canvas.renderAll();
-                        }
-                      }}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a font" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Arial">Arial</SelectItem>
-                        <SelectItem value="Helvetica">Helvetica</SelectItem>
-                        <SelectItem value="Times New Roman">Times New Roman</SelectItem>
-                        <SelectItem value="Courier New">Courier New</SelectItem>
-                        <SelectItem value="Georgia">Georgia</SelectItem>
-                        <SelectItem value="Verdana">Verdana</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-                
-                <Separator />
-                
-                <div className="space-y-2">
-                  <h3 className="text-sm font-medium">Layer Controls</h3>
-                  <div className="flex justify-between">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={handleBringForward}
-                      disabled={!selectedElement}
-                    >
-                      Bring Forward
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={handleSendBackward}
-                      disabled={!selectedElement}
-                    >
-                      Send Backward
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </ScrollArea>
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-};
-
-export default DiagramSidebar;
+                      className="h-10 w-full aspect-square flex items-
