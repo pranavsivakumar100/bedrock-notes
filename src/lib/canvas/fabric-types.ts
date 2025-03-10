@@ -23,4 +23,9 @@ declare module 'fabric' {
       [key: string]: any;
     }
   }
+  
+  // Add correct Path type extensions
+  interface Path {
+    path: string | Array<{ x: number; y: number; }>;
+  }
 }
