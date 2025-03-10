@@ -11,6 +11,7 @@ import { CodeExecutionResult, ContextMenuPosition } from '@/lib/types';
 import { toast } from 'sonner';
 import Prism from 'prismjs';
 import CodeEditorContextMenu from '@/components/ui/context-menu/CodeEditorContextMenu';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const CodeSnippetEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -247,16 +248,18 @@ const CodeSnippetEditor: React.FC = () => {
               onRun={handleRunCode}
               onSave={handleSave}
             >
-              <textarea
-                ref={editorRef}
-                id="code-editor"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className="font-mono text-sm w-full h-full p-4 resize-none absolute inset-0 bg-transparent text-gray-300 border-0 focus:ring-0 outline-none"
-                placeholder="Write your code here..."
-                spellCheck="false"
-                onContextMenu={handleContextMenu}
-              />
+              <ScrollArea className="absolute inset-0 h-full" invisible={true}>
+                <textarea
+                  ref={editorRef}
+                  id="code-editor"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  className="font-mono text-sm w-full h-full p-4 resize-none bg-transparent text-gray-300 border-0 focus:ring-0 outline-none invisible-scrollbar"
+                  placeholder="Write your code here..."
+                  spellCheck="false"
+                  onContextMenu={handleContextMenu}
+                />
+              </ScrollArea>
             </CodeEditorContextMenu>
           </div>
         </div>
@@ -265,13 +268,15 @@ const CodeSnippetEditor: React.FC = () => {
           <Label className="mb-2">Output</Label>
           <Card className="flex-1 border-[#374151] bg-[#1f2937] min-h-[400px]">
             <CardContent className="p-0 h-full">
-              <pre 
-                className={`font-mono text-sm p-4 overflow-auto h-full ${
-                  result?.isError ? 'text-red-400' : 'text-gray-300'
-                }`}
-              >
-                {result ? result.output : 'Code output will appear here after running'}
-              </pre>
+              <ScrollArea className="h-full" invisible={true}>
+                <pre 
+                  className={`font-mono text-sm p-4 h-full ${
+                    result?.isError ? 'text-red-400' : 'text-gray-300'
+                  }`}
+                >
+                  {result ? result.output : 'Code output will appear here after running'}
+                </pre>
+              </ScrollArea>
             </CardContent>
           </Card>
         </div>
