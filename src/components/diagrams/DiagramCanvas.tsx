@@ -35,14 +35,20 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricCanvasRef = useRef<Canvas | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current || !containerRef.current) return;
 
-    // Initialize Fabric Canvas
+    // Get container dimensions for responsive canvas
+    const container = containerRef.current;
+    const containerWidth = container.clientWidth;
+    const containerHeight = container.clientHeight;
+
+    // Initialize Fabric Canvas with proper dimensions
     const canvas = new Canvas(canvasRef.current, {
-      width: window.innerWidth - 300,
-      height: window.innerHeight - 120,
+      width: containerWidth,
+      height: containerHeight,
       backgroundColor: '#ffffff',
       selection: true,
       preserveObjectStacking: true,
@@ -94,8 +100,13 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
 
     // Handle window resize
     const handleResize = () => {
-      canvas.setWidth(window.innerWidth - (300 + 40)); // Adjust width based on sidebar
-      canvas.setHeight(window.innerHeight - 120); // Adjust for header
+      if (!containerRef.current) return;
+      
+      const newWidth = containerRef.current.clientWidth;
+      const newHeight = containerRef.current.clientHeight;
+      
+      canvas.setWidth(newWidth);
+      canvas.setHeight(newHeight);
       canvas.renderAll();
       
       // Recreate grid when canvas is resized
@@ -103,6 +114,9 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
     };
 
     window.addEventListener('resize', handleResize);
+
+    // Initial resize to fit container
+    handleResize();
 
     // Clean up
     return () => {
@@ -131,8 +145,6 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
         data: { type: 'grid' }
       });
       canvas.add(line);
-      
-      // Use setCoords instead of moveTo
       canvas.sendObjectToBack(line);
     }
     
@@ -146,8 +158,6 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
         data: { type: 'grid' }
       });
       canvas.add(line);
-      
-      // Use setCoords instead of moveTo
       canvas.sendObjectToBack(line);
     }
     
@@ -193,8 +203,11 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
   };
 
   return (
-    <div className="flex-1 overflow-auto p-4 bg-gray-50 dark:bg-gray-900">
-      <div className="canvas-container drop-shadow-md">
+    <div 
+      ref={containerRef} 
+      className="flex-1 overflow-auto p-4 bg-gray-50 dark:bg-gray-900 h-full"
+    >
+      <div className="canvas-container drop-shadow-md h-full w-full">
         <canvas ref={canvasRef} />
       </div>
     </div>
