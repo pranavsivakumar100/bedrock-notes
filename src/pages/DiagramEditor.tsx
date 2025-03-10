@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Canvas, util } from 'fabric';
@@ -61,6 +60,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
+import { useCanvasHistory } from '@/hooks/useCanvasHistory';
 
 const DiagramEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -72,11 +72,11 @@ const DiagramEditor: React.FC = () => {
   const [selectedElement, setSelectedElement] = useState<any | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
-  const [undoStack, setUndoStack] = useState<any[]>([]);
-  const [redoStack, setRedoStack] = useState<any[]>([]);
   const [lastSavedState, setLastSavedState] = useState<string | null>(null);
   const [templateData, setTemplateData] = useState<any | null>(null);
   const [activeTab, setActiveTab] = useState<"diagram" | "style" | "outline">("diagram");
+  
+  const { undo: handleUndo, redo: handleRedo } = useCanvasHistory(canvas);
   
   useEffect(() => {
     document.title = `${title} - Diagram Editor`;
@@ -129,9 +129,6 @@ const DiagramEditor: React.FC = () => {
       try {
         canvas.loadFromJSON(templateData, () => {
           canvas.renderAll();
-          // Capture initial state for undo
-          const jsonState = JSON.stringify(canvas.toJSON());
-          setUndoStack([jsonState]);
           setTemplateData(null); // Clear template data after applying
         });
       } catch (error) {
@@ -143,14 +140,6 @@ const DiagramEditor: React.FC = () => {
   
   useEffect(() => {
     if (!canvas) return;
-    
-    const captureCanvasState = () => {
-      if (canvas) {
-        const jsonState = JSON.stringify(canvas.toJSON());
-        setUndoStack(prev => [...prev, jsonState]);
-        setRedoStack([]);
-      }
-    };
     
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey) {
@@ -182,90 +171,16 @@ const DiagramEditor: React.FC = () => {
           e.preventDefault();
           canvas.remove(canvas.getActiveObject());
           canvas.renderAll();
-          captureCanvasState();
         }
       }
     };
-    
-    canvas.on('object:modified', captureCanvasState);
-    canvas.on('object:added', captureCanvasState);
-    canvas.on('object:removed', captureCanvasState);
     
     window.addEventListener('keydown', handleKeyDown);
     
     return () => {
-      canvas.off('object:modified', captureCanvasState);
-      canvas.off('object:added', captureCanvasState);
-      canvas.off('object:removed', captureCanvasState);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [canvas, undoStack, redoStack]);
-  
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.ctrlKey || e.metaKey) {
-      if (e.key === 'z') {
-        e.preventDefault();
-        handleUndo();
-      } else if (e.key === 'y' || (e.shiftKey && e.key === 'z')) {
-        e.preventDefault();
-        handleRedo();
-      } else if (e.key === 's') {
-        e.preventDefault();
-        handleSaveDiagram();
-      } else if (e.key === 'c') {
-        e.preventDefault();
-        if (canvas?.getActiveObject()) {
-          handleCopy();
-        }
-      } else if (e.key === 'v') {
-        e.preventDefault();
-        handlePaste();
-      } else if (e.key === 'x') {
-        e.preventDefault();
-        if (canvas?.getActiveObject()) {
-          handleCut();
-        }
-      }
-    } else if (e.key === 'Delete' || e.key === 'Backspace') {
-      if (canvas?.getActiveObject() && document.activeElement === document.body) {
-        e.preventDefault();
-        canvas.remove(canvas.getActiveObject());
-        canvas.renderAll();
-        if (canvas) {
-          const jsonState = JSON.stringify(canvas.toJSON());
-          setUndoStack(prev => [...prev, jsonState]);
-          setRedoStack([]);
-        }
-      }
-    }
-  };
-  
-  const handleUndo = () => {
-    if (undoStack.length <= 1 || !canvas) return;
-    
-    const currentState = undoStack[undoStack.length - 1];
-    const previousState = undoStack[undoStack.length - 2];
-    
-    setRedoStack(prev => [...prev, currentState]);
-    setUndoStack(prev => prev.slice(0, -1));
-    
-    canvas.loadFromJSON(previousState, () => {
-      canvas.renderAll();
-    });
-  };
-  
-  const handleRedo = () => {
-    if (redoStack.length === 0 || !canvas) return;
-    
-    const nextState = redoStack[redoStack.length - 1];
-    
-    setUndoStack(prev => [...prev, nextState]);
-    setRedoStack(prev => prev.slice(0, -1));
-    
-    canvas.loadFromJSON(nextState, () => {
-      canvas.renderAll();
-    });
-  };
+  }, [canvas, handleUndo, handleRedo]);
   
   const handleCopy = () => {
     if (!canvas) return;
