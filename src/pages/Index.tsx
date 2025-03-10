@@ -1,80 +1,40 @@
 
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Plus, BookText, Code, File, Tag as TagIcon, Clock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Plus, BookText, Code, File, Tag as TagIcon, Clock, Heart, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import NoteCard from '@/components/notes/NoteCard';
+import { getUser, getNotes, updateNote, deleteNote } from '@/lib/storage';
 import { Note } from '@/lib/types';
 import { toast } from 'sonner';
-
-// Mock data for demonstration
-const mockNotes: Note[] = [
-  {
-    id: '1',
-    title: 'Understanding Data Structures',
-    content: 'Data structures are specialized formats for organizing, processing, retrieving and storing data. There are several basic and advanced types of data structures, all designed to arrange data to suit a specific purpose.',
-    tags: ['data-structures', 'algorithms'],
-    createdAt: new Date('2023-10-15T14:48:00'),
-    updatedAt: new Date('2023-10-16T09:22:00'),
-    isFavorite: true
-  },
-  {
-    id: '2',
-    title: 'Introduction to Algorithms',
-    content: 'In mathematics and computer science, an algorithm is a finite sequence of well-defined, computer-implementable instructions, typically to solve a class of problems or to perform a computation.',
-    tags: ['algorithms', 'complexity'],
-    createdAt: new Date('2023-10-10T11:32:00'),
-    updatedAt: new Date('2023-10-12T16:49:00'),
-    isFavorite: false
-  },
-  {
-    id: '3',
-    title: 'Graph Theory Basics',
-    content: 'Graph theory is the study of graphs, which are mathematical structures used to model pairwise relations between objects. A graph in this context is made up of vertices (also called nodes or points) which are connected by edges (also called links or lines).',
-    tags: ['graph-theory', 'discrete-math'],
-    createdAt: new Date('2023-09-28T09:14:00'),
-    updatedAt: new Date('2023-09-30T15:20:00'),
-    isFavorite: false
-  },
-  {
-    id: '4',
-    title: 'Recursion Techniques',
-    content: 'Recursion in computer science is a method of solving a problem where the solution depends on solutions to smaller instances of the same problem. Such problems can generally be solved by iteration, but this needs to identify and index the smaller instances at programming time.',
-    tags: ['recursion', 'algorithms'],
-    createdAt: new Date('2023-09-22T13:45:00'),
-    updatedAt: new Date('2023-09-23T10:31:00'),
-    isFavorite: true
-  },
-  {
-    id: '5',
-    title: 'Dynamic Programming',
-    content: 'Dynamic programming is both a mathematical optimization method and a computer programming method. The method was developed by Richard Bellman in the 1950s and has found applications in numerous fields, from aerospace engineering to economics.',
-    tags: ['dynamic-programming', 'optimization'],
-    createdAt: new Date('2023-09-18T16:22:00'),
-    updatedAt: new Date('2023-09-20T11:16:00'),
-    isFavorite: false
-  }
-];
+import AuthDialog from '@/components/auth/AuthDialog';
 
 const Index: React.FC = () => {
-  const [notes, setNotes] = useState<Note[]>(mockNotes);
+  const navigate = useNavigate();
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [user, setUser] = useState(getUser());
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  
+  useEffect(() => {
+    // Load notes from storage
+    setNotes(getNotes());
+  }, []);
   
   const handleDeleteNote = (id: string) => {
-    setNotes(notes.filter(note => note.id !== id));
+    deleteNote(id);
+    setNotes(getNotes());
     toast.success("Note deleted successfully");
   };
   
   const handleToggleFavorite = (id: string) => {
-    setNotes(notes.map(note => 
-      note.id === id 
-        ? { ...note, isFavorite: !note.isFavorite } 
-        : note
-    ));
-    
-    const note = notes.find(n => n.id === id);
-    if (note) {
-      toast.success(note.isFavorite 
+    const noteToUpdate = notes.find(note => note.id === id);
+    if (noteToUpdate) {
+      const updatedNote = { ...noteToUpdate, isFavorite: !noteToUpdate.isFavorite };
+      updateNote(updatedNote);
+      setNotes(getNotes());
+      
+      toast.success(noteToUpdate.isFavorite 
         ? "Removed from favorites" 
         : "Added to favorites"
       );
@@ -83,6 +43,23 @@ const Index: React.FC = () => {
   
   return (
     <div className="container max-w-7xl py-6 px-4 sm:px-6 lg:px-8 animate-fade-in">
+      {!user && (
+        <div className="bg-muted/30 border rounded-lg p-6 mb-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <h2 className="text-xl font-semibold mb-2">Welcome to CodeChime Notes</h2>
+              <p className="text-muted-foreground max-w-xl">
+                Sign in to save your notes, create folders, and access your content from anywhere.
+              </p>
+            </div>
+            <Button onClick={() => setAuthDialogOpen(true)} className="gap-2">
+              <User className="h-4 w-4" />
+              Sign In
+            </Button>
+          </div>
+        </div>
+      )}
+      
       <div className="mb-8">
         <h1 className="text-4xl font-bold tracking-tight text-foreground mb-4">
           Welcome to CodeChime Notes
@@ -153,7 +130,7 @@ const Index: React.FC = () => {
               Recent
             </TabsTrigger>
             <TabsTrigger value="favorites" className="flex items-center gap-1">
-              <TagIcon className="h-4 w-4" />
+              <Heart className="h-4 w-4" />
               Favorites
             </TabsTrigger>
           </TabsList>
@@ -172,6 +149,15 @@ const Index: React.FC = () => {
                   />
                 ))
               }
+              
+              {notes.length === 0 && (
+                <div className="col-span-full py-10 text-center">
+                  <p className="text-muted-foreground">No notes yet. Create your first note to get started.</p>
+                  <Button onClick={() => navigate('/editor/new')} className="mt-4">
+                    Create Note
+                  </Button>
+                </div>
+              )}
             </div>
           </TabsContent>
           
@@ -198,6 +184,15 @@ const Index: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Auth Dialog */}
+      <AuthDialog
+        isOpen={authDialogOpen}
+        onClose={() => {
+          setAuthDialogOpen(false);
+          setUser(getUser());
+        }}
+      />
     </div>
   );
 };

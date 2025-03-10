@@ -7,6 +7,7 @@ export type Note = {
   createdAt: Date;
   updatedAt: Date;
   isFavorite: boolean;
+  folderId?: string;
 };
 
 export type Tag = {
@@ -38,4 +39,21 @@ export type CodeExecutionResult = {
   output: string;
   error?: string;
   isError: boolean;
+};
+
+export type Folder = {
+  id: string;
+  name: string;
+  parentId: string | null;
+};
+
+export type User = {
+  id: string;
+  name: string;
+  email: string;
+};
+
+export type ContextMenuPosition = {
+  x: number;
+  y: number;
 };

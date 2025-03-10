@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Eye, 
   Code, 
@@ -8,73 +9,22 @@ import {
   Save, 
   ArrowLeft, 
   Tag as TagIcon,
-  AlertCircle 
+  AlertCircle,
+  Check
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Note, ViewMode } from '@/lib/types';
 import { cn, renderMarkdown, extractCodeBlocks } from '@/lib/utils';
 import { toast } from 'sonner';
 import CodeSnippet from './CodeSnippet';
+import { addNote, getNotes, updateNote } from '@/lib/storage';
 
 interface NoteEditorProps {
   noteId?: string;
 }
 
-// For demo purposes, we'll use a mockup note
-const getMockNote = (id: string): Note => ({
-  id,
-  title: 'Understanding Data Structures',
-  content: `# Understanding Data Structures
-
-## Introduction
-Data structures are specialized formats for organizing, processing, retrieving and storing data. There are several basic and advanced types of data structures, all designed to arrange data to suit a specific purpose.
-
-## Arrays
-Arrays are a simple data structure where elements are stored in contiguous memory locations:
-
-\`\`\`javascript
-// Creating an array
-const array = [1, 2, 3, 4, 5];
-
-// Accessing elements
-console.log(array[0]); // Output: 1
-\`\`\`
-
-## Linked Lists
-A linked list is a sequence of data structures, connected via links:
-
-\`\`\`python
-class Node:
-    def __init__(self, data):
-        self.data = data
-        self.next = None
-
-class LinkedList:
-    def __init__(self):
-        self.head = None
-\`\`\`
-
-## Trees
-Trees are hierarchical data structures:
-
-\`\`\`java
-class TreeNode {
-    int val;
-    TreeNode left;
-    TreeNode right;
-    
-    TreeNode(int x) { 
-        val = x; 
-    }
-}
-\`\`\``,
-  tags: ['data-structures', 'algorithms', 'computer-science'],
-  createdAt: new Date('2023-10-15T14:48:00'),
-  updatedAt: new Date('2023-10-16T09:22:00'),
-  isFavorite: false
-});
-
 const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
+  const navigate = useNavigate();
   const [note, setNote] = useState<Note | null>(null);
   const [content, setContent] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.SPLIT);
@@ -83,10 +33,14 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
   
   useEffect(() => {
     if (noteId && noteId !== 'new') {
-      // In a real app, we'd fetch the note from an API
-      const mockNote = getMockNote(noteId);
-      setNote(mockNote);
-      setContent(mockNote.content);
+      // Load the note from storage
+      const notes = getNotes();
+      const foundNote = notes.find(n => n.id === noteId);
+      
+      if (foundNote) {
+        setNote(foundNote);
+        setContent(foundNote.content);
+      }
     }
   }, [noteId]);
   
@@ -129,16 +83,42 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
   
   const saveNote = () => {
     setIsSaving(true);
-    // In a real app, we'd send this to an API
+    
     setTimeout(() => {
+      if (noteId === 'new') {
+        // Create a new note
+        const newNote = addNote({
+          title: note?.title || 'Untitled Note',
+          content,
+          tags: note?.tags || [],
+          isFavorite: note?.isFavorite || false,
+          folderId: note?.folderId
+        });
+        
+        setNote(newNote);
+        navigate(`/editor/${newNote.id}`, { replace: true });
+      } else if (note) {
+        // Update existing note
+        const updatedNote = updateNote({
+          ...note,
+          content,
+        });
+        
+        setNote(updatedNote);
+      }
+      
       setIsSaving(false);
-      toast.success("Note saved successfully");
-    }, 800);
+      toast.success("Note saved successfully", {
+        icon: <Check className="h-4 w-4 text-green-500" />
+      });
+    }, 500);
   };
   
   const toggleFavorite = () => {
     if (note) {
-      setNote({ ...note, isFavorite: !note.isFavorite });
+      const updatedNote = { ...note, isFavorite: !note.isFavorite };
+      updateNote(updatedNote);
+      setNote(updatedNote);
       toast.success(note.isFavorite ? "Removed from favorites" : "Added to favorites");
     }
   };
@@ -156,6 +136,19 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
         </div>
       </div>
     );
+  }
+  
+  // For new notes, create a default note object
+  if (!note && noteId === 'new') {
+    setNote({
+      id: 'new',
+      title: 'Untitled Note',
+      content: '',
+      tags: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isFavorite: false
+    });
   }
   
   const renderPreview = () => {
