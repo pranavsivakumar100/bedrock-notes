@@ -27,7 +27,18 @@ const CodeSnippetEditor: React.FC = () => {
       editorRef.current.style.height = 'auto';
       editorRef.current.style.height = `${editorRef.current.scrollHeight}px`;
     }
-  }, [code]);
+    
+    // Highlight code after it changes
+    if (editorRef.current) {
+      const preElement = document.createElement('pre');
+      const codeElement = document.createElement('code');
+      codeElement.className = `language-${language}`;
+      codeElement.textContent = code;
+      preElement.appendChild(codeElement);
+      
+      Prism.highlightElement(codeElement);
+    }
+  }, [code, language]);
 
   const handleSave = () => {
     // This would save to a database in a real app
@@ -88,7 +99,7 @@ const CodeSnippetEditor: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-4 animate-fade-in">
+    <div className="container mx-auto px-4 py-6 animate-fade-in">
       <div className="mb-6">
         <Input
           type="text"
@@ -99,11 +110,11 @@ const CodeSnippetEditor: React.FC = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        <div>
-          <Label htmlFor="language">Language</Label>
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <div className="w-full md:w-auto">
+          <Label htmlFor="language" className="mb-2 block">Language</Label>
           <Select value={language} onValueChange={setLanguage}>
-            <SelectTrigger id="language">
+            <SelectTrigger id="language" className="w-full md:w-[200px]">
               <SelectValue placeholder="Select Language" />
             </SelectTrigger>
             <SelectContent>
@@ -125,7 +136,7 @@ const CodeSnippetEditor: React.FC = () => {
           </Select>
         </div>
         
-        <div className="flex items-end gap-2 justify-end">
+        <div className="flex items-center gap-3 w-full md:w-auto justify-end">
           <Button onClick={handleSave} variant="outline" className="gap-2">
             <Save className="h-4 w-4" />
             Save
@@ -137,30 +148,28 @@ const CodeSnippetEditor: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="flex flex-col">
           <Label htmlFor="code-editor" className="mb-2">Code</Label>
-          <div className="font-mono text-sm flex-1 p-0 rounded-md border min-h-[300px] bg-[#1f2937] overflow-hidden">
-            <div className="p-4 relative h-full">
-              <textarea
-                ref={editorRef}
-                id="code-editor"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className="font-mono text-sm flex-1 p-0 resize-none absolute inset-0 w-full h-full bg-transparent text-gray-300 border-0 focus:ring-0 outline-none"
-                placeholder="Write your code here..."
-                spellCheck="false"
-              />
-            </div>
+          <div className="font-mono text-sm flex-1 rounded-md border min-h-[400px] bg-[#1f2937] overflow-hidden relative">
+            <textarea
+              ref={editorRef}
+              id="code-editor"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              className="font-mono text-sm w-full h-full p-4 resize-none absolute inset-0 bg-transparent text-gray-300 border-0 focus:ring-0 outline-none"
+              placeholder="Write your code here..."
+              spellCheck="false"
+            />
           </div>
         </div>
 
         <div className="flex flex-col">
           <Label className="mb-2">Output</Label>
-          <Card className="flex-1 border-[#374151] bg-[#1f2937]">
-            <CardContent className="p-0">
+          <Card className="flex-1 border-[#374151] bg-[#1f2937] min-h-[400px]">
+            <CardContent className="p-0 h-full">
               <pre 
-                className={`font-mono text-sm p-4 overflow-auto min-h-[300px] ${
+                className={`font-mono text-sm p-4 overflow-auto h-full ${
                   result?.isError ? 'text-red-400' : 'text-gray-300'
                 }`}
               >
