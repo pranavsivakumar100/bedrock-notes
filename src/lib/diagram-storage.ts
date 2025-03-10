@@ -39,14 +39,14 @@ export function saveDiagram(id: string, diagramData: Omit<DiagramData, 'id'>): D
     const diagram: Diagram = {
       id: diagramId,
       title: diagramData.title,
-      content: diagramData.json,
+      content: diagramData.json, // Map json to content which is used in the Diagram type
       createdAt: isNew ? now : new Date(diagramData.createdAt),
       updatedAt: now,
       isFavorite: false,
       type: 'diagram'
     };
     
-    // Save to main storage using updateNote function (which handles all item types)
+    // Save to main storage using updateNote function
     updateNote(diagram);
     
     return diagram;

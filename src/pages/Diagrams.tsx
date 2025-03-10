@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Search, Trash2, Database, FileCode, Activity } from 'lucide-react';
@@ -115,7 +114,6 @@ const DiagramsPage: React.FC = () => {
                 className="h-40 bg-gray-100 dark:bg-gray-800 p-4 flex items-center justify-center cursor-pointer"
                 onClick={() => handleOpenDiagram(diagram.id)}
               >
-                {/* This would show a preview of the diagram in a real implementation */}
                 <div className="text-4xl text-gray-400">
                   {Object.values(DiagramTypes)[Math.floor(Math.random() * Object.values(DiagramTypes).length)]}
                 </div>

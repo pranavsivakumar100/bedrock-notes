@@ -237,7 +237,7 @@ const DiagramEditor: React.FC = () => {
         return;
       }
       
-      const diagramId = id || `diagram-${Date.now()}`;
+      const diagramId = id || 'new';
       
       saveDiagram(diagramId, {
         title,
