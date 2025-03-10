@@ -63,6 +63,11 @@ import {
 } from "@/components/ui/tabs";
 import { useCanvasHistory } from '@/hooks/useCanvasHistory';
 
+// Define an interface for the clone method to help TypeScript understand it
+interface FabricObjectWithClone extends FabricObject {
+  clone(callback?: (cloned: FabricObject) => void): FabricObject;
+}
+
 const DiagramEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -191,8 +196,11 @@ const DiagramEditor: React.FC = () => {
     const activeObject = canvas.getActiveObject();
     if (!activeObject) return;
     
-    // Use clone function with proper callback handling
-    activeObject.clone((clonedObj: FabricObject) => {
+    // Cast the object to our interface that properly defines the clone method
+    const objectWithClone = activeObject as unknown as FabricObjectWithClone;
+    
+    // Now we can call clone with a callback
+    objectWithClone.clone((clonedObj: FabricObject) => {
       localStorage.setItem('cs-diagram-clipboard', JSON.stringify(clonedObj.toJSON()));
       toast.success("Copied to clipboard");
     });
