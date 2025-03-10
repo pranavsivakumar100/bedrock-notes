@@ -608,12 +608,10 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           strokeWidth: 1,
         });
         
-        // Fix: Use proper format for Line constructor (points array)
+        // Fix Line constructor to use the correct number of points (4 total points, not 8)
         const foldLine = new Line([
           80, 0, 
-          100, 20, 
-          80, 20, 
-          80, 0
+          100, 20
         ], {
           stroke: '#333333',
           strokeWidth: 1,
@@ -630,7 +628,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'cloud':
-        // Create a cloud shape using path data
+        // Create a cloud shape using path data - using SVG path format for Fabric.js v6
         const cloudPath = new Path('M25,60 C10,60 10,45 25,35 C10,35 10,10 40,10 C80,10 80,35 95,35 C95,50 95,60 80,60 Z', {
           left: centerX - 50,
           top: centerY - 35,
@@ -643,7 +641,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'speech-bubble':
-        // Create speech bubble using path data
+        // Create speech bubble using SVG path data
         const bubblePath = new Path('M10,0 C0,0 0,10 0,10 L0,70 C0,80 10,80 10,80 L50,80 L60,100 L70,80 L90,80 C100,80 100,70 100,70 L100,10 C100,0 90,0 90,0 Z', {
           left: centerX - 50,
           top: centerY - 50,
@@ -656,7 +654,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'note':
-        // Create note using path data
+        // Create note using SVG path data
         const notePath = new Path('M0,0 L70,0 L70,70 L85,55 L85,100 L0,100 Z', {
           left: centerX - 42.5,
           top: centerY - 50,
@@ -679,7 +677,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           strokeWidth: 1,
         });
         
-        // Use proper format for Line constructor (array of points)
+        // Fix Line constructor to use proper format
         const body = new Line([
           15, 30, 
           15, 70
@@ -730,7 +728,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'arrow':
-        // Use proper format for Line constructor
+        // Fix Line constructor to use proper format
         const arrowLine = new Line([
           0, 0, 
           100, 0
@@ -766,7 +764,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'line':
-        // Use proper format for Line constructor
+        // Fix Line constructor to use proper format
         shape = new Line([
           0, 0, 
           100, 0
@@ -780,7 +778,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'curved-line':
-        // Create curved line using path data
+        // Create curved line using SVG path data
         shape = new Path('M0,0 Q50,-50 100,0', {
           fill: '',
           stroke: '#333333',
