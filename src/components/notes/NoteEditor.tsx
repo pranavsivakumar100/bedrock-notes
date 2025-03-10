@@ -54,6 +54,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
     
     setTimeout(() => {
       if (noteId === 'new' && note) {
+        // For new notes, use addNote which expects certain properties
         const newNote = addNote({
           title: note.title,
           content,
@@ -66,15 +67,20 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
         setNote(newNote);
         navigate(`/editor/${newNote.id}`, { replace: true });
       } else if (note) {
-        // Explicitly specify the type to ensure all required properties are included
-        const updatedNote = updateNote({
-          ...note,
-          content,
-          type: 'note', // Ensure type property is present
-          tags: note.tags // Ensure tags property is present
-        }) as Note; // Cast the result to Note type
+        // For existing notes, use updateNote which expects a Note object
+        // The issue was that we were passing content directly to updateNote
+        // But updateNote expects a fully formed Note object
+        const updatedNote = updateNote(note);
         
-        setNote(updatedNote);
+        // Since the note hasn't been updated with the new content yet,
+        // we need to create a new object with the updated content
+        const noteWithUpdatedContent: Note = {
+          ...updatedNote as Note,
+          content,
+          updatedAt: new Date()
+        };
+        
+        setNote(noteWithUpdatedContent);
       }
       
       setIsSaving(false);
@@ -86,14 +92,16 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
   
   const toggleFavorite = () => {
     if (note) {
-      const updatedNote: Note = { 
+      // Create a new note object with the toggled favorite status
+      const updatedNoteWithFavoriteToggled: Note = { 
         ...note, 
-        isFavorite: !note.isFavorite,
-        type: 'note',  // Ensure type property is present
-        content: note.content, // Ensure content is included
-        tags: note.tags // Ensure tags is included
+        isFavorite: !note.isFavorite
       };
-      const result = updateNote(updatedNote) as Note; // Cast the result to Note
+      
+      // Pass the updated note to updateNote and cast the result back to Note
+      const result = updateNote(updatedNoteWithFavoriteToggled) as Note;
+      
+      // Update the local state with the result
       setNote(result);
       toast.success(note.isFavorite ? "Removed from favorites" : "Added to favorites");
     }
