@@ -9,6 +9,10 @@ import Navbar from "./components/layout/Navbar";
 import Sidebar from "./components/layout/Sidebar";
 import Index from "./pages/Index";
 import Editor from "./pages/Editor";
+import Notes from "./pages/Notes";
+import Favorites from "./pages/Favorites";
+import CodeSnippets from "./pages/CodeSnippets";
+import CodeSnippetEditor from "./pages/CodeSnippetEditor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +47,10 @@ const App = () => {
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/editor/:id" element={<Editor />} />
+                  <Route path="/notes" element={<Notes />} />
+                  <Route path="/favorites" element={<Favorites />} />
+                  <Route path="/code-snippets" element={<CodeSnippets />} />
+                  <Route path="/code-snippets/:id" element={<CodeSnippetEditor />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>
