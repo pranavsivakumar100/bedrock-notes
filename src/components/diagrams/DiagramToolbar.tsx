@@ -1,21 +1,12 @@
+
 import React, { useState } from 'react';
 import { Canvas, Rect, Circle as FabricCircle, Triangle as FabricTriangle, Path, IText, Group, Line, util as fabricUtil } from 'fabric';
 import { 
   MousePointer, 
   Pencil, 
   Type, 
-  Square, 
-  Circle as CircleIcon, 
-  Triangle as TriangleIcon,
   ArrowRight,
-  Database,
-  Server,
   GitBranch,
-  Component,
-  MessageSquare,
-  Router,
-  Code,
-  Diamond,
   Undo as UndoIcon,
   Redo as RedoIcon,
   Trash2,
@@ -26,21 +17,12 @@ import {
   Grid,
   FileOutput,
   Move,
-  Shapes,
   BoxSelect
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Toggle } from '@/components/ui/toggle';
 import { Separator } from '@/components/ui/separator';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { toast } from 'sonner';
 import { useCanvasHistory } from '@/hooks/useCanvasHistory';
 
@@ -222,172 +204,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
     let shape: any;
     
     switch (shapeType) {
-      case 'square':
-        shape = new Rect({
-          width: 100,
-          height: 100,
-          fill: fill,
-          stroke: drawingColor,
-          strokeWidth: 2,
-          left: 100,
-          top: 100
-        });
-        break;
-        
-      case 'circle':
-        shape = new FabricCircle({
-          radius: 50,
-          fill: fill,
-          stroke: drawingColor,
-          strokeWidth: 2,
-          left: 100,
-          top: 100
-        });
-        break;
-        
-      case 'triangle':
-        shape = new FabricTriangle({
-          width: 100,
-          height: 100,
-          fill: fill,
-          stroke: drawingColor,
-          strokeWidth: 2,
-          left: 100,
-          top: 100
-        });
-        break;
-        
-      case 'diamond':
-        shape = new Path('M 50 0 L 100 50 L 50 100 L 0 50 Z', {
-          fill: fill,
-          stroke: drawingColor,
-          strokeWidth: 2,
-          left: 100,
-          top: 100
-        });
-        break;
-        
-      case 'database':
-        shape = new Path('M 0 20 Q 0 0 50 0 Q 100 0 100 20 L 100 80 Q 100 100 50 100 Q 0 100 0 80 Z M 0 20 Q 0 40 50 40 Q 100 40 100 20 M 0 40 Q 0 60 50 60 Q 100 60 100 40 M 0 60 Q 0 80 50 80 Q 100 80 100 60', {
-          fill: fill,
-          stroke: drawingColor,
-          strokeWidth: 2,
-          left: 100,
-          top: 100,
-          scaleX: 0.8,
-          scaleY: 0.8
-        });
-        break;
-        
-      case 'server':
-        shape = new Rect({
-          width: 80,
-          height: 120,
-          fill: fill,
-          stroke: drawingColor,
-          strokeWidth: 2,
-          left: 100,
-          top: 100,
-          rx: 5,
-          ry: 5
-        });
-        
-        const serverDetails = new Group([
-          new Line([10, 30, 70, 30], {
-            stroke: drawingColor,
-            strokeWidth: 1
-          }),
-          new Line([10, 50, 70, 50], {
-            stroke: drawingColor,
-            strokeWidth: 1
-          }),
-          new Line([10, 70, 70, 70], {
-            stroke: drawingColor,
-            strokeWidth: 1
-          })
-        ], {
-          left: 100 + 5,
-          top: 100 + 20
-        });
-        
-        canvas.add(serverDetails);
-        break;
-        
-      case 'component':
-        shape = new Rect({
-          width: 120,
-          height: 80,
-          fill: fill,
-          stroke: drawingColor,
-          strokeWidth: 2,
-          left: 100,
-          top: 100,
-          rx: 2,
-          ry: 2
-        });
-        
-        const componentPorts = new Group([
-          new Rect({
-            width: 10,
-            height: 20,
-            fill: fill,
-            stroke: drawingColor,
-            strokeWidth: 2,
-            left: -10,
-            top: 20
-          }),
-          new Rect({
-            width: 10,
-            height: 20,
-            fill: fill,
-            stroke: drawingColor,
-            strokeWidth: 2,
-            left: 120,
-            top: 20
-          })
-        ], {
-          left: 100,
-          top: 100 + 10
-        });
-        
-        canvas.add(componentPorts);
-        break;
-        
-      case 'message':
-        shape = new Path('M 0,0 h 100 v 70 h -30 l -20,20 l 0,-20 h -50 z', {
-          fill: fill,
-          stroke: drawingColor,
-          strokeWidth: 2,
-          left: 100,
-          top: 100
-        });
-        break;
-        
-      case 'router':
-        shape = new Group([
-          new Rect({
-            width: 100,
-            height: 30,
-            fill: fill,
-            stroke: drawingColor,
-            strokeWidth: 2,
-            rx: 2,
-            ry: 2
-          }),
-          new Path('M 20,0 L 20,-20', {
-            stroke: drawingColor,
-            strokeWidth: 2
-          }),
-          new Path('M 80,0 L 80,-20', {
-            stroke: drawingColor,
-            strokeWidth: 2
-          })
-        ], {
-          left: 100,
-          top: 100
-        });
-        break;
-        
       case 'text':
         shape = new IText('Text', {
           left: 100,
@@ -414,18 +230,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
     handleToolSelect('select');
     
     switch (shapeType) {
-      case 'square':
-      case 'circle':
-      case 'triangle':
-      case 'diamond':
-      case 'database':
-      case 'server':
-      case 'component':
-      case 'message':
-      case 'router':
-        addShape(shapeType);
-        break;
-        
       case 'text':
         addShape('text');
         break;
@@ -541,7 +345,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
 
   return (
     <div className="border-b border-border/40 bg-background/80 backdrop-blur-sm">
-      <div className="flex items-center px-2 py-1">
+      <div className="flex items-center px-4 py-2">
         <div className="flex items-center gap-1 mr-2">
           <TooltipProvider>
             <Tooltip>
@@ -572,7 +376,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
           </TooltipProvider>
         </div>
         
-        <Separator orientation="vertical" className="h-8 mx-1" />
+        <Separator orientation="vertical" className="h-8 mx-2" />
         
         <div className="flex items-center gap-1 mr-2">
           <TooltipProvider>
@@ -602,7 +406,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
           </TooltipProvider>
         </div>
         
-        <Separator orientation="vertical" className="h-8 mx-1" />
+        <Separator orientation="vertical" className="h-8 mx-2" />
         
         <div className="flex items-center gap-1 mr-2">
           <TooltipProvider>
@@ -645,7 +449,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
           </TooltipProvider>
         </div>
         
-        <Separator orientation="vertical" className="h-8 mx-1" />
+        <Separator orientation="vertical" className="h-8 mx-2" />
         
         <div className="flex items-center gap-1 mr-2">
           <TooltipProvider>
@@ -703,7 +507,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
           </TooltipProvider>
         </div>
         
-        <Separator orientation="vertical" className="h-8 mx-1" />
+        <Separator orientation="vertical" className="h-8 mx-2" />
         
         <div className="flex items-center gap-1 mr-2">
           <TooltipProvider>
@@ -743,55 +547,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
           </TooltipProvider>
         </div>
         
-        <Separator orientation="vertical" className="h-8 mx-1" />
-        
-        <div className="flex items-center gap-1 mr-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => handleAddShape('square')}>
-                  <Square className="h-5 w-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Square</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => handleAddShape('circle')}>
-                  <CircleIcon className="h-5 w-5" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Circle</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-10 w-10">
-                <Shapes className="h-5 w-5" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>More Shapes</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => handleAddShape('triangle')}>Triangle</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleAddShape('diamond')}>Diamond</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleAddShape('database')}>Database</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleAddShape('server')}>Server</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleAddShape('component')}>Component</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleAddShape('message')}>Message</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleAddShape('router')}>Router</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        
         <div className="ml-auto flex items-center gap-4">
           <div className="flex items-center gap-2">
             <label htmlFor="stroke-color" className="text-sm">Stroke:</label>
@@ -800,7 +555,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
               id="stroke-color"
               value={drawingColor}
               onChange={handleColorChange}
-              className="w-8 h-8 border-0"
+              className="w-10 h-10 border-0"
             />
           </div>
           
@@ -811,13 +566,13 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
               id="fill-color"
               value={fill === 'transparent' ? '#ffffff' : fill}
               onChange={handleFillChange}
-              className="w-8 h-8 border-0"
+              className="w-10 h-10 border-0"
             />
             <Toggle
               pressed={fill === 'transparent'}
               onPressedChange={() => setFill(fill === 'transparent' ? '#ffffff' : 'transparent')}
               aria-label="Toggle transparent fill"
-              className="h-8 w-8"
+              className="h-10 w-10"
             >
               <BoxSelect className="h-5 w-5" />
             </Toggle>
