@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef } from 'react';
 import { Canvas, Object as FabricObject, Line, util, Point } from 'fabric';
 import { getDiagram } from '@/lib/diagram-storage';
@@ -106,6 +107,11 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
 
     window.addEventListener('resize', handleResize);
 
+    // Handle zoom changes to update grid
+    canvas.on('zoom:changed', () => {
+      createGrid(canvas);
+    });
+
     setTimeout(() => {
       handleResize();
     }, 100);
@@ -124,15 +130,17 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
         const delta = e.deltaY;
         let zoom = canvas.getZoom();
         
-        const point = new Point(e.offsetX, e.offsetY);
+        const mousePoint = new Point(e.offsetX, e.offsetY);
         
         zoom = delta > 0 ? zoom * 0.95 : zoom * 1.05;
         
         if (zoom > 20) zoom = 20;
         if (zoom < 0.1) zoom = 0.1;
         
-        canvas.zoomToPoint(point, zoom);
+        canvas.zoomToPoint(mousePoint, zoom);
         
+        // Trigger our custom zoom event
+        canvas.fire('zoom:changed');
         canvas.renderAll();
         
         return false;
@@ -141,15 +149,40 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
   };
 
   const createGrid = (canvas: Canvas) => {
+    // Remove existing grid lines
     const existingGrids = canvas.getObjects().filter(obj => obj.data?.type === 'grid');
     existingGrids.forEach(grid => canvas.remove(grid));
     
     const gridSize = 20;
-    const width = canvas.width || 1000;
-    const height = canvas.height || 800;
+    const zoom = canvas.getZoom();
     
-    for (let i = 0; i < width / gridSize; i++) {
-      const line = new Line([i * gridSize, 0, i * gridSize, height], {
+    // Calculate how far beyond the visible canvas we need to draw
+    // to ensure grid covers entire viewable area when zoomed out
+    const extraGridFactor = 3; // Draw grid 3x larger than visible area
+    
+    const width = (canvas.width || 1000) * extraGridFactor;
+    const height = (canvas.height || 800) * extraGridFactor;
+    
+    // Calculate visible bounds and adjust grid center
+    const viewportCenterX = canvas.width! / 2;
+    const viewportCenterY = canvas.height! / 2;
+    
+    // Calculate adjusted grid origin to center it on the viewport
+    const gridOriginX = viewportCenterX - width / 2;
+    const gridOriginY = viewportCenterY - height / 2;
+    
+    // Calculate the number of grid lines needed
+    const linesX = Math.ceil(width / (gridSize * zoom));
+    const linesY = Math.ceil(height / (gridSize * zoom));
+    
+    // Calculate the offset to make sure grid lines align with the origin
+    const offsetX = (viewportCenterX - canvas.viewportTransform![4]) % (gridSize * zoom);
+    const offsetY = (viewportCenterY - canvas.viewportTransform![5]) % (gridSize * zoom);
+    
+    // Draw vertical lines
+    for (let i = 0; i <= linesX; i++) {
+      const lineX = gridOriginX + i * gridSize * zoom - offsetX;
+      const line = new Line([lineX, gridOriginY, lineX, gridOriginY + height], {
         stroke: '#e0e0e0',
         selectable: false,
         evented: false,
@@ -160,8 +193,10 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       canvas.sendObjectToBack(line);
     }
     
-    for (let i = 0; i < height / gridSize; i++) {
-      const line = new Line([0, i * gridSize, width, i * gridSize], {
+    // Draw horizontal lines
+    for (let i = 0; i <= linesY; i++) {
+      const lineY = gridOriginY + i * gridSize * zoom - offsetY;
+      const line = new Line([gridOriginX, lineY, gridOriginX + width, lineY], {
         stroke: '#e0e0e0',
         selectable: false,
         evented: false,
