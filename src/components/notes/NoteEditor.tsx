@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Note, ViewMode } from '@/lib/types';
 import { toast } from 'sonner';
@@ -27,20 +26,19 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
       const foundNote = notes.find(n => n.id === noteId);
       
       if (foundNote) {
-        setNote(foundNote);
+        setNote(foundNote as Note);
         setContent(foundNote.content);
       }
     } else if (noteId === 'new') {
-      // Initialize a new note
       const newNote: Note = {
         id: 'new',
+        type: 'note',
         title: 'Untitled Note',
         content: '',
         tags: [],
         createdAt: new Date(),
         updatedAt: new Date(),
-        isFavorite: false,
-        type: 'note'
+        isFavorite: false
       };
       setNote(newNote);
     }
@@ -54,13 +52,13 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
     setIsSaving(true);
     
     setTimeout(() => {
-      if (noteId === 'new') {
+      if (noteId === 'new' && note) {
         const newNote = addNote({
-          title: note?.title || 'Untitled Note',
+          title: note.title,
           content,
-          tags: note?.tags || [],
-          isFavorite: note?.isFavorite || false,
-          folderId: note?.folderId,
+          tags: note.tags,
+          isFavorite: note.isFavorite,
+          folderId: note.folderId,
           type: 'note'
         });
         
@@ -69,7 +67,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
       } else if (note) {
         const updatedNote = updateNote({
           ...note,
-          content,
+          content
         });
         
         setNote(updatedNote);
@@ -84,7 +82,10 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
   
   const toggleFavorite = () => {
     if (note) {
-      const updatedNote = { ...note, isFavorite: !note.isFavorite };
+      const updatedNote: Note = { 
+        ...note, 
+        isFavorite: !note.isFavorite 
+      };
       updateNote(updatedNote);
       setNote(updatedNote);
       toast.success(note.isFavorite ? "Removed from favorites" : "Added to favorites");
@@ -176,8 +177,5 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
     </div>
   );
 };
-
-// Import this to avoid the build error
-import { Check } from 'lucide-react';
 
 export default NoteEditor;
