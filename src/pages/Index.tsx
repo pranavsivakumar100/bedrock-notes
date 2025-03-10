@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus, BookText, Code, FileDigit, Tag as TagIcon, Clock, Heart, User } from 'lucide-react';
@@ -5,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import NoteCard from '@/components/notes/NoteCard';
 import { getUser, getItems, updateNote, deleteNote } from '@/lib/storage';
-import { Note, CodeSnippet, Diagram } from '@/lib/types';
+import { Note, CodeSnippet, Diagram, BaseItem } from '@/lib/types';
 import { toast } from 'sonner';
 import AuthDialog from '@/components/auth/AuthDialog';
 
@@ -29,7 +30,7 @@ const Index: React.FC = () => {
     const itemToUpdate = items.find(item => item.id === id);
     if (itemToUpdate) {
       const updatedItem = { ...itemToUpdate, isFavorite: !itemToUpdate.isFavorite };
-      updateNote(updatedItem as Note);
+      updateNote(updatedItem);
       setItems(getItems());
       
       toast.success(itemToUpdate.isFavorite 
@@ -39,7 +40,7 @@ const Index: React.FC = () => {
     }
   };
 
-  const getItemPath = (item: Note | CodeSnippet | Diagram) => {
+  const getItemPath = (item: BaseItem) => {
     switch (item.type) {
       case 'note':
         return `/editor/${item.id}`;
@@ -50,6 +51,18 @@ const Index: React.FC = () => {
       default:
         return '/';
     }
+  };
+
+  // Helper to render appropriate content for different item types
+  const getItemContent = (item: BaseItem) => {
+    if (item.type === 'note') {
+      return (item as Note).content || 'No content';
+    } else if (item.type === 'code-snippet') {
+      return (item as CodeSnippet).description || 'No description';
+    } else if (item.type === 'diagram') {
+      return 'Diagram';
+    }
+    return '';
   };
 
   return (

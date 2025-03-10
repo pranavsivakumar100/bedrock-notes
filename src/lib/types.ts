@@ -1,13 +1,3 @@
-export type Note = {
-  id: string;
-  title: string;
-  content: string;
-  tags: string[];
-  createdAt: Date;
-  updatedAt: Date;
-  isFavorite: boolean;
-  folderId?: string;
-};
 
 export type Tag = {
   id: string;
@@ -66,6 +56,7 @@ export type BaseItem = {
   updatedAt: Date;
   isFavorite: boolean;
   folderId?: string;
+  type: ItemType;
 };
 
 export type Note = BaseItem & {

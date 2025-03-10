@@ -20,6 +20,7 @@ interface NoteCardProps {
   onDelete?: (id: string) => void;
   onToggleFavorite?: (id: string) => void;
   className?: string;
+  href?: string;
 }
 
 const formatDate = (date: Date) => {
@@ -39,15 +40,17 @@ const NoteCard: React.FC<NoteCardProps> = ({
   note, 
   onDelete, 
   onToggleFavorite,
-  className
+  className,
+  href
 }) => {
   const { id, title, content, tags, updatedAt, isFavorite } = note;
+  const linkPath = href || `/editor/${id}`;
   
   return (
     <Card className={cn("note-card overflow-hidden h-full flex flex-col", className)}>
       <CardHeader className="p-4 pb-2 flex-none">
         <div className="flex justify-between items-start gap-2">
-          <Link to={`/editor/${id}`} className="flex-1">
+          <Link to={linkPath} className="flex-1">
             <h3 className="text-lg font-medium line-clamp-1 hover:underline transition-all">
               {title || 'Untitled Note'}
             </h3>
@@ -91,7 +94,7 @@ const NoteCard: React.FC<NoteCardProps> = ({
       </CardHeader>
       
       <CardContent className="p-4 pt-0 flex-1">
-        <Link to={`/editor/${id}`} className="block h-full">
+        <Link to={linkPath} className="block h-full">
           <p className="text-muted-foreground text-sm line-clamp-3">
             {truncateText(content || 'No content', 120)}
           </p>
@@ -100,15 +103,21 @@ const NoteCard: React.FC<NoteCardProps> = ({
       
       <CardFooter className="p-4 pt-2 border-t flex-none flex justify-between items-center text-xs text-muted-foreground">
         <div className="flex gap-1 flex-wrap">
-          {tags.slice(0, 2).map(tag => (
-            <span key={tag} className="bg-secondary px-1.5 py-0.5 rounded-full">
-              {tag}
-            </span>
-          ))}
-          {tags.length > 2 && (
-            <span className="bg-secondary px-1.5 py-0.5 rounded-full">
-              +{tags.length - 2}
-            </span>
+          {tags && tags.length > 0 ? (
+            <>
+              {tags.slice(0, 2).map(tag => (
+                <span key={tag} className="bg-secondary px-1.5 py-0.5 rounded-full">
+                  {tag}
+                </span>
+              ))}
+              {tags.length > 2 && (
+                <span className="bg-secondary px-1.5 py-0.5 rounded-full">
+                  +{tags.length - 2}
+                </span>
+              )}
+            </>
+          ) : (
+            <span>No tags</span>
           )}
         </div>
         <time dateTime={updatedAt.toISOString()}>{formatDate(updatedAt)}</time>
