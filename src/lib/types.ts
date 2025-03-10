@@ -1,4 +1,3 @@
-
 export type Note = {
   id: string;
   title: string;
@@ -56,4 +55,34 @@ export type User = {
 export type ContextMenuPosition = {
   x: number;
   y: number;
+};
+
+export type ItemType = 'note' | 'code-snippet' | 'diagram';
+
+export type BaseItem = {
+  id: string;
+  title: string;
+  createdAt: Date;
+  updatedAt: Date;
+  isFavorite: boolean;
+  folderId?: string;
+};
+
+export type Note = BaseItem & {
+  type: 'note';
+  content: string;
+  tags: string[];
+};
+
+export type CodeSnippet = BaseItem & {
+  type: 'code-snippet';
+  code: string;
+  language: string;
+  description: string;
+};
+
+export type Diagram = BaseItem & {
+  type: 'diagram';
+  content: string; // JSON string of canvas data
+  thumbnail?: string;
 };

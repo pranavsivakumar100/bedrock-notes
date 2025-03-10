@@ -1,4 +1,3 @@
-
 import { Note } from '@/lib/types';
 
 // Default notes for new users

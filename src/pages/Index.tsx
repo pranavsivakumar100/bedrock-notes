@@ -1,46 +1,57 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, BookText, Code, File, Tag as TagIcon, Clock, Heart, User } from 'lucide-react';
+import { Plus, BookText, Code, FileDigit, Tag as TagIcon, Clock, Heart, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import NoteCard from '@/components/notes/NoteCard';
-import { getUser, getNotes, updateNote, deleteNote } from '@/lib/storage';
-import { Note } from '@/lib/types';
+import { getUser, getItems, updateNote, deleteNote } from '@/lib/storage';
+import { Note, CodeSnippet, Diagram } from '@/lib/types';
 import { toast } from 'sonner';
 import AuthDialog from '@/components/auth/AuthDialog';
 
 const Index: React.FC = () => {
   const navigate = useNavigate();
-  const [notes, setNotes] = useState<Note[]>([]);
+  const [items, setItems] = useState<(Note | CodeSnippet | Diagram)[]>([]);
   const [user, setUser] = useState(getUser());
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   
   useEffect(() => {
-    // Load notes from storage
-    setNotes(getNotes());
+    setItems(getItems());
   }, []);
   
-  const handleDeleteNote = (id: string) => {
+  const handleDelete = (id: string) => {
     deleteNote(id);
-    setNotes(getNotes());
-    toast.success("Note deleted successfully");
+    setItems(getItems());
+    toast.success("Item deleted successfully");
   };
   
   const handleToggleFavorite = (id: string) => {
-    const noteToUpdate = notes.find(note => note.id === id);
-    if (noteToUpdate) {
-      const updatedNote = { ...noteToUpdate, isFavorite: !noteToUpdate.isFavorite };
-      updateNote(updatedNote);
-      setNotes(getNotes());
+    const itemToUpdate = items.find(item => item.id === id);
+    if (itemToUpdate) {
+      const updatedItem = { ...itemToUpdate, isFavorite: !itemToUpdate.isFavorite };
+      updateNote(updatedItem as Note);
+      setItems(getItems());
       
-      toast.success(noteToUpdate.isFavorite 
+      toast.success(itemToUpdate.isFavorite 
         ? "Removed from favorites" 
         : "Added to favorites"
       );
     }
   };
-  
+
+  const getItemPath = (item: Note | CodeSnippet | Diagram) => {
+    switch (item.type) {
+      case 'note':
+        return `/editor/${item.id}`;
+      case 'code-snippet':
+        return `/code-snippets/${item.id}`;
+      case 'diagram':
+        return `/diagram/${item.id}`;
+      default:
+        return '/';
+    }
+  };
+
   return (
     <div className="container max-w-7xl py-6 px-4 sm:px-6 lg:px-8 animate-fade-in">
       {!user && (
@@ -97,7 +108,7 @@ const Index: React.FC = () => {
         <Link to="/diagram/new" className="block">
           <div className="bg-muted/40 hover:bg-muted/60 border border-border/50 rounded-lg p-6 h-full transition-colors flex flex-col items-center justify-center text-center">
             <div className="bg-background h-14 w-14 rounded-full flex items-center justify-center mb-4">
-              <File className="h-6 w-6 text-primary" />
+              <FileDigit className="h-6 w-6 text-primary" />
             </div>
             <h3 className="font-medium text-lg mb-1">Diagram</h3>
             <p className="text-muted-foreground text-sm">Create a new diagram</p>
@@ -117,10 +128,18 @@ const Index: React.FC = () => {
       
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Your Notes</h2>
-          <Button variant="outline" asChild>
-            <Link to="/notes">View all</Link>
-          </Button>
+          <h2 className="text-xl font-semibold">Your Content</h2>
+          <div className="flex gap-2">
+            <Button variant="outline" asChild>
+              <Link to="/notes">View all notes</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/code-snippets">View snippets</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to="/diagrams">View diagrams</Link>
+            </Button>
+          </div>
         </div>
         
         <Tabs defaultValue="recent" className="w-full">
@@ -137,22 +156,23 @@ const Index: React.FC = () => {
           
           <TabsContent value="recent" className="mt-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {notes
+              {items
                 .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
                 .slice(0, 6)
-                .map(note => (
+                .map(item => (
                   <NoteCard 
-                    key={note.id} 
-                    note={note} 
-                    onDelete={handleDeleteNote}
+                    key={item.id} 
+                    note={item as Note}
+                    onDelete={handleDelete}
                     onToggleFavorite={handleToggleFavorite}
+                    href={getItemPath(item)}
                   />
                 ))
               }
               
-              {notes.length === 0 && (
+              {items.length === 0 && (
                 <div className="col-span-full py-10 text-center">
-                  <p className="text-muted-foreground">No notes yet. Create your first note to get started.</p>
+                  <p className="text-muted-foreground">No content yet. Create your first note, code snippet, or diagram to get started.</p>
                   <Button onClick={() => navigate('/editor/new')} className="mt-4">
                     Create Note
                   </Button>
@@ -163,21 +183,22 @@ const Index: React.FC = () => {
           
           <TabsContent value="favorites" className="mt-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {notes
-                .filter(note => note.isFavorite)
-                .map(note => (
+              {items
+                .filter(item => item.isFavorite)
+                .map(item => (
                   <NoteCard 
-                    key={note.id} 
-                    note={note} 
-                    onDelete={handleDeleteNote}
+                    key={item.id} 
+                    note={item as Note}
+                    onDelete={handleDelete}
                     onToggleFavorite={handleToggleFavorite}
+                    href={getItemPath(item)}
                   />
                 ))
               }
               
-              {notes.filter(note => note.isFavorite).length === 0 && (
+              {items.filter(item => item.isFavorite).length === 0 && (
                 <div className="col-span-full py-10 text-center">
-                  <p className="text-muted-foreground">No favorite notes yet.</p>
+                  <p className="text-muted-foreground">No favorite items yet.</p>
                 </div>
               )}
             </div>
@@ -185,7 +206,6 @@ const Index: React.FC = () => {
         </Tabs>
       </div>
       
-      {/* Auth Dialog */}
       <AuthDialog
         isOpen={authDialogOpen}
         onClose={() => {
