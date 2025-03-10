@@ -2,11 +2,17 @@
 import { toast } from 'sonner';
 
 const TAGS_STORAGE_KEY = 'bedrock_tags';
+const NOTES_TAGS_KEY = 'bedrock_notes_tags';
 
 export interface Tag {
   id: string;
   name: string;
   color: string;
+}
+
+export interface NoteTagsMap {
+  noteId: string;
+  tagIds: string[];
 }
 
 export function getTags(): Tag[] {
@@ -57,6 +63,10 @@ export function deleteTag(id: string): boolean {
     }
     
     localStorage.setItem(TAGS_STORAGE_KEY, JSON.stringify(filteredTags));
+    
+    // Also remove this tag from all notes
+    removeTagFromAllNotes(id);
+    
     return true;
   } catch (error) {
     console.error('Error deleting tag:', error);
@@ -65,9 +75,57 @@ export function deleteTag(id: string): boolean {
   }
 }
 
+function getNoteTags(): NoteTagsMap[] {
+  try {
+    const storedNoteTags = localStorage.getItem(NOTES_TAGS_KEY);
+    return storedNoteTags ? JSON.parse(storedNoteTags) : [];
+  } catch (error) {
+    console.error('Error getting note tags:', error);
+    return [];
+  }
+}
+
+function saveNoteTags(noteTags: NoteTagsMap[]): void {
+  try {
+    localStorage.setItem(NOTES_TAGS_KEY, JSON.stringify(noteTags));
+  } catch (error) {
+    console.error('Error saving note tags:', error);
+    toast.error('Error saving note tags');
+  }
+}
+
+function removeTagFromAllNotes(tagId: string): void {
+  try {
+    const noteTags = getNoteTags();
+    const updatedNoteTags = noteTags.map(noteTag => ({
+      ...noteTag,
+      tagIds: noteTag.tagIds.filter(id => id !== tagId)
+    }));
+    
+    saveNoteTags(updatedNoteTags);
+  } catch (error) {
+    console.error('Error removing tag from notes:', error);
+  }
+}
+
 export function updateTagsForNote(noteId: string, tagIds: string[]): void {
-  // This function will be implemented when we add tags to notes
-  console.log('Updating tags for note:', noteId, tagIds);
+  try {
+    const noteTags = getNoteTags();
+    const existingNoteTagIndex = noteTags.findIndex(noteTag => noteTag.noteId === noteId);
+    
+    if (existingNoteTagIndex !== -1) {
+      // Update existing note tags
+      noteTags[existingNoteTagIndex].tagIds = tagIds;
+    } else {
+      // Add new note tags
+      noteTags.push({ noteId, tagIds });
+    }
+    
+    saveNoteTags(noteTags);
+  } catch (error) {
+    console.error('Error updating tags for note:', error);
+    toast.error('Error updating tags for note');
+  }
 }
 
 export const TAG_COLORS = [

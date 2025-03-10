@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Heart, Save, Tag as TagIcon, Code, Eye, Split } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ViewMode, Note } from '@/lib/types';
+import { Tag } from '@/lib/tags-storage';
+import TagSelect from '@/components/tags/TagSelect';
 
 interface EditorHeaderProps {
   note: Note | null;
@@ -13,6 +15,8 @@ interface EditorHeaderProps {
   toggleFavorite: () => void;
   saveNote: () => void;
   isSaving: boolean;
+  availableTags?: Tag[];
+  onToggleTag?: (tagId: string) => void;
 }
 
 const EditorHeader: React.FC<EditorHeaderProps> = ({
@@ -22,7 +26,9 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
   onNoteChange,
   toggleFavorite,
   saveNote,
-  isSaving
+  isSaving,
+  availableTags = [],
+  onToggleTag = () => {}
 }) => {
   return (
     <header className="border-b border-border/40 p-4 flex items-center justify-between glass-morphism">
@@ -89,14 +95,12 @@ const EditorHeader: React.FC<EditorHeaderProps> = ({
           <span className="sr-only">Toggle favorite</span>
         </Button>
         
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-9 w-9"
-        >
-          <TagIcon className="h-5 w-5" />
-          <span className="sr-only">Manage tags</span>
-        </Button>
+        {onToggleTag && note && (
+          <TagSelect 
+            selectedTags={note.tags || []}
+            onToggleTag={onToggleTag}
+          />
+        )}
         
         <Button 
           onClick={saveNote} 

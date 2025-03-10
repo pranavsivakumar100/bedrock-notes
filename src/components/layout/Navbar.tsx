@@ -52,14 +52,14 @@ const Navbar: React.FC<NavbarProps> = ({
   };
 
   const handleToggleTag = (tagId: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tagId) 
-        ? prev.filter(id => id !== tagId)
-        : [...prev, tagId]
+    setSelectedTags(prevTags => 
+      prevTags.includes(tagId) 
+        ? prevTags.filter(id => id !== tagId)
+        : [...prevTags, tagId]
     );
     
     // Here you would typically update your filter state or URL parameters
-    toast.success(`Tag filter ${prev.includes(tagId) ? 'removed' : 'applied'}`);
+    toast.success(`Tag filter ${selectedTags.includes(tagId) ? 'removed' : 'applied'}`);
   };
 
   const handleSearch = (e: React.FormEvent) => {
