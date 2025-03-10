@@ -15,6 +15,13 @@ declare module 'fabric' {
       connectionStart?: FabricObject;
       [key: string]: any;
     }
+    
+    // Add typing for freeDrawingBrush
+    freeDrawingBrush: {
+      width: number;
+      color: string;
+      [key: string]: any;
+    };
   }
   
   // Extend FabricObjectProps to include our custom data property

@@ -66,16 +66,15 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
   useEffect(() => {
     if (!canvas) return;
     
-    if (canvas.freeDrawingBrush) {
-      canvas.freeDrawingBrush.width = drawingWidth;
-      canvas.freeDrawingBrush.color = drawingColor;
-      console.log("Updated brush:", canvas.freeDrawingBrush);
-    } else {
-      console.error("Free drawing brush not available in effect");
+    try {
+      if (canvas.isDrawingMode && canvas.freeDrawingBrush) {
+        console.log("Updating drawing brush properties");
+        canvas.freeDrawingBrush.width = drawingWidth;
+        canvas.freeDrawingBrush.color = drawingColor;
+      }
+    } catch (err) {
+      console.error("Error updating brush:", err);
     }
-    
-    canvas.isDrawingMode = activeTool === 'draw' || activeTool === 'eraser';
-    console.log("Drawing mode:", canvas.isDrawingMode, "Active tool:", activeTool);
   }, [canvas, drawingWidth, drawingColor, activeTool]);
 
   const handleToolSelect = (tool: Tool) => {
@@ -84,46 +83,47 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
     console.log("Selecting tool:", tool);
     setActiveTool(tool);
     
-    if (tool === 'draw') {
-      if (!canvas.freeDrawingBrush) {
-        console.error("Free drawing brush not available in handleToolSelect");
-      } else {
+    try {
+      canvas.isDrawingMode = false;
+      
+      if (tool === 'draw') {
         canvas.freeDrawingBrush.width = drawingWidth;
         canvas.freeDrawingBrush.color = drawingColor;
-      }
-      canvas.isDrawingMode = true;
-      console.log("Set drawing mode to:", canvas.isDrawingMode);
-    } else if (tool === 'eraser') {
-      if (canvas.freeDrawingBrush) {
+        canvas.isDrawingMode = true;
+        console.log("Set drawing mode to:", canvas.isDrawingMode);
+      } else if (tool === 'eraser') {
         canvas.freeDrawingBrush.width = drawingWidth * 2;
         canvas.freeDrawingBrush.color = '#ffffff';
+        canvas.isDrawingMode = true;
+      } else {
+        canvas.isDrawingMode = false;
+        canvas.selection = tool === 'select';
       }
-      canvas.isDrawingMode = true;
-    } else {
-      canvas.isDrawingMode = false;
-      canvas.selection = tool === 'select';
-    }
-    
-    canvas.off('mouse:down');
-    canvas.off('mouse:up');
-    
-    if (tool === 'lineConnect' || tool === 'bezierConnect') {
-      canvas.on('mouse:down', (options) => {
-        if (options.target) {
-          canvas.customData = { ...canvas.customData, connectionStart: options.target };
-        }
-      });
       
-      canvas.on('mouse:up', (options) => {
-        if (options.target && canvas.customData?.connectionStart && options.target !== canvas.customData.connectionStart) {
-          createConnection(canvas.customData.connectionStart, options.target, tool === 'bezierConnect' ? 'curved' : connectionStyle);
-          canvas.customData = { ...canvas.customData, connectionStart: null };
-        }
-      });
+      canvas.off('mouse:down');
+      canvas.off('mouse:up');
+      
+      if (tool === 'lineConnect' || tool === 'bezierConnect') {
+        canvas.on('mouse:down', (options) => {
+          if (options.target) {
+            canvas.customData = { ...canvas.customData, connectionStart: options.target };
+          }
+        });
+        
+        canvas.on('mouse:up', (options) => {
+          if (options.target && canvas.customData?.connectionStart && options.target !== canvas.customData.connectionStart) {
+            createConnection(canvas.customData.connectionStart, options.target, tool === 'bezierConnect' ? 'curved' : connectionStyle);
+            canvas.customData = { ...canvas.customData, connectionStart: null };
+          }
+        });
+      }
+      
+      canvas.discardActiveObject();
+      canvas.renderAll();
+    } catch (err) {
+      console.error("Error setting tool:", err);
+      toast.error("Failed to select tool");
     }
-    
-    canvas.discardActiveObject();
-    canvas.renderAll();
   };
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
