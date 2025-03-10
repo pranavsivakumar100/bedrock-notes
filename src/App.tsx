@@ -13,6 +13,8 @@ import Notes from "./pages/Notes";
 import Favorites from "./pages/Favorites";
 import CodeSnippets from "./pages/CodeSnippets";
 import CodeSnippetEditor from "./pages/CodeSnippetEditor";
+import DiagramEditor from "./pages/DiagramEditor";
+import Diagrams from "./pages/Diagrams";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,6 +53,8 @@ const App = () => {
                   <Route path="/favorites" element={<Favorites />} />
                   <Route path="/code-snippets" element={<CodeSnippets />} />
                   <Route path="/code-snippets/:id" element={<CodeSnippetEditor />} />
+                  <Route path="/diagram/:id" element={<DiagramEditor />} />
+                  <Route path="/diagrams" element={<Diagrams />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>

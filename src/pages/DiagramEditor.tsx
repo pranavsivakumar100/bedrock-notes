@@ -46,8 +46,9 @@ const DiagramEditor: React.FC = () => {
     
     try {
       const json = canvas.toJSON();
-      saveDiagram(id || 'new', {
-        id: id || `diagram-${Date.now()}`,
+      const diagramId = id || `diagram-${Date.now()}`;
+      
+      saveDiagram(diagramId, {
         title,
         json: JSON.stringify(json),
         createdAt: new Date(),
@@ -57,7 +58,7 @@ const DiagramEditor: React.FC = () => {
       toast.success("Diagram saved successfully");
       
       if (id === 'new') {
-        navigate(`/diagram/${id}`, { replace: true });
+        navigate(`/diagram/${diagramId}`, { replace: true });
       }
     } catch (error) {
       toast.error("Failed to save diagram");
