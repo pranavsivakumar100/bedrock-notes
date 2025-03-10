@@ -66,6 +66,9 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
     // Enable snap-to-grid
     enableSnapToGrid(canvas);
 
+    // Setup mouse wheel zoom
+    setupZoomWithMouseWheel(canvas, container);
+
     // Load diagram if ID is provided
     if (diagramId && diagramId !== 'new') {
       try {
@@ -126,6 +129,39 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       canvas.dispose();
     };
   }, [diagramId, setCanvas, setSelectedElement]);
+
+  // Setup zoom with mouse wheel
+  const setupZoomWithMouseWheel = (canvas: Canvas, container: HTMLDivElement) => {
+    container.addEventListener('wheel', (e) => {
+      // Only zoom if Ctrl key is pressed
+      if (e.ctrlKey) {
+        e.preventDefault();
+        
+        const delta = e.deltaY;
+        let zoom = canvas.getZoom();
+        
+        // Calculate point under mouse in canvas coordinates
+        const point = {
+          x: e.offsetX,
+          y: e.offsetY
+        };
+        
+        // Calculate zoom factor - decrease for scroll down, increase for scroll up
+        zoom = delta > 0 ? zoom * 0.95 : zoom * 1.05;
+        
+        // Limit zoom levels
+        if (zoom > 20) zoom = 20;
+        if (zoom < 0.1) zoom = 0.1;
+        
+        // Set zoom centered on mouse position
+        canvas.zoomToPoint(point, zoom);
+        
+        canvas.renderAll();
+        
+        return false;
+      }
+    }, { passive: false });
+  };
 
   // Create a grid pattern on the canvas
   const createGrid = (canvas: Canvas) => {

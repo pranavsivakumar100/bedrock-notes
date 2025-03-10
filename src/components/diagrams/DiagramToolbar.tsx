@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Canvas, Rect, Circle as FabricCircle, Triangle as FabricTriangle, Path, IText, Group, Line, util as fabricUtil } from 'fabric';
 import { 
@@ -42,6 +43,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from 'sonner';
+import { useCanvasHistory } from '@/hooks/useCanvasHistory';
 
 interface DiagramToolbarProps {
   canvas: Canvas | null;
@@ -76,6 +78,9 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
   const [fill, setFill] = useState('transparent');
   const [connectionStyle, setConnectionStyle] = useState<ConnectionStyle>('straight');
   const [zoomPercent, setZoomPercent] = useState(100);
+  
+  // Use the canvas history hook for undo/redo
+  const { undo: handleHistoryUndo, redo: handleHistoryRedo } = useCanvasHistory(canvas);
 
   const handleToolSelect = (tool: Tool) => {
     if (!canvas) return;
@@ -455,7 +460,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
   const handleUndo = () => {
     if (!canvas) return;
     try {
-      canvas.undo();
+      handleHistoryUndo();
       toast.info("Undo successful");
     } catch (error) {
       toast.info("Nothing to undo");
@@ -465,7 +470,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
   const handleRedo = () => {
     if (!canvas) return;
     try {
-      canvas.redo();
+      handleHistoryRedo();
       toast.info("Redo successful");
     } catch (error) {
       toast.info("Nothing to redo");

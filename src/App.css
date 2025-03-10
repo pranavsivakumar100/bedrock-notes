@@ -54,6 +54,11 @@ html {
   background-color: #ffffff;
 }
 
+/* Prevent browser default zooming with Ctrl+wheel */
+.diagram-editor-container {
+  touch-action: none;
+}
+
 /* Invisible scrollbar styles for all browsers */
 .invisible-scrollbar {
   scrollbar-width: none; /* Firefox */
