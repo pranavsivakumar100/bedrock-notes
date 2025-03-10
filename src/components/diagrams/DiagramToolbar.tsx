@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Canvas, Rect, Circle as FabricCircle, Triangle as FabricTriangle, Path, IText, Group, Line, util as fabricUtil } from 'fabric';
 import { 
@@ -25,6 +24,8 @@ import { Toggle } from '@/components/ui/toggle';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { useCanvasHistory } from '@/hooks/useCanvasHistory';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 interface DiagramToolbarProps {
   canvas: Canvas | null;
@@ -547,34 +548,36 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
           </TooltipProvider>
         </div>
         
-        <div className="ml-auto flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <label htmlFor="stroke-color" className="text-sm">Stroke:</label>
+        <div className="ml-auto flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            <label htmlFor="stroke-color" className="text-xs whitespace-nowrap">Stroke:</label>
             <input 
               type="color" 
               id="stroke-color"
               value={drawingColor}
               onChange={handleColorChange}
-              className="w-10 h-10 border-0"
+              className="w-6 h-6 border-0"
+              aria-label="Stroke color"
             />
           </div>
           
-          <div className="flex items-center gap-2">
-            <label htmlFor="fill-color" className="text-sm">Fill:</label>
+          <div className="flex items-center gap-1">
+            <label htmlFor="fill-color" className="text-xs whitespace-nowrap">Fill:</label>
             <input 
               type="color" 
               id="fill-color"
               value={fill === 'transparent' ? '#ffffff' : fill}
               onChange={handleFillChange}
-              className="w-10 h-10 border-0"
+              className="w-6 h-6 border-0"
+              aria-label="Fill color"
             />
             <Toggle
               pressed={fill === 'transparent'}
               onPressedChange={() => setFill(fill === 'transparent' ? '#ffffff' : 'transparent')}
               aria-label="Toggle transparent fill"
-              className="h-10 w-10"
+              className="h-6 w-6"
             >
-              <BoxSelect className="h-5 w-5" />
+              <BoxSelect className="h-3 w-3" />
             </Toggle>
           </div>
         </div>
