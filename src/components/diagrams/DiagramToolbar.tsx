@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Canvas, Rect, Circle as FabricCircle, Triangle as FabricTriangle, Path, IText, Group, Line, util as fabricUtil } from 'fabric';
 import { 
   MousePointer, 
@@ -62,25 +62,44 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
   const [zoomPercent, setZoomPercent] = useState(100);
   
   const { undo: handleHistoryUndo, redo: handleHistoryRedo } = useCanvasHistory(canvas);
+  
+  useEffect(() => {
+    if (!canvas) return;
+    
+    if (canvas.freeDrawingBrush) {
+      canvas.freeDrawingBrush.width = drawingWidth;
+      canvas.freeDrawingBrush.color = drawingColor;
+    }
+    
+    canvas.isDrawingMode = activeTool === 'draw' || activeTool === 'eraser';
+  }, [canvas, drawingWidth, drawingColor, activeTool]);
 
   const handleToolSelect = (tool: Tool) => {
     if (!canvas) return;
     
     setActiveTool(tool);
-    canvas.isDrawingMode = tool === 'draw';
     
     if (tool === 'draw') {
+      canvas.isDrawingMode = true;
       if (canvas.freeDrawingBrush) {
         canvas.freeDrawingBrush.width = drawingWidth;
         canvas.freeDrawingBrush.color = drawingColor;
       }
     } else if (tool === 'eraser') {
+      canvas.isDrawingMode = true;
       if (canvas.freeDrawingBrush) {
         canvas.freeDrawingBrush.width = drawingWidth * 2;
         canvas.freeDrawingBrush.color = '#ffffff';
       }
-      canvas.isDrawingMode = true;
-    } else if (tool === 'lineConnect' || tool === 'bezierConnect') {
+    } else {
+      canvas.isDrawingMode = false;
+      canvas.selection = tool === 'select';
+    }
+    
+    if (tool === 'lineConnect' || tool === 'bezierConnect') {
+      canvas.off('mouse:down');
+      canvas.off('mouse:up');
+      
       canvas.on('mouse:down', (options) => {
         if (options.target) {
           canvas.customData = { ...canvas.customData, connectionStart: options.target };
@@ -94,7 +113,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         }
       });
     } else {
-      canvas.selection = tool === 'select';
       canvas.off('mouse:down');
       canvas.off('mouse:up');
     }
@@ -114,6 +132,15 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
   
   const handleFillChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFill(e.target.value);
+  };
+
+  const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const width = parseInt(e.target.value);
+    setDrawingWidth(width);
+    
+    if (canvas && canvas.freeDrawingBrush) {
+      canvas.freeDrawingBrush.width = width;
+    }
   };
 
   const createConnection = (fromObj: any, toObj: any, style: ConnectionStyle = 'straight') => {
@@ -545,7 +572,22 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
           </TooltipProvider>
         </div>
         
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-4">
+          <div className="flex items-center gap-1">
+            <label htmlFor="stroke-width" className="text-xs whitespace-nowrap">Width:</label>
+            <input 
+              type="range" 
+              id="stroke-width"
+              min="1"
+              max="20"
+              value={drawingWidth}
+              onChange={handleWidthChange}
+              className="w-20 h-6"
+              aria-label="Stroke width"
+            />
+            <span className="text-xs">{drawingWidth}px</span>
+          </div>
+          
           <div className="flex items-center gap-1">
             <label htmlFor="stroke-color" className="text-xs whitespace-nowrap">Stroke:</label>
             <input 
