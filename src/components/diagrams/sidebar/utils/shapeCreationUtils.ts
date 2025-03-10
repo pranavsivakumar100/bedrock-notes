@@ -1,5 +1,5 @@
 
-import { Canvas, Object as FabricObject, util, XY, Line, Rect, Circle, IText, Triangle, Polygon } from 'fabric';
+import { Canvas, Object as FabricObject, util, XY, Line, Rect, Circle, IText, Triangle, Polygon, Ellipse } from 'fabric';
 
 export interface ShapeCreationOptions {
   canvas: Canvas | null;
@@ -16,11 +16,23 @@ export const handleAddShape = ({ canvas, shapeType, setSelectedElement }: ShapeC
     case 'rectangle':
       shape = createRectangle();
       break;
+    case 'round-rectangle':
+      shape = createRoundRectangle();
+      break;
     case 'circle':
       shape = createCircle();
       break;
+    case 'ellipse':
+      shape = createEllipse();
+      break;
+    case 'square':
+      shape = createSquare();
+      break;
     case 'triangle':
       shape = createTriangle();
+      break;
+    case 'right-triangle':
+      shape = createRightTriangle();
       break;
     case 'diamond':
       shape = createDiamond();
@@ -31,6 +43,9 @@ export const handleAddShape = ({ canvas, shapeType, setSelectedElement }: ShapeC
     case 'database':
       shape = createDatabase();
       break;
+    case 'server':
+      shape = createServer();
+      break;
     case 'cloud':
       shape = createCloud();
       break;
@@ -40,12 +55,21 @@ export const handleAddShape = ({ canvas, shapeType, setSelectedElement }: ShapeC
     case 'actor':
       shape = createActor();
       break;
+    case 'person':
+      shape = createPerson();
+      break;
     case 'text':
       // Use as FabricObject to fix type compatibility issues
       shape = createText() as unknown as FabricObject;
       break;
+    case 'text-box':
+      shape = createTextBox() as unknown as FabricObject;
+      break;
     case 'line':
       shape = createLine();
+      break;
+    case 'curved-line':
+      shape = createCurvedLine();
       break;
     case 'process':
       shape = createProcess();
@@ -79,6 +103,36 @@ function createRectangle(): Rect {
   });
 }
 
+function createRoundRectangle(): Rect {
+  return new Rect({
+    left: 100,
+    top: 100,
+    fill: 'rgba(255, 255, 255, 0.0)',
+    stroke: '#333',
+    strokeWidth: 1,
+    width: 100,
+    height: 50,
+    rx: 10,
+    ry: 10,
+    data: { type: 'round-rectangle' },
+  });
+}
+
+function createSquare(): Rect {
+  return new Rect({
+    left: 100,
+    top: 100,
+    fill: 'rgba(255, 255, 255, 0.0)',
+    stroke: '#333',
+    strokeWidth: 1,
+    width: 80,
+    height: 80,
+    rx: 0,
+    ry: 0,
+    data: { type: 'square' },
+  });
+}
+
 function createCircle(): Circle {
   return new Circle({
     left: 100,
@@ -88,6 +142,19 @@ function createCircle(): Circle {
     strokeWidth: 1,
     radius: 30,
     data: { type: 'circle' },
+  });
+}
+
+function createEllipse(): Ellipse {
+  return new Ellipse({
+    left: 100,
+    top: 100,
+    fill: 'rgba(255, 255, 255, 0.0)',
+    stroke: '#333',
+    strokeWidth: 1,
+    rx: 50,
+    ry: 30,
+    data: { type: 'ellipse' },
   });
 }
 
@@ -102,6 +169,24 @@ function createTriangle(): Triangle {
     height: 60,
     data: { type: 'triangle' },
   });
+}
+
+function createRightTriangle(): Polygon {
+  return new Polygon(
+    [
+      {x: 0, y: 0},
+      {x: 100, y: 0},
+      {x: 0, y: 100}
+    ],
+    {
+      left: 100,
+      top: 100,
+      fill: 'rgba(255, 255, 255, 0.0)',
+      stroke: '#333',
+      strokeWidth: 1,
+      data: { type: 'right-triangle' },
+    }
+  );
 }
 
 function createDiamond(): Polygon {
@@ -139,6 +224,29 @@ function createLine(): Line {
   );
 }
 
+function createCurvedLine(): FabricObject {
+  // Create a curved path
+  const path = new Polygon(
+    [
+      {x: 0, y: 50},
+      {x: 25, y: 0},
+      {x: 50, y: 25},
+      {x: 75, y: 0},
+      {x: 100, y: 50}
+    ],
+    {
+      left: 100,
+      top: 100,
+      fill: 'rgba(255, 255, 255, 0.0)',
+      stroke: '#333',
+      strokeWidth: 2,
+      data: { type: 'curved-line' },
+    }
+  );
+
+  return path;
+}
+
 function createArrow(): Line {
   // Create an arrow as a Line with proper array of points
   return new Line(
@@ -165,6 +273,20 @@ function createText(): IText {
     fontSize: 16,
     fill: '#333',
     data: { type: 'text' },
+  });
+}
+
+function createTextBox(): IText {
+  return new IText('Text Box', {
+    left: 100,
+    top: 100,
+    fontFamily: 'Arial',
+    fontSize: 16,
+    fill: '#333',
+    textAlign: 'center',
+    width: 120,
+    backgroundColor: 'rgba(255, 255, 255, 0.0)',
+    data: { type: 'text-box' },
   });
 }
 
@@ -251,6 +373,73 @@ function createDatabase(): FabricObject {
   group.addWithUpdate(leftLine);
   // @ts-ignore - we know these methods exist
   group.addWithUpdate(rightLine);
+
+  return group;
+}
+
+function createServer(): FabricObject {
+  // Create a server rack shape
+  const rect = new Rect({
+    width: 80,
+    height: 120,
+    left: 0,
+    top: 0,
+    fill: 'rgba(255, 255, 255, 0.0)',
+    stroke: '#333',
+    strokeWidth: 1,
+  });
+  
+  const line1 = new Line(
+    [10, 30, 70, 30], 
+    {
+      stroke: '#333',
+      strokeWidth: 1,
+      calcLinePoints: function() {
+        return { x1: this.x1, x2: this.x2, y1: this.y1, y2: this.y2 };
+      }
+    }
+  );
+  
+  const line2 = new Line(
+    [10, 60, 70, 60], 
+    {
+      stroke: '#333',
+      strokeWidth: 1,
+      calcLinePoints: function() {
+        return { x1: this.x1, x2: this.x2, y1: this.y1, y2: this.y2 };
+      }
+    }
+  );
+  
+  const line3 = new Line(
+    [10, 90, 70, 90], 
+    {
+      stroke: '#333',
+      strokeWidth: 1,
+      calcLinePoints: function() {
+        return { x1: this.x1, x2: this.x2, y1: this.y1, y2: this.y2 };
+      }
+    }
+  );
+
+  // Group all elements together
+  const group = util.createObject<FabricObject>('group', {
+    left: 100,
+    top: 100,
+    width: 80,
+    height: 120,
+    data: { type: 'server' },
+    subTargetCheck: true,
+  });
+
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(rect);
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(line1);
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(line2);
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(line3);
 
   return group;
 }
@@ -412,6 +601,87 @@ function createActor(): FabricObject {
   group.addWithUpdate(body);
   // @ts-ignore - we know these methods exist
   group.addWithUpdate(legs);
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(leftLeg);
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(rightLeg);
+
+  return group;
+}
+
+function createPerson(): FabricObject {
+  // Create a person stick figure
+  const head = new Circle({
+    radius: 15,
+    top: -40,
+    left: 0,
+    originX: 'center',
+    originY: 'center',
+    fill: 'rgba(255, 255, 255, 0.0)',
+    stroke: '#333',
+    strokeWidth: 1,
+  });
+  
+  const body = new Line(
+    [0, -25, 0, 30], 
+    {
+      stroke: '#333',
+      strokeWidth: 1,
+      calcLinePoints: function() {
+        return { x1: this.x1, x2: this.x2, y1: this.y1, y2: this.y2 };
+      }
+    }
+  );
+  
+  const arms = new Line(
+    [-20, 0, 20, 0], 
+    {
+      stroke: '#333',
+      strokeWidth: 1,
+      calcLinePoints: function() {
+        return { x1: this.x1, x2: this.x2, y1: this.y1, y2: this.y2 };
+      }
+    }
+  );
+  
+  const leftLeg = new Line(
+    [0, 30, -20, 60], 
+    {
+      stroke: '#333',
+      strokeWidth: 1,
+      calcLinePoints: function() {
+        return { x1: this.x1, x2: this.x2, y1: this.y1, y2: this.y2 };
+      }
+    }
+  );
+  
+  const rightLeg = new Line(
+    [0, 30, 20, 60], 
+    {
+      stroke: '#333',
+      strokeWidth: 1,
+      calcLinePoints: function() {
+        return { x1: this.x1, x2: this.x2, y1: this.y1, y2: this.y2 };
+      }
+    }
+  );
+  
+  // Group all elements together
+  const group = util.createObject<FabricObject>('group', {
+    left: 100,
+    top: 100,
+    width: 50,
+    height: 100,
+    data: { type: 'person' },
+    subTargetCheck: true,
+  });
+
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(head);
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(body);
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(arms);
   // @ts-ignore - we know these methods exist
   group.addWithUpdate(leftLeg);
   // @ts-ignore - we know these methods exist
