@@ -94,7 +94,7 @@ const Index: React.FC = () => {
           </div>
         </Link>
         
-        <Link to="/diagrams/new" className="block">
+        <Link to="/diagram/new" className="block">
           <div className="bg-muted/40 hover:bg-muted/60 border border-border/50 rounded-lg p-6 h-full transition-colors flex flex-col items-center justify-center text-center">
             <div className="bg-background h-14 w-14 rounded-full flex items-center justify-center mb-4">
               <File className="h-6 w-6 text-primary" />
