@@ -176,7 +176,7 @@ const DiagramEditor: React.FC = () => {
     const activeObject = canvas.getActiveObject();
     if (!activeObject) return;
     
-    activeObject.clone(function(clonedObj: any) {
+    canvas.getActiveObject()?.clone().then((clonedObj: any) => {
       localStorage.setItem('cs-diagram-clipboard', JSON.stringify(clonedObj.toJSON()));
       toast.success("Copied to clipboard");
     });
@@ -192,18 +192,16 @@ const DiagramEditor: React.FC = () => {
     }
     
     try {
-      util.enlivenObjects([JSON.parse(clipboard)], {
-        onComplete: (objects: any[]) => {
-          objects.forEach(obj => {
-            obj.set({
-              left: obj.left + 20,
-              top: obj.top + 20,
-            });
-            canvas.add(obj);
-            canvas.setActiveObject(obj);
+      util.enlivenObjects([JSON.parse(clipboard)]).then((objects: any[]) => {
+        objects.forEach(obj => {
+          obj.set({
+            left: obj.left + 20,
+            top: obj.top + 20,
           });
-          canvas.renderAll();
-        }
+          canvas.add(obj);
+          canvas.setActiveObject(obj);
+        });
+        canvas.renderAll();
       });
       toast.success("Pasted from clipboard");
     } catch (error) {
