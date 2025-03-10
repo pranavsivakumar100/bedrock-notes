@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { Canvas, Object as FabricObject, Line, util, Rect } from 'fabric';
+import { Canvas, Object as FabricObject, Line, util } from 'fabric';
 import { getDiagram } from '@/lib/diagram-storage';
 import { toast } from 'sonner';
 
@@ -45,16 +45,11 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
     const containerWidth = container.clientWidth;
     const containerHeight = container.clientHeight;
 
-    // Calculate a centered, paper-like area (draw.io style)
-    // Default to standard paper size with some margin
-    const paperWidth = Math.min(containerWidth - 100, 1100);
-    const paperHeight = Math.min(containerHeight - 100, 800);
-
     // Initialize Fabric Canvas with proper dimensions
     const canvas = new Canvas(canvasRef.current, {
       width: containerWidth,
       height: containerHeight,
-      backgroundColor: '#f5f5f5', // Light gray background like draw.io
+      backgroundColor: '#ffffff',
       selection: true,
       preserveObjectStacking: true,
     });
@@ -65,11 +60,8 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
     fabricCanvasRef.current = canvas;
     setCanvas(canvas);
 
-    // Add grid (draw.io style)
+    // Add grid
     createGrid(canvas);
-
-    // Create a centered "paper" rectangle
-    createPaperArea(canvas, containerWidth, containerHeight, paperWidth, paperHeight);
 
     // Enable snap-to-grid
     enableSnapToGrid(canvas);
@@ -115,22 +107,10 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       
       canvas.setWidth(newWidth);
       canvas.setHeight(newHeight);
-      
-      // Update paper area on resize
-      const objects = canvas.getObjects();
-      const paperObjects = objects.filter(obj => obj.data?.type === 'paper');
-      
-      if (paperObjects.length > 0) {
-        canvas.remove(...paperObjects);
-      }
-      
-      const paperWidth = Math.min(newWidth - 100, 1100);
-      const paperHeight = Math.min(newHeight - 100, 800);
-      
-      createPaperArea(canvas, newWidth, newHeight, paperWidth, paperHeight);
-      createGrid(canvas);
-      
       canvas.renderAll();
+      
+      // Recreate grid when canvas is resized
+      createGrid(canvas);
     };
 
     window.addEventListener('resize', handleResize);
@@ -147,7 +127,7 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
     };
   }, [diagramId, setCanvas, setSelectedElement]);
 
-  // Create a grid pattern on the canvas (draw.io style)
+  // Create a grid pattern on the canvas
   const createGrid = (canvas: Canvas) => {
     // Clear any existing grid
     const existingGrids = canvas.getObjects().filter(obj => obj.data?.type === 'grid');
@@ -160,7 +140,7 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
     // Create vertical lines
     for (let i = 0; i < width / gridSize; i++) {
       const line = new Line([i * gridSize, 0, i * gridSize, height], {
-        stroke: '#dddddd',
+        stroke: '#e0e0e0',
         selectable: false,
         evented: false,
         excludeFromExport: true,
@@ -173,7 +153,7 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
     // Create horizontal lines
     for (let i = 0; i < height / gridSize; i++) {
       const line = new Line([0, i * gridSize, width, i * gridSize], {
-        stroke: '#dddddd',
+        stroke: '#e0e0e0',
         selectable: false,
         evented: false,
         excludeFromExport: true,
@@ -183,32 +163,6 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       canvas.sendObjectToBack(line);
     }
     
-    canvas.renderAll();
-  };
-
-  // Create a centered paper area (draw.io style)
-  const createPaperArea = (canvas: Canvas, containerWidth: number, containerHeight: number, paperWidth: number, paperHeight: number) => {
-    // Calculate centered position
-    const left = (containerWidth - paperWidth) / 2;
-    const top = (containerHeight - paperHeight) / 2;
-    
-    // Create "paper" rectangle
-    const paperRect = new Rect({
-      left: left,
-      top: top,
-      width: paperWidth,
-      height: paperHeight,
-      fill: '#ffffff',
-      stroke: '#cccccc',
-      strokeWidth: 1,
-      selectable: false,
-      evented: false,
-      excludeFromExport: true,
-      data: { type: 'paper' }
-    });
-    
-    canvas.add(paperRect);
-    canvas.sendObjectToBack(paperRect);
     canvas.renderAll();
   };
 
@@ -253,7 +207,7 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
   return (
     <div 
       ref={containerRef} 
-      className="canvas-container draw-io-canvas-area" 
+      className="flex-1 w-full h-full overflow-hidden bg-white" 
       style={{ position: 'absolute', left: 0, right: 0, bottom: 0, top: 0 }}
     >
       <canvas 

@@ -1,6 +1,7 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Canvas, util, Object as FabricObject } from 'fabric';
+import { Canvas, util } from 'fabric';
 import { 
   Database, 
   Server, 
@@ -60,7 +61,6 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
-import { useCanvasHistory } from '@/hooks/useCanvasHistory';
 
 const DiagramEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -72,19 +72,19 @@ const DiagramEditor: React.FC = () => {
   const [selectedElement, setSelectedElement] = useState<any | null>(null);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
+  const [undoStack, setUndoStack] = useState<any[]>([]);
+  const [redoStack, setRedoStack] = useState<any[]>([]);
   const [lastSavedState, setLastSavedState] = useState<string | null>(null);
   const [templateData, setTemplateData] = useState<any | null>(null);
   const [activeTab, setActiveTab] = useState<"diagram" | "style" | "outline">("diagram");
-  const [showGrid, setShowGrid] = useState(true);
-  const [showPage, setShowPage] = useState(true);
-  
-  const { undo: handleUndo, redo: handleRedo } = useCanvasHistory(canvas);
   
   useEffect(() => {
     document.title = `${title} - Diagram Editor`;
     
+    // Apply a class to the body to ensure full viewport usage
     document.body.classList.add('overflow-hidden');
     
+    // Check for template data
     const storedTemplateData = localStorage.getItem('diagram_template');
     
     if (id === 'new' && storedTemplateData) {
@@ -99,8 +99,10 @@ const DiagramEditor: React.FC = () => {
           setTemplateData(template.json);
         }
         
+        // Show a toast notification
         toast.success('Template applied!');
         
+        // Clear the template data to prevent applying it again on refresh
         localStorage.removeItem('diagram_template');
       } catch (error) {
         console.error('Error parsing template data:', error);
@@ -121,12 +123,16 @@ const DiagramEditor: React.FC = () => {
     };
   }, [id, title, canvas]);
   
+  // Apply template to canvas when canvas and template data are available
   useEffect(() => {
     if (canvas && templateData) {
       try {
         canvas.loadFromJSON(templateData, () => {
           canvas.renderAll();
-          setTemplateData(null);
+          // Capture initial state for undo
+          const jsonState = JSON.stringify(canvas.toJSON());
+          setUndoStack([jsonState]);
+          setTemplateData(null); // Clear template data after applying
         });
       } catch (error) {
         console.error('Error applying template to canvas:', error);
@@ -137,6 +143,14 @@ const DiagramEditor: React.FC = () => {
   
   useEffect(() => {
     if (!canvas) return;
+    
+    const captureCanvasState = () => {
+      if (canvas) {
+        const jsonState = JSON.stringify(canvas.toJSON());
+        setUndoStack(prev => [...prev, jsonState]);
+        setRedoStack([]);
+      }
+    };
     
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey) {
@@ -168,16 +182,90 @@ const DiagramEditor: React.FC = () => {
           e.preventDefault();
           canvas.remove(canvas.getActiveObject());
           canvas.renderAll();
+          captureCanvasState();
         }
       }
     };
     
+    canvas.on('object:modified', captureCanvasState);
+    canvas.on('object:added', captureCanvasState);
+    canvas.on('object:removed', captureCanvasState);
+    
     window.addEventListener('keydown', handleKeyDown);
     
     return () => {
+      canvas.off('object:modified', captureCanvasState);
+      canvas.off('object:added', captureCanvasState);
+      canvas.off('object:removed', captureCanvasState);
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [canvas, handleUndo, handleRedo]);
+  }, [canvas, undoStack, redoStack]);
+  
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.ctrlKey || e.metaKey) {
+      if (e.key === 'z') {
+        e.preventDefault();
+        handleUndo();
+      } else if (e.key === 'y' || (e.shiftKey && e.key === 'z')) {
+        e.preventDefault();
+        handleRedo();
+      } else if (e.key === 's') {
+        e.preventDefault();
+        handleSaveDiagram();
+      } else if (e.key === 'c') {
+        e.preventDefault();
+        if (canvas?.getActiveObject()) {
+          handleCopy();
+        }
+      } else if (e.key === 'v') {
+        e.preventDefault();
+        handlePaste();
+      } else if (e.key === 'x') {
+        e.preventDefault();
+        if (canvas?.getActiveObject()) {
+          handleCut();
+        }
+      }
+    } else if (e.key === 'Delete' || e.key === 'Backspace') {
+      if (canvas?.getActiveObject() && document.activeElement === document.body) {
+        e.preventDefault();
+        canvas.remove(canvas.getActiveObject());
+        canvas.renderAll();
+        if (canvas) {
+          const jsonState = JSON.stringify(canvas.toJSON());
+          setUndoStack(prev => [...prev, jsonState]);
+          setRedoStack([]);
+        }
+      }
+    }
+  };
+  
+  const handleUndo = () => {
+    if (undoStack.length <= 1 || !canvas) return;
+    
+    const currentState = undoStack[undoStack.length - 1];
+    const previousState = undoStack[undoStack.length - 2];
+    
+    setRedoStack(prev => [...prev, currentState]);
+    setUndoStack(prev => prev.slice(0, -1));
+    
+    canvas.loadFromJSON(previousState, () => {
+      canvas.renderAll();
+    });
+  };
+  
+  const handleRedo = () => {
+    if (redoStack.length === 0 || !canvas) return;
+    
+    const nextState = redoStack[redoStack.length - 1];
+    
+    setUndoStack(prev => [...prev, nextState]);
+    setRedoStack(prev => prev.slice(0, -1));
+    
+    canvas.loadFromJSON(nextState, () => {
+      canvas.renderAll();
+    });
+  };
   
   const handleCopy = () => {
     if (!canvas) return;
@@ -185,12 +273,9 @@ const DiagramEditor: React.FC = () => {
     const activeObject = canvas.getActiveObject();
     if (!activeObject) return;
     
-    activeObject.clone().then((clonedObj: FabricObject) => {
+    canvas.getActiveObject()?.clone().then((clonedObj: any) => {
       localStorage.setItem('cs-diagram-clipboard', JSON.stringify(clonedObj.toJSON()));
       toast.success("Copied to clipboard");
-    }).catch((error: any) => {
-      console.error("Clone error:", error);
-      toast.error("Failed to copy to clipboard");
     });
   };
   
@@ -204,11 +289,11 @@ const DiagramEditor: React.FC = () => {
     }
     
     try {
-      util.enlivenObjects([JSON.parse(clipboard)]).then((objects: FabricObject[]) => {
+      util.enlivenObjects([JSON.parse(clipboard)]).then((objects: any[]) => {
         objects.forEach(obj => {
           obj.set({
-            left: obj.left! + 20,
-            top: obj.top! + 20,
+            left: obj.left + 20,
+            top: obj.top + 20,
           });
           canvas.add(obj);
           canvas.setActiveObject(obj);
@@ -245,7 +330,7 @@ const DiagramEditor: React.FC = () => {
         return;
       }
       
-      const diagramId = id === 'new' ? `diagram-${Date.now()}` : id;
+      const diagramId = id || `diagram-${Date.now()}`;
       
       saveDiagram(diagramId, {
         title,
@@ -337,17 +422,9 @@ const DiagramEditor: React.FC = () => {
     setRightSidebarOpen(!rightSidebarOpen);
   };
   
-  const toggleGrid = () => {
-    setShowGrid(!showGrid);
-  };
-  
-  const togglePage = () => {
-    setShowPage(!showPage);
-  };
-  
   return (
     <div className="diagram-editor-container">
-      <header className="border-b border-border/40 p-2 flex items-center justify-between relative z-10 bg-white">
+      <header className="border-b border-border/40 p-2 flex items-center justify-between glass-morphism relative z-10">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
             <a href="/diagrams">
@@ -443,7 +520,7 @@ const DiagramEditor: React.FC = () => {
         </div>
         
         {rightSidebarOpen && (
-          <div className="w-64 border-l border-border/40 flex flex-col bg-white">
+          <div className="w-64 border-l border-border/40 flex flex-col">
             <Tabs defaultValue="diagram" value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
               <TabsList className="w-full rounded-none border-b">
                 <TabsTrigger value="diagram" className="flex-1">Diagram</TabsTrigger>
@@ -456,23 +533,11 @@ const DiagramEditor: React.FC = () => {
                   <h3 className="text-sm font-medium">View</h3>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <input 
-                        type="checkbox" 
-                        id="grid" 
-                        className="checkbox" 
-                        checked={showGrid}
-                        onChange={toggleGrid}
-                      />
+                      <input type="checkbox" id="grid" className="checkbox" checked />
                       <label htmlFor="grid" className="text-sm">Grid</label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <input 
-                        type="checkbox" 
-                        id="page-view" 
-                        className="checkbox" 
-                        checked={showPage}
-                        onChange={togglePage}
-                      />
+                      <input type="checkbox" id="page-view" className="checkbox" checked />
                       <label htmlFor="page-view" className="text-sm">Page View</label>
                     </div>
                   </div>
@@ -491,19 +556,19 @@ const DiagramEditor: React.FC = () => {
                   <h3 className="text-sm font-medium">Options</h3>
                   <div className="space-y-2">
                     <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="connection-arrows" className="checkbox" defaultChecked />
+                      <input type="checkbox" id="connection-arrows" className="checkbox" checked />
                       <label htmlFor="connection-arrows" className="text-sm">Connection Arrows</label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="connection-points" className="checkbox" defaultChecked />
+                      <input type="checkbox" id="connection-points" className="checkbox" checked />
                       <label htmlFor="connection-points" className="text-sm">Connection Points</label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="guides" className="checkbox" defaultChecked />
+                      <input type="checkbox" id="guides" className="checkbox" checked />
                       <label htmlFor="guides" className="text-sm">Guides</label>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="autosave" className="checkbox" defaultChecked />
+                      <input type="checkbox" id="autosave" className="checkbox" checked />
                       <label htmlFor="autosave" className="text-sm">Autosave</label>
                     </div>
                   </div>
@@ -519,7 +584,7 @@ const DiagramEditor: React.FC = () => {
                   
                   <div className="flex gap-2 mt-2">
                     <div className="flex items-center space-x-2">
-                      <input type="radio" id="portrait" name="orientation" className="radio" defaultChecked />
+                      <input type="radio" id="portrait" name="orientation" className="radio" checked />
                       <label htmlFor="portrait" className="text-sm">Portrait</label>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -536,10 +601,12 @@ const DiagramEditor: React.FC = () => {
               </TabsContent>
               
               <TabsContent value="style" className="p-4">
+                {/* Style options would go here */}
                 <p className="text-muted-foreground text-sm">Select an element to view style options</p>
               </TabsContent>
               
               <TabsContent value="outline" className="p-4">
+                {/* Outline/layers view would go here */}
                 <p className="text-muted-foreground text-sm">Layer structure will appear here</p>
               </TabsContent>
             </Tabs>

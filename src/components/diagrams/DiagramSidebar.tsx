@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Canvas, Object as FabricObject, Group, Line, IText, Rect } from 'fabric';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -22,9 +21,7 @@ import {
   Ruler,
   FileText,
   BadgeCheck,
-  EyeOff,
-  Square as SquareIcon,
-  ArrowRight as ArrowRightIcon
+  EyeOff
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -289,8 +286,9 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
     setBackgroundColor(color);
     
     if (canvas) {
-      canvas.backgroundColor = color;
-      canvas.renderAll();
+      canvas.setBackgroundColor(color, () => {
+        canvas.renderAll();
+      });
     }
   };
   
@@ -339,7 +337,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
                 <AccordionContent className="pt-0 pb-1">
                   <div className="grid grid-cols-3 gap-1 px-2">
                     <Button variant="outline" size="icon" className="h-10 w-full aspect-square">
-                      <SquareIcon className="h-6 w-6" />
+                      <Square className="h-6 w-6" />
                     </Button>
                     <Button variant="outline" size="icon" className="h-10 w-full aspect-square">
                       <div className="rounded-full border-2 h-6 w-6"></div>
@@ -358,7 +356,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
                 <AccordionContent className="pt-0 pb-1">
                   <div className="grid grid-cols-3 gap-1 px-2">
                     <Button variant="outline" size="icon" className="h-10 w-full aspect-square">
-                      <SquareIcon className="h-6 w-6" />
+                      <Square className="h-6 w-6" />
                     </Button>
                     <Button variant="outline" size="icon" className="h-10 w-full aspect-square">
                       <div className="rounded-full border-2 h-6 w-6"></div>
@@ -377,7 +375,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
                 <AccordionContent className="pt-0 pb-1">
                   <div className="grid grid-cols-3 gap-1 px-2">
                     <Button variant="outline" size="icon" className="h-10 w-full aspect-square">
-                      <ArrowRightIcon className="h-6 w-6" />
+                      <ArrowRight className="h-6 w-6" />
                     </Button>
                   </div>
                 </AccordionContent>
@@ -581,7 +579,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
                   <Checkbox 
                     id="show-grid" 
                     checked={showGrid} 
-                    onCheckedChange={(checked) => handleGridToggle(!!checked)}
+                    onCheckedChange={handleGridToggle}
                   />
                   <Label htmlFor="show-grid" className="cursor-pointer">Grid</Label>
                 </div>
@@ -590,7 +588,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
                   <Checkbox 
                     id="page-view" 
                     checked={showPageView} 
-                    onCheckedChange={(checked) => setShowPageView(!!checked)}
+                    onCheckedChange={setShowPageView}
                   />
                   <Label htmlFor="page-view" className="cursor-pointer">Page View</Label>
                 </div>
