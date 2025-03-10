@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Canvas, Rect, Circle, Triangle, Path, IText } from 'fabric';
+import { Canvas, Rect, Circle as FabricCircle, Triangle as FabricTriangle, Path, IText, Group, Line } from 'fabric';
 import { 
   MousePointer, 
   Pencil, 
@@ -102,7 +102,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         break;
         
       case 'circle':
-        shape = new Circle({
+        shape = new FabricCircle({
           radius: 50,
           fill: 'transparent',
           stroke: drawingColor,
@@ -113,7 +113,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         break;
         
       case 'triangle':
-        shape = new Triangle({
+        shape = new FabricTriangle({
           width: 100,
           height: 100,
           fill: 'transparent',
@@ -151,16 +151,16 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         });
         
         // Add server detail lines
-        const serverDetails = new fabric.Group([
-          new fabric.Line([10, 30, 70, 30], {
+        const serverDetails = new Group([
+          new Line([10, 30, 70, 30], {
             stroke: drawingColor,
             strokeWidth: 1
           }),
-          new fabric.Line([10, 50, 70, 50], {
+          new Line([10, 50, 70, 50], {
             stroke: drawingColor,
             strokeWidth: 1
           }),
-          new fabric.Line([10, 70, 70, 70], {
+          new Line([10, 70, 70, 70], {
             stroke: drawingColor,
             strokeWidth: 1
           })
@@ -209,8 +209,8 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         });
         
         // Add component ports
-        const componentPorts = new fabric.Group([
-          new fabric.Rect({
+        const componentPorts = new Group([
+          new Rect({
             width: 10,
             height: 20,
             fill: 'transparent',
@@ -219,7 +219,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
             left: -10,
             top: 20
           }),
-          new fabric.Rect({
+          new Rect({
             width: 10,
             height: 20,
             fill: 'transparent',
@@ -354,7 +354,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
                 onPressedChange={() => handleAddShape('circle')}
                 aria-label="Circle shape"
               >
-                <Circle className="h-4 w-4" />
+                <CircleIcon className="h-4 w-4" />
               </Toggle>
             </TooltipTrigger>
             <TooltipContent>
@@ -371,7 +371,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
                 onPressedChange={() => handleAddShape('triangle')}
                 aria-label="Triangle shape"
               >
-                <Triangle className="h-4 w-4" />
+                <TriangleIcon className="h-4 w-4" />
               </Toggle>
             </TooltipTrigger>
             <TooltipContent>

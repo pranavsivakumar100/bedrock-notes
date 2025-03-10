@@ -38,8 +38,8 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       try {
         const diagram = getDiagram(diagramId);
         if (diagram && diagram.json) {
-          canvas.loadFromJSON(diagram.json, canvas.renderAll.bind(canvas), (o, object) => {
-            // Callback for each object loaded
+          canvas.loadFromJSON(diagram.json, () => {
+            canvas.renderAll();
           });
         }
       } catch (error) {

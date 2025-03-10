@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Canvas, Object as FabricObject } from 'fabric';
+import { Canvas, Object as FabricObject, Group, Line, IText, Rect } from 'fabric';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Palette,
@@ -43,7 +44,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
   const handleDuplicate = () => {
     if (!canvas || !selectedElement) return;
     
-    selectedElement.clone((cloned: FabricObject) => {
+    selectedElement.clone((cloned: any) => {
       // Position the clone slightly offset from the original
       cloned.set({
         left: selectedElement.left! + 20,
@@ -61,14 +62,16 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
   const handleBringForward = () => {
     if (!canvas || !selectedElement) return;
     
-    canvas.bringForward(selectedElement);
+    // Use bringObjectToFront instead of bringForward
+    canvas.bringToFront(selectedElement);
     canvas.renderAll();
   };
   
   const handleSendBackward = () => {
     if (!canvas || !selectedElement) return;
     
-    canvas.sendBackward(selectedElement);
+    // Use sendObjectToBack instead of sendBackward
+    canvas.sendToBack(selectedElement);
     canvas.renderAll();
   };
   
@@ -374,7 +377,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
                     defaultValue="Arial" 
                     onValueChange={(value) => {
                       if (canvas && selectedElement && selectedElement.type === 'i-text') {
-                        (selectedElement as fabric.IText).set({ fontFamily: value });
+                        (selectedElement as IText).set({ fontFamily: value });
                         canvas.renderAll();
                       }
                     }}
