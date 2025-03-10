@@ -1,6 +1,6 @@
 
 // Type definitions for fabric.js extensions
-import { Canvas, Object as FabricObject, IText, util, XY, TPointerEvent, InteractiveFabricObject } from 'fabric';
+import { Canvas, Object as FabricObject, IText, util, XY, TPointerEvent, InteractiveFabricObject, BaseBrush } from 'fabric';
 
 // Extend Canvas events to add our custom events
 declare module 'fabric' {
@@ -16,12 +16,8 @@ declare module 'fabric' {
       [key: string]: any;
     }
     
-    // Add typing for freeDrawingBrush
-    freeDrawingBrush: {
-      width: number;
-      color: string;
-      [key: string]: any;
-    };
+    // Update typing for freeDrawingBrush to correctly extend BaseBrush
+    freeDrawingBrush: BaseBrush;
   }
   
   // Extend FabricObjectProps to include our custom data property

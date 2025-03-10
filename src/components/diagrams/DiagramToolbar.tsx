@@ -87,14 +87,22 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
       canvas.isDrawingMode = false;
       
       if (tool === 'draw') {
-        canvas.freeDrawingBrush.width = drawingWidth;
-        canvas.freeDrawingBrush.color = drawingColor;
-        canvas.isDrawingMode = true;
-        console.log("Set drawing mode to:", canvas.isDrawingMode);
+        if (canvas.freeDrawingBrush) {
+          canvas.freeDrawingBrush.width = drawingWidth;
+          canvas.freeDrawingBrush.color = drawingColor;
+          canvas.isDrawingMode = true;
+          console.log("Set drawing mode to:", canvas.isDrawingMode);
+        } else {
+          console.error("freeDrawingBrush is not available");
+        }
       } else if (tool === 'eraser') {
-        canvas.freeDrawingBrush.width = drawingWidth * 2;
-        canvas.freeDrawingBrush.color = '#ffffff';
-        canvas.isDrawingMode = true;
+        if (canvas.freeDrawingBrush) {
+          canvas.freeDrawingBrush.width = drawingWidth * 2;
+          canvas.freeDrawingBrush.color = '#ffffff';
+          canvas.isDrawingMode = true;
+        } else {
+          console.error("freeDrawingBrush is not available");
+        }
       } else {
         canvas.isDrawingMode = false;
         canvas.selection = tool === 'select';

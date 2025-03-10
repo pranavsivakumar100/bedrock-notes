@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { Canvas, Object as FabricObject } from 'fabric';
+import { Canvas, Object as FabricObject, PencilBrush } from 'fabric';
 import { getDiagram } from '@/lib/diagram-storage';
 import { toast } from 'sonner';
 import { createGrid, enableSnapToGrid } from '@/lib/canvas/grid-utils';
@@ -41,12 +41,17 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       isDrawingMode: false,
     });
     
-    // Create a fresh drawing brush
+    // Create a fresh drawing brush and set its properties
     console.log("Setting up the drawing brush...");
-    // Default PencilBrush from fabric
-    canvas.freeDrawingBrush.width = 2;
-    canvas.freeDrawingBrush.color = '#000000';
-    console.log("Drawing brush initialized:", canvas.freeDrawingBrush);
+    // Make sure the PencilBrush is properly initialized
+    if (canvas.freeDrawingBrush) {
+      // Set initial brush properties
+      canvas.freeDrawingBrush.width = 2;
+      canvas.freeDrawingBrush.color = '#000000';
+      console.log("Drawing brush initialized:", canvas.freeDrawingBrush);
+    } else {
+      console.error("Failed to initialize drawing brush");
+    }
     
     canvas.customData = {};
     
