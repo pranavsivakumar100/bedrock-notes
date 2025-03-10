@@ -16,6 +16,7 @@ import CodeSnippetEditor from "./pages/CodeSnippetEditor";
 import DiagramEditor from "./pages/DiagramEditor";
 import Diagrams from "./pages/Diagrams";
 import NotFound from "./pages/NotFound";
+import Templates from "./pages/Templates";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ const App = () => {
                   <Route path="/code-snippets/:id" element={<CodeSnippetEditor />} />
                   <Route path="/diagram/:id" element={<DiagramEditor />} />
                   <Route path="/diagrams" element={<Diagrams />} />
+                  <Route path="/templates" element={<Templates />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </main>

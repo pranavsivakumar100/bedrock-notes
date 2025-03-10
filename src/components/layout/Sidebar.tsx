@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
@@ -14,7 +13,9 @@ import {
   ChevronDown,
   MoreVertical,
   LogOut,
-  User
+  User,
+  LayoutTemplate,
+  FileDigit
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -274,7 +275,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
       const newFolder = addFolder(name, parentId || null);
       setFolders([...folders, newFolder]);
       
-      // Expand the parent folder
       if (parentId) {
         setExpandedFolders(prev => ({
           ...prev,
@@ -368,6 +368,20 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
                   isActive={isActive("/code-snippets")} 
                   collapse={!isOpen}
                 />
+                <SidebarItem 
+                  to="/diagrams" 
+                  icon={<FileDigit className="h-4 w-4" />} 
+                  text="Diagrams" 
+                  isActive={isActive("/diagrams")} 
+                  collapse={!isOpen}
+                />
+                <SidebarItem 
+                  to="/templates" 
+                  icon={<LayoutTemplate className="h-4 w-4" />} 
+                  text="Templates" 
+                  isActive={isActive("/templates")} 
+                  collapse={!isOpen}
+                />
               </div>
               
               <Separator className="my-2 opacity-50" />
@@ -415,7 +429,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
                         </FolderContextMenu>
                       ))}
                     
-                    {/* Show notes for selected folder */}
                     {selectedFolderId && isOpen && (
                       <NotesList notes={notes} selectedFolderId={selectedFolderId} />
                     )}
@@ -431,7 +444,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
                       </Button>
                     </div>
                     
-                    {/* Get unique tags from all notes */}
                     {Array.from(new Set(notes.flatMap(note => note.tags)))
                       .sort()
                       .slice(0, 5)
@@ -466,6 +478,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
                 <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
                   <Link to="/code-snippets">
                     <Code className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                  <Link to="/diagrams">
+                    <FileDigit className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
+                  <Link to="/templates">
+                    <LayoutTemplate className="h-4 w-4" />
                   </Link>
                 </Button>
                 
@@ -530,7 +552,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
         </div>
       </aside>
       
-      {/* Folder Dialog */}
       <FolderDialog
         isOpen={folderDialogState.isOpen}
         onClose={() => setFolderDialogState(prev => ({ ...prev, isOpen: false }))}
@@ -539,7 +560,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
         title={folderDialogState.title}
       />
       
-      {/* Move Note Dialog */}
       <MoveFolderDialog
         isOpen={moveDialogState.isOpen}
         onClose={() => setMoveDialogState({ isOpen: false, note: null })}
@@ -547,7 +567,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
         note={moveDialogState.note}
       />
       
-      {/* Auth Dialog */}
       <AuthDialog
         isOpen={authDialogOpen}
         onClose={() => {
