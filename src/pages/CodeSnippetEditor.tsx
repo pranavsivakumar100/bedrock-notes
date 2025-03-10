@@ -7,10 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Play, Save } from 'lucide-react';
-import { CodeExecutionResult, ContextMenuPosition } from '@/lib/types';
+import { CodeExecutionResult } from '@/lib/types';
 import { toast } from 'sonner';
 import Prism from 'prismjs';
-import CodeEditorContextMenu from '@/components/ui/context-menu/CodeEditorContextMenu';
 
 const CodeSnippetEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -21,7 +20,6 @@ const CodeSnippetEditor: React.FC = () => {
   const [code, setCode] = useState(isNew ? '' : 'function example() {\n  console.log("Hello from Bedrock!");\n}\n\nexample();');
   const [result, setResult] = useState<CodeExecutionResult | null>(null);
   const editorRef = useRef<HTMLTextAreaElement>(null);
-  const [contextMenu, setContextMenu] = useState<ContextMenuPosition | null>(null);
   
   useEffect(() => {
     // Check for template data
@@ -129,61 +127,6 @@ const CodeSnippetEditor: React.FC = () => {
     }
   };
 
-  const handleContextMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setContextMenu({ x: e.clientX, y: e.clientY });
-  };
-  
-  const closeContextMenu = () => {
-    setContextMenu(null);
-  };
-  
-  const handleCopy = () => {
-    if (editorRef.current) {
-      const selected = editorRef.current.value.substring(
-        editorRef.current.selectionStart,
-        editorRef.current.selectionEnd
-      );
-      navigator.clipboard.writeText(selected);
-      toast.success("Copied to clipboard");
-    }
-    closeContextMenu();
-  };
-  
-  const handleCut = () => {
-    if (editorRef.current) {
-      const selected = editorRef.current.value.substring(
-        editorRef.current.selectionStart,
-        editorRef.current.selectionEnd
-      );
-      navigator.clipboard.writeText(selected);
-      
-      const beforeSelection = editorRef.current.value.substring(0, editorRef.current.selectionStart);
-      const afterSelection = editorRef.current.value.substring(editorRef.current.selectionEnd);
-      setCode(beforeSelection + afterSelection);
-      
-      toast.success("Cut to clipboard");
-    }
-    closeContextMenu();
-  };
-  
-  const handlePaste = async () => {
-    try {
-      const clipboardText = await navigator.clipboard.readText();
-      
-      if (editorRef.current) {
-        const cursorPosition = editorRef.current.selectionStart;
-        const beforeCursor = code.substring(0, cursorPosition);
-        const afterCursor = code.substring(cursorPosition);
-        
-        setCode(beforeCursor + clipboardText + afterCursor);
-      }
-    } catch (error) {
-      toast.error("Unable to paste from clipboard");
-    }
-    closeContextMenu();
-  };
-
   return (
     <div className="container mx-auto px-4 py-6 animate-fade-in">
       <div className="mb-6">
@@ -238,26 +181,15 @@ const CodeSnippetEditor: React.FC = () => {
         <div className="flex flex-col">
           <Label htmlFor="code-editor" className="mb-2">Code</Label>
           <div className="font-mono text-sm flex-1 rounded-md border min-h-[400px] bg-[#1f2937] overflow-hidden relative">
-            <CodeEditorContextMenu
-              position={contextMenu}
-              onClose={closeContextMenu}
-              onCopy={handleCopy}
-              onCut={handleCut}
-              onPaste={handlePaste}
-              onRun={handleRunCode}
-              onSave={handleSave}
-            >
-              <textarea
-                ref={editorRef}
-                id="code-editor"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className="font-mono text-sm w-full h-full p-4 resize-none absolute inset-0 bg-transparent text-gray-300 border-0 focus:ring-0 outline-none"
-                placeholder="Write your code here..."
-                spellCheck="false"
-                onContextMenu={handleContextMenu}
-              />
-            </CodeEditorContextMenu>
+            <textarea
+              ref={editorRef}
+              id="code-editor"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              className="font-mono text-sm w-full h-full p-4 resize-none absolute inset-0 bg-transparent text-gray-300 border-0 focus:ring-0 outline-none"
+              placeholder="Write your code here..."
+              spellCheck="false"
+            />
           </div>
         </div>
 

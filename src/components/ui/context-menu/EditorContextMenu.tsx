@@ -5,10 +5,7 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
-  ContextMenuTrigger,
-  ContextMenuSub,
-  ContextMenuSubTrigger,
-  ContextMenuSubContent
+  ContextMenuTrigger 
 } from '@/components/ui/context-menu';
 import { ContextMenuPosition } from '@/lib/types';
 import { 
@@ -22,9 +19,7 @@ import {
   Heading2,
   List,
   ListOrdered,
-  Quote,
-  FileCode,
-  Image
+  Quote
 } from 'lucide-react';
 
 interface EditorContextMenuProps {
@@ -41,8 +36,6 @@ interface EditorContextMenuProps {
   onFormatBulletList: () => void;
   onFormatNumberedList: () => void;
   onFormatBlockquote: () => void;
-  onInsertCodeSnippet?: () => void;
-  onInsertDiagram?: () => void;
   children: React.ReactNode;
 }
 
@@ -60,8 +53,6 @@ const EditorContextMenu: React.FC<EditorContextMenuProps> = ({
   onFormatBulletList,
   onFormatNumberedList,
   onFormatBlockquote,
-  onInsertCodeSnippet,
-  onInsertDiagram,
   children
 }) => {
   return (
@@ -173,31 +164,6 @@ const EditorContextMenu: React.FC<EditorContextMenuProps> = ({
           <Quote className="h-4 w-4" />
           <span>Blockquote</span>
         </ContextMenuItem>
-
-        {/* Insert items - only show if handlers are provided */}
-        {(onInsertCodeSnippet || onInsertDiagram) && (
-          <ContextMenuSeparator />
-        )}
-        
-        {onInsertCodeSnippet && (
-          <ContextMenuItem 
-            className="flex items-center gap-2 cursor-pointer"
-            onClick={onInsertCodeSnippet}
-          >
-            <FileCode className="h-4 w-4" />
-            <span>Insert Code Snippet</span>
-          </ContextMenuItem>
-        )}
-        
-        {onInsertDiagram && (
-          <ContextMenuItem 
-            className="flex items-center gap-2 cursor-pointer"
-            onClick={onInsertDiagram}
-          >
-            <Image className="h-4 w-4" />
-            <span>Insert Diagram</span>
-          </ContextMenuItem>
-        )}
       </ContextMenuContent>
     </ContextMenu>
   );
