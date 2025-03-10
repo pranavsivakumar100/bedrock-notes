@@ -1,4 +1,5 @@
 import { Note, CodeSnippet, Diagram, BaseItem } from '@/lib/types';
+import { Diagram as DiagramType } from '@/lib/diagram-storage';
 
 // Default notes for new users
 const defaultNotes: Note[] = [
@@ -472,13 +473,4 @@ export const saveUser = (user: User): void => {
 
 export const removeUser = (): void => {
   localStorage.removeItem(USER_STORAGE_KEY);
-};
-
-export const saveItem = (item: BaseItem): BaseItem => {
-  return updateNote(item);
-};
-
-export const deleteItem = (id: string): boolean => {
-  deleteNote(id);
-  return true;
 };

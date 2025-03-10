@@ -237,8 +237,9 @@ const DiagramEditor: React.FC = () => {
         return;
       }
       
-      const diagramId = id || 'new';
-      const savedDiagram = saveDiagram(diagramId, {
+      const diagramId = id || `diagram-${Date.now()}`;
+      
+      saveDiagram(diagramId, {
         title,
         json: jsonString,
         createdAt: new Date(),
@@ -248,8 +249,8 @@ const DiagramEditor: React.FC = () => {
       setLastSavedState(jsonString);
       toast.success("Diagram saved successfully");
       
-      if (diagramId === 'new') {
-        navigate(`/diagram/${savedDiagram.id}`, { replace: true });
+      if (id === 'new') {
+        navigate(`/diagram/${diagramId}`, { replace: true });
       }
     } catch (error) {
       toast.error("Failed to save diagram");

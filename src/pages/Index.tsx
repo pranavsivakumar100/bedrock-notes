@@ -71,7 +71,7 @@ const Index: React.FC = () => {
         <div className="bg-muted/30 border rounded-lg p-6 mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <h2 className="text-xl font-semibold mb-2">Welcome to Bedrock</h2>
+              <h2 className="text-xl font-semibold mb-2">Welcome to CodeChime Notes</h2>
               <p className="text-muted-foreground max-w-xl">
                 Sign in to save your notes, create folders, and access your content from anywhere.
               </p>
@@ -86,7 +86,7 @@ const Index: React.FC = () => {
       
       <div className="mb-8">
         <h1 className="text-4xl font-bold tracking-tight text-foreground mb-4">
-          Welcome to Bedrock
+          Welcome to CodeChime Notes
         </h1>
         <p className="text-xl text-muted-foreground max-w-3xl">
           Your all-in-one platform for computer science notes, code snippets, and technical diagrams.
@@ -170,7 +170,7 @@ const Index: React.FC = () => {
           <TabsContent value="recent" className="mt-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {items
-                .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+                .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
                 .slice(0, 6)
                 .map(item => (
                   <NoteCard 
