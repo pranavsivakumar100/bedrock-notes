@@ -68,6 +68,7 @@ const DiagramEditor: React.FC = () => {
   const [undoStack, setUndoStack] = useState<any[]>([]);
   const [redoStack, setRedoStack] = useState<any[]>([]);
   const [lastSavedState, setLastSavedState] = useState<string | null>(null);
+  const [templateData, setTemplateData] = useState<any | null>(null);
   
   useEffect(() => {
     document.title = `${title} - Diagram Editor`;
@@ -75,7 +76,30 @@ const DiagramEditor: React.FC = () => {
     // Apply a class to the body to ensure full viewport usage
     document.body.classList.add('overflow-hidden');
     
-    if (id && id !== 'new' && canvas) {
+    // Check for template data
+    const storedTemplateData = localStorage.getItem('diagram_template');
+    
+    if (id === 'new' && storedTemplateData) {
+      try {
+        const template = JSON.parse(storedTemplateData);
+        
+        if (template.title) {
+          setTitle(template.title);
+        }
+        
+        if (template.json) {
+          setTemplateData(template.json);
+        }
+        
+        // Show a toast notification
+        toast.success('Template applied!');
+        
+        // Clear the template data to prevent applying it again on refresh
+        localStorage.removeItem('diagram_template');
+      } catch (error) {
+        console.error('Error parsing template data:', error);
+      }
+    } else if (id && id !== 'new' && canvas) {
       try {
         const diagram = getDiagram(id);
         if (diagram) {
@@ -90,6 +114,24 @@ const DiagramEditor: React.FC = () => {
       document.body.classList.remove('overflow-hidden');
     };
   }, [id, title, canvas]);
+  
+  // Apply template to canvas when canvas and template data are available
+  useEffect(() => {
+    if (canvas && templateData) {
+      try {
+        canvas.loadFromJSON(templateData, () => {
+          canvas.renderAll();
+          // Capture initial state for undo
+          const jsonState = JSON.stringify(canvas.toJSON());
+          setUndoStack([jsonState]);
+          setTemplateData(null); // Clear template data after applying
+        });
+      } catch (error) {
+        console.error('Error applying template to canvas:', error);
+        toast.error('Failed to apply template');
+      }
+    }
+  }, [canvas, templateData]);
   
   useEffect(() => {
     if (!canvas) return;
@@ -150,6 +192,45 @@ const DiagramEditor: React.FC = () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [canvas, undoStack, redoStack]);
+  
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.ctrlKey || e.metaKey) {
+      if (e.key === 'z') {
+        e.preventDefault();
+        handleUndo();
+      } else if (e.key === 'y' || (e.shiftKey && e.key === 'z')) {
+        e.preventDefault();
+        handleRedo();
+      } else if (e.key === 's') {
+        e.preventDefault();
+        handleSaveDiagram();
+      } else if (e.key === 'c') {
+        e.preventDefault();
+        if (canvas?.getActiveObject()) {
+          handleCopy();
+        }
+      } else if (e.key === 'v') {
+        e.preventDefault();
+        handlePaste();
+      } else if (e.key === 'x') {
+        e.preventDefault();
+        if (canvas?.getActiveObject()) {
+          handleCut();
+        }
+      }
+    } else if (e.key === 'Delete' || e.key === 'Backspace') {
+      if (canvas?.getActiveObject() && document.activeElement === document.body) {
+        e.preventDefault();
+        canvas.remove(canvas.getActiveObject());
+        canvas.renderAll();
+        if (canvas) {
+          const jsonState = JSON.stringify(canvas.toJSON());
+          setUndoStack(prev => [...prev, jsonState]);
+          setRedoStack([]);
+        }
+      }
+    }
+  };
   
   const handleUndo = () => {
     if (undoStack.length <= 1 || !canvas) return;

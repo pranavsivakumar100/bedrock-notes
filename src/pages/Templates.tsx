@@ -17,7 +17,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 
-// Sample template data
+// Sample template data with content
 const sampleTemplates = [
   {
     id: '1',
@@ -25,7 +25,29 @@ const sampleTemplates = [
     description: 'A structured template for organizing study notes with sections for key concepts, examples, and practice problems.',
     type: 'note',
     category: 'academic',
-    tags: ['study', 'notes', 'academic']
+    tags: ['study', 'notes', 'academic'],
+    content: `# Study Notes: [Subject]
+
+## Key Concepts
+- Concept 1
+- Concept 2
+- Concept 3
+
+## Definitions
+- **Term 1**: Definition here
+- **Term 2**: Definition here
+
+## Examples
+1. Example 1
+2. Example 2
+
+## Practice Problems
+- [ ] Problem 1
+- [ ] Problem 2
+
+## Additional Resources
+- [Resource name](URL)
+`
   },
   {
     id: '2',
@@ -33,7 +55,34 @@ const sampleTemplates = [
     description: 'Template for documenting software projects with sections for overview, architecture, APIs, and usage examples.',
     type: 'note',
     category: 'development',
-    tags: ['project', 'documentation', 'software']
+    tags: ['project', 'documentation', 'software'],
+    content: `# Project: [Project Name]
+
+## Overview
+Brief description of the project and its purpose.
+
+## Architecture
+- Component 1
+- Component 2
+
+## API Reference
+\`\`\`typescript
+// API example
+function exampleAPI(param: string): void {
+  // implementation
+}
+\`\`\`
+
+## Usage Examples
+\`\`\`typescript
+// How to use this project
+import { feature } from 'project';
+feature.initialize();
+\`\`\`
+
+## Deployment
+Steps for deployment.
+`
   },
   {
     id: '3',
@@ -41,7 +90,51 @@ const sampleTemplates = [
     description: 'A starter template for React components with TypeScript typing and proper exports.',
     type: 'code',
     category: 'development',
-    tags: ['react', 'typescript', 'component']
+    tags: ['react', 'typescript', 'component'],
+    content: `import React, { useState, useEffect } from 'react';
+
+interface ComponentProps {
+  title: string;
+  description?: string;
+  onAction?: () => void;
+}
+
+const Component: React.FC<ComponentProps> = ({ 
+  title, 
+  description = '', 
+  onAction 
+}) => {
+  const [isActive, setIsActive] = useState(false);
+  
+  useEffect(() => {
+    // Component initialization logic
+    console.log('Component mounted');
+    return () => {
+      // Cleanup logic
+      console.log('Component unmounted');
+    };
+  }, []);
+  
+  const handleClick = () => {
+    setIsActive(!isActive);
+    if (onAction) {
+      onAction();
+    }
+  };
+  
+  return (
+    <div className={isActive ? 'active' : ''}>
+      <h2>{title}</h2>
+      {description && <p>{description}</p>}
+      <button onClick={handleClick}>
+        {isActive ? 'Deactivate' : 'Activate'}
+      </button>
+    </div>
+  );
+};
+
+export default Component;`,
+    language: 'typescript'
   },
   {
     id: '4',
@@ -49,7 +142,8 @@ const sampleTemplates = [
     description: 'Template for visualizing common data structures like trees, graphs, and linked lists.',
     type: 'diagram',
     category: 'academic',
-    tags: ['data structure', 'visualization', 'computer science']
+    tags: ['data structure', 'visualization', 'computer science'],
+    diagramJson: `{"objects":[{"type":"rect","left":200,"top":100,"width":120,"height":60,"fill":"#4a90e2","stroke":"#3a70b2","rx":10,"ry":10,"text":"Root Node","fontSize":16,"fontFamily":"Arial","textAlign":"center","fill":"#ffffff"},{"type":"rect","left":100,"top":220,"width":100,"height":50,"fill":"#4a90e2","stroke":"#3a70b2","rx":10,"ry":10,"text":"Child 1","fontSize":16,"fontFamily":"Arial","textAlign":"center","fill":"#ffffff"},{"type":"rect","left":300,"top":220,"width":100,"height":50,"fill":"#4a90e2","stroke":"#3a70b2","rx":10,"ry":10,"text":"Child 2","fontSize":16,"fontFamily":"Arial","textAlign":"center","fill":"#ffffff"},{"type":"path","path":["M","200","160","L","150","220"],"stroke":"#333333","strokeWidth":2},{"type":"path","path":["M","270","160","L","320","220"],"stroke":"#333333","strokeWidth":2}],"background":"#f5f5f5"}`
   },
   {
     id: '5',
@@ -57,7 +151,8 @@ const sampleTemplates = [
     description: 'Diagram template for mapping out system architecture with components and connections.',
     type: 'diagram',
     category: 'development',
-    tags: ['architecture', 'system design', 'diagram']
+    tags: ['architecture', 'system design', 'diagram'],
+    diagramJson: `{"objects":[{"type":"rect","left":150,"top":100,"width":200,"height":80,"fill":"#4CAF50","stroke":"#2E7D32","rx":5,"ry":5,"text":"Frontend","fontSize":20,"fontFamily":"Arial","textAlign":"center","fill":"#ffffff"},{"type":"rect","left":150,"top":300,"width":200,"height":80,"fill":"#2196F3","stroke":"#0D47A1","rx":5,"ry":5,"text":"Backend API","fontSize":20,"fontFamily":"Arial","textAlign":"center","fill":"#ffffff"},{"type":"rect","left":450,"top":300,"width":180,"height":80,"fill":"#FFC107","stroke":"#FF8F00","rx":5,"ry":5,"text":"Database","fontSize":20,"fontFamily":"Arial","textAlign":"center","fill":"#ffffff"},{"type":"path","path":["M","250","180","L","250","300"],"stroke":"#333333","strokeWidth":2,"strokeDashArray":[5,5]},{"type":"path","path":["M","350","340","L","450","340"],"stroke":"#333333","strokeWidth":2},{"type":"circle","left":250,"top":240,"radius":15,"fill":"#E91E63","stroke":"#C2185B"},{"type":"circle","left":400,"top":340,"radius":15,"fill":"#9C27B0","stroke":"#7B1FA2"}],"background":"#f5f5f5"}`
   },
   {
     id: '6',
@@ -65,7 +160,49 @@ const sampleTemplates = [
     description: 'Code template for implementing common algorithms with comments and complexity analysis.',
     type: 'code',
     category: 'academic',
-    tags: ['algorithm', 'implementation', 'computer science']
+    tags: ['algorithm', 'implementation', 'computer science'],
+    content: `/**
+ * Binary Search implementation
+ * 
+ * Time Complexity:
+ * - Best Case: O(1) - Element found at the middle
+ * - Average Case: O(log n)
+ * - Worst Case: O(log n)
+ * 
+ * Space Complexity: O(1) - Iterative implementation
+ */
+function binarySearch(arr: number[], target: number): number {
+  let left = 0;
+  let right = arr.length - 1;
+  
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+    
+    // Check if target is present at mid
+    if (arr[mid] === target) {
+      return mid;
+    }
+    
+    // If target greater, ignore left half
+    if (arr[mid] < target) {
+      left = mid + 1;
+    } 
+    // If target smaller, ignore right half
+    else {
+      right = mid - 1;
+    }
+  }
+  
+  // Element is not present
+  return -1;
+}
+
+// Example usage
+const sortedArray = [1, 3, 5, 7, 9, 11, 13, 15, 17];
+const targetValue = 7;
+const result = binarySearch(sortedArray, targetValue);
+console.log(\`Found target at index: \${result}\`);`,
+    language: 'typescript'
   }
 ];
 
@@ -87,19 +224,48 @@ const Templates: React.FC = () => {
     return template.type === activeTab && matchesSearch;
   });
   
-  const handleUseTemplate = (templateId: string, type: string) => {
+  const handleUseTemplate = (template: any) => {
     // In a real application, this would likely create a new item based on the template
-    // For now, we'll just navigate to the appropriate editor
-    switch (type) {
-      case 'note':
+    switch (template.type) {
+      case 'note': {
+        // Create a new note with the template content
+        const noteData = {
+          title: template.title,
+          content: template.content,
+          tags: template.tags,
+          isFavorite: false
+        };
+        
+        // Store template data in localStorage to be accessed by the editor
+        localStorage.setItem('note_template', JSON.stringify(noteData));
         navigate('/editor/new');
         break;
-      case 'code':
+      }
+      case 'code': {
+        // Store code template in localStorage
+        const codeData = {
+          title: template.title,
+          language: template.language || 'javascript',
+          code: template.content,
+          tags: template.tags
+        };
+        
+        localStorage.setItem('code_snippet_template', JSON.stringify(codeData));
         navigate('/code-snippets/new');
         break;
-      case 'diagram':
+      }
+      case 'diagram': {
+        // Store diagram template in localStorage
+        const diagramData = {
+          title: template.title,
+          json: template.diagramJson,
+          tags: template.tags
+        };
+        
+        localStorage.setItem('diagram_template', JSON.stringify(diagramData));
         navigate('/diagram/new');
         break;
+      }
       default:
         navigate('/');
     }
@@ -177,7 +343,7 @@ const Templates: React.FC = () => {
               <TemplateCard
                 key={template.id}
                 template={template}
-                onUse={handleUseTemplate}
+                onUse={() => handleUseTemplate(template)}
                 icon={getTemplateIcon(template.type)}
               />
             ))}
@@ -197,7 +363,7 @@ const Templates: React.FC = () => {
               <TemplateCard
                 key={template.id}
                 template={template}
-                onUse={handleUseTemplate}
+                onUse={() => handleUseTemplate(template)}
                 icon={getTemplateIcon(template.type)}
               />
             ))}
@@ -217,7 +383,7 @@ const Templates: React.FC = () => {
               <TemplateCard
                 key={template.id}
                 template={template}
-                onUse={handleUseTemplate}
+                onUse={() => handleUseTemplate(template)}
                 icon={getTemplateIcon(template.type)}
               />
             ))}
@@ -237,7 +403,7 @@ const Templates: React.FC = () => {
               <TemplateCard
                 key={template.id}
                 template={template}
-                onUse={handleUseTemplate}
+                onUse={() => handleUseTemplate(template)}
                 icon={getTemplateIcon(template.type)}
               />
             ))}
@@ -264,7 +430,7 @@ interface TemplateCardProps {
     category: string;
     tags: string[];
   };
-  onUse: (id: string, type: string) => void;
+  onUse: () => void;
   icon: React.ReactNode;
 }
 
@@ -295,7 +461,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({ template, onUse, icon }) =>
         <Button 
           variant="default" 
           className="w-full"
-          onClick={() => onUse(template.id, template.type)}
+          onClick={onUse}
         >
           Use Template
         </Button>

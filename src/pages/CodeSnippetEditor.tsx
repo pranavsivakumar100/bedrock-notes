@@ -22,6 +22,35 @@ const CodeSnippetEditor: React.FC = () => {
   const editorRef = useRef<HTMLTextAreaElement>(null);
   
   useEffect(() => {
+    // Check for template data
+    const templateData = localStorage.getItem('code_snippet_template');
+    
+    if (isNew && templateData) {
+      try {
+        const template = JSON.parse(templateData);
+        
+        if (template.title) {
+          setTitle(template.title);
+        }
+        
+        if (template.language) {
+          setLanguage(template.language);
+        }
+        
+        if (template.code) {
+          setCode(template.code);
+        }
+        
+        // Show a toast notification
+        toast.success('Template applied!');
+        
+        // Clear the template data to prevent applying it again on refresh
+        localStorage.removeItem('code_snippet_template');
+      } catch (error) {
+        console.error('Error parsing template data:', error);
+      }
+    }
+    
     // Apply line numbers and adjust textarea height
     if (editorRef.current) {
       editorRef.current.style.height = 'auto';
@@ -38,7 +67,7 @@ const CodeSnippetEditor: React.FC = () => {
       
       Prism.highlightElement(codeElement);
     }
-  }, [code, language]);
+  }, [code, language, isNew]);
 
   const handleSave = () => {
     // This would save to a database in a real app
