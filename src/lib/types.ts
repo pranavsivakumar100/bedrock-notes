@@ -28,3 +28,14 @@ export enum ViewMode {
   PREVIEW = 'preview',
   SPLIT = 'split'
 }
+
+export type CodeBlock = {
+  code: string;
+  language: string;
+};
+
+export type CodeExecutionResult = {
+  output: string;
+  error?: string;
+  isError: boolean;
+};

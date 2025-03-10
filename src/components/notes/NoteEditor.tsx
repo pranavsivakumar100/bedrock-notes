@@ -1,6 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Eye, 
   Code, 
@@ -13,8 +12,13 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Note, ViewMode } from '@/lib/types';
-import { cn } from '@/lib/utils';
+import { cn, renderMarkdown, extractCodeBlocks } from '@/lib/utils';
 import { toast } from 'sonner';
+import CodeSnippet from './CodeSnippet';
+
+interface NoteEditorProps {
+  noteId?: string;
+}
 
 // For demo purposes, we'll use a mockup note
 const getMockNote = (id: string): Note => ({
@@ -70,21 +74,54 @@ class TreeNode {
   isFavorite: false
 });
 
-const NoteEditor: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
   const [note, setNote] = useState<Note | null>(null);
   const [content, setContent] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.SPLIT);
   const [isSaving, setIsSaving] = useState(false);
+  const previewRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
-    if (id && id !== 'new') {
+    if (noteId && noteId !== 'new') {
       // In a real app, we'd fetch the note from an API
-      const mockNote = getMockNote(id);
+      const mockNote = getMockNote(noteId);
       setNote(mockNote);
       setContent(mockNote.content);
     }
-  }, [id]);
+  }, [noteId]);
+  
+  useEffect(() => {
+    // After rendering markdown, hydrate the code blocks with our React component
+    if (previewRef.current && (viewMode === ViewMode.PREVIEW || viewMode === ViewMode.SPLIT)) {
+      const codeBlocks = previewRef.current.querySelectorAll('pre[data-code]');
+      codeBlocks.forEach((block) => {
+        const code = decodeURIComponent(block.getAttribute('data-code') || '');
+        const language = block.getAttribute('data-language') || 'plaintext';
+        
+        // Create a React root and render our component
+        if (code && !block.hasAttribute('data-hydrated')) {
+          block.setAttribute('data-hydrated', 'true');
+          
+          // Replace the pre tag with our CodeSnippet component
+          const div = document.createElement('div');
+          block.parentNode?.replaceChild(div, block);
+          
+          // Render the CodeSnippet in the div
+          const codeSnippet = document.createElement('div');
+          codeSnippet.className = 'code-snippet-container';
+          codeSnippet.innerHTML = `
+            <div class="rounded-lg overflow-hidden border border-border/50 my-4">
+              <div class="bg-muted/50 px-4 py-2 flex items-center justify-between">
+                <div class="text-sm font-medium">${language}</div>
+              </div>
+              <pre class="p-4 overflow-auto text-sm font-mono"><code>${code}</code></pre>
+            </div>
+          `;
+          div.appendChild(codeSnippet);
+        }
+      });
+    }
+  }, [content, viewMode]);
   
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
@@ -106,7 +143,7 @@ const NoteEditor: React.FC = () => {
     }
   };
   
-  if (!note && id !== 'new') {
+  if (!note && noteId !== 'new') {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center space-y-4">
@@ -120,6 +157,34 @@ const NoteEditor: React.FC = () => {
       </div>
     );
   }
+  
+  const renderPreview = () => {
+    // Extract code blocks to render them with our CodeSnippet component
+    const blocks = extractCodeBlocks(content);
+    
+    return (
+      <div className="markdown-preview">
+        {blocks.map((block, index) => {
+          if (!block.isCodeBlock) {
+            return (
+              <div 
+                key={`text-${index}`} 
+                dangerouslySetInnerHTML={{ __html: renderMarkdown(block.content) }} 
+              />
+            );
+          } else {
+            return (
+              <CodeSnippet 
+                key={`code-${index}`} 
+                code={block.content} 
+                language={block.language} 
+              />
+            );
+          }
+        })}
+      </div>
+    );
+  };
   
   return (
     <div className="flex flex-col h-full">
@@ -218,10 +283,9 @@ const NoteEditor: React.FC = () => {
         )}
         
         {viewMode === ViewMode.PREVIEW && (
-          <div 
-            className="markdown-preview"
-            dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
-          />
+          <div ref={previewRef}>
+            {renderPreview()}
+          </div>
         )}
         
         {viewMode === ViewMode.SPLIT && (
@@ -232,37 +296,14 @@ const NoteEditor: React.FC = () => {
               placeholder="Start writing..."
               className="markdown-editor"
             />
-            <div 
-              className="markdown-preview"
-              dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
-            />
+            <div ref={previewRef}>
+              {renderPreview()}
+            </div>
           </div>
         )}
       </div>
     </div>
   );
 };
-
-// Simple markdown renderer for demo purposes
-// In a real app, we'd use a proper markdown library
-function renderMarkdown(markdown: string): string {
-  let html = markdown
-    // Headers
-    .replace(/^# (.*?)$/gm, '<h1>$1</h1>')
-    .replace(/^## (.*?)$/gm, '<h2>$1</h2>')
-    .replace(/^### (.*?)$/gm, '<h3>$1</h3>')
-    // Code blocks
-    .replace(/```(.*?)\n([\s\S]*?)```/gm, '<pre><code>$2</code></pre>')
-    // Inline code
-    .replace(/`([^`]+)`/g, '<code>$1</code>')
-    // Bold
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    // Italic
-    .replace(/\*(.*?)\*/g, '<em>$1</em>')
-    // Paragraphs (must be after other transformations)
-    .replace(/^(?!<h|<pre|<ul|<ol|<p)(.*?)$/gm, '<p>$1</p>');
-  
-  return html;
-}
 
 export default NoteEditor;
