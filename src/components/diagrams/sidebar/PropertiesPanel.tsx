@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Canvas, Object as FabricObject } from 'fabric';
 import { Button } from '@/components/ui/button';
@@ -46,15 +45,27 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   const handleBringForward = () => {
     if (!canvas || !selectedElement) return;
     
-    canvas.bringForward(selectedElement);
-    canvas.renderAll();
+    const objects = canvas.getObjects();
+    const currentIndex = objects.indexOf(selectedElement);
+    
+    if (currentIndex < objects.length - 1) {
+      objects.splice(currentIndex, 1);
+      objects.splice(currentIndex + 1, 0, selectedElement);
+      canvas.renderAll();
+    }
   };
   
   const handleSendBackward = () => {
     if (!canvas || !selectedElement) return;
     
-    canvas.sendBackwards(selectedElement);
-    canvas.renderAll();
+    const objects = canvas.getObjects();
+    const currentIndex = objects.indexOf(selectedElement);
+    
+    if (currentIndex > 0) {
+      objects.splice(currentIndex, 1);
+      objects.splice(currentIndex - 1, 0, selectedElement);
+      canvas.renderAll();
+    }
   };
   
   const handleAlign = (alignment: string) => {
