@@ -124,3 +124,94 @@ pre {
 [data-panel-group-direction="horizontal"] > [data-resize-handle][data-resize-handle-active] > div {
   opacity: 1;
 }
+
+/* Diagram editor dark theme styling */
+.diagram-sidebar {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  border-right: 1px solid #333;
+}
+
+.diagram-header {
+  background-color: #1a1a1a;
+  border-bottom: 1px solid #333;
+}
+
+.diagram-toolbar {
+  background-color: #1a1a1a;
+  border-bottom: 1px solid #333;
+}
+
+/* Input styles for dark theme */
+.diagram-sidebar input[type="text"],
+.diagram-sidebar input[type="number"],
+.diagram-sidebar select {
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #444;
+}
+
+.diagram-sidebar input[type="color"] {
+  background-color: transparent;
+}
+
+/* Radio and checkbox styling */
+.diagram-sidebar .radio,
+.diagram-sidebar .checkbox {
+  accent-color: #3b82f6;
+}
+
+/* Button styling */
+.diagram-sidebar button {
+  background-color: #333;
+  color: #fff;
+  border: 1px solid #444;
+}
+
+.diagram-sidebar button:hover {
+  background-color: #444;
+}
+
+/* Tab styling */
+.diagram-sidebar .tabs-list {
+  background-color: #262626;
+  border-bottom: 1px solid #333;
+}
+
+.diagram-sidebar .tab {
+  color: #aaa;
+}
+
+.diagram-sidebar .tab.active {
+  color: #fff;
+  background-color: #333;
+}
+
+/* Property panel styling */
+.property-label {
+  color: #ccc;
+  font-size: 0.85rem;
+}
+
+.property-section {
+  border-bottom: 1px solid #333;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Fixed black canvas when sidebars are hidden */
+.diagram-editor-container .canvas-only {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+}
+
+.diagram-editor-container .canvas-only .diagram-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ffffff;
+}

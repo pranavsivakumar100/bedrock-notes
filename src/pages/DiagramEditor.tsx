@@ -90,6 +90,7 @@ const DiagramEditor: React.FC = () => {
     
     // Apply a class to the body to ensure full viewport usage
     document.body.classList.add('overflow-hidden');
+    document.body.classList.add('diagram-editor-dark');
     
     // Check for template data
     const storedTemplateData = localStorage.getItem('diagram_template');
@@ -127,6 +128,7 @@ const DiagramEditor: React.FC = () => {
     
     return () => {
       document.body.classList.remove('overflow-hidden');
+      document.body.classList.remove('diagram-editor-dark');
     };
   }, [id, title, canvas]);
   
@@ -349,12 +351,24 @@ const DiagramEditor: React.FC = () => {
     if (sidebarOpen || rightSidebarOpen) return 80;
     return 100;
   };
+
+  // Correct panel sizes based on which sidebars are open
+  const getPanelSizes = () => {
+    if (sidebarOpen && rightSidebarOpen) {
+      return [20, 60, 20]; // Left, Main, Right
+    } else if (sidebarOpen) {
+      return [20, 80]; // Left, Main
+    } else if (rightSidebarOpen) {
+      return [80, 20]; // Main, Right
+    }
+    return [100]; // Main only
+  };
   
   return (
     <div className="diagram-editor-container">
-      <header className="border-b border-border/40 p-2 flex items-center justify-between glass-morphism relative z-10">
+      <header className="diagram-header p-2 flex items-center justify-between relative z-10">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild>
+          <Button variant="ghost" size="icon" asChild className="text-foreground">
             <a href="/diagrams">
               <ArrowLeft className="h-4 w-4" />
               <span className="sr-only">Back</span>
@@ -366,7 +380,7 @@ const DiagramEditor: React.FC = () => {
             placeholder="Untitled Diagram"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="bg-transparent border-none outline-none focus:ring-0 text-xl font-medium w-full max-w-md"
+            className="bg-transparent border-none outline-none focus:ring-0 text-xl font-medium w-full max-w-md text-foreground"
           />
         </div>
         
@@ -446,7 +460,7 @@ const DiagramEditor: React.FC = () => {
                   defaultSize={20} 
                   minSize={15}
                   maxSize={30}
-                  className="border-r border-border/40"
+                  className="diagram-sidebar border-r border-border/40"
                 >
                   <DiagramSidebar 
                     canvas={canvas} 
@@ -478,7 +492,7 @@ const DiagramEditor: React.FC = () => {
                   defaultSize={20}
                   minSize={15}
                   maxSize={30}
-                  className="border-l border-border/40"
+                  className="diagram-sidebar border-l border-border/40"
                 >
                   <Tabs defaultValue="diagram" value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
                     <TabsList className="w-full rounded-none border-b">
@@ -573,10 +587,10 @@ const DiagramEditor: React.FC = () => {
           </ResizablePanelGroup>
         ) : (
           // When both sidebars are closed, render just the canvas directly
-          <div className="w-full h-full">
+          <div className="w-full h-full canvas-only">
             <div className="flex-1 flex flex-col relative h-full">
               <DiagramToolbar canvas={canvas} />
-              <div className="flex-1 relative bg-white">
+              <div className="flex-1 relative diagram-canvas">
                 <DiagramCanvas 
                   setCanvas={setCanvas} 
                   diagramId={id} 
