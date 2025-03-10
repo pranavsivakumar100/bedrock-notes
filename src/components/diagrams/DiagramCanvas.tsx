@@ -143,8 +143,8 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
     });
 
     container.addEventListener('mousedown', (e) => {
-      // Only trigger panning on left mouse button (button 0) with Ctrl key
-      if (e.ctrlKey && e.button === 0) {
+      // Only trigger panning on mouse button with Ctrl key
+      if (e.ctrlKey) {
         isPanning.current = true;
         lastPanPoint.current = { x: e.clientX, y: e.clientY };
         container.style.cursor = 'grabbing';
@@ -160,7 +160,10 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
         if (canvas.viewportTransform) {
           canvas.viewportTransform[4] += dx;
           canvas.viewportTransform[5] += dy;
-          canvas.renderAll();
+          canvas.requestRenderAll();
+          
+          // Trigger pan event for other components to react
+          canvas.fire('pan:moved', { dx, dy });
           
           // Update grid when panning
           createGrid(canvas);
@@ -171,11 +174,12 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       }
     });
 
-    const endPanning = () => {
+    const endPanning = (e: MouseEvent) => {
       if (isPanning.current) {
         isPanning.current = false;
         lastPanPoint.current = null;
         container.style.cursor = 'default';
+        e.preventDefault();
       }
     };
 
