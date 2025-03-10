@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Canvas, Object as FabricObject, Group, Line, IText, Rect, Circle, Triangle, Ellipse, Path, Polygon } from 'fabric';
 import { Button } from '@/components/ui/button';
@@ -104,10 +105,10 @@ const ShapesList: React.FC<ShapesListProps> = ({
         });
         
         canvas.add(shape);
-        canvas.add(text);
-        canvas.setActiveObject(text);
+        canvas.add(text as unknown as FabricObject);
+        canvas.setActiveObject(text as unknown as FabricObject);
         canvas.renderAll();
-        setSelectedElement(text);
+        setSelectedElement(text as unknown as FabricObject);
         toast.success(`Added text box`);
         return;
         
@@ -498,10 +499,10 @@ const ShapesList: React.FC<ShapesListProps> = ({
           objectCaching: false,
         });
         
-        canvas.add(textObject as any);
-        canvas.setActiveObject(textObject as any);
+        canvas.add(textObject as unknown as FabricObject);
+        canvas.setActiveObject(textObject as unknown as FabricObject);
         canvas.renderAll();
-        setSelectedElement(textObject as any);
+        setSelectedElement(textObject as unknown as FabricObject);
         
         toast.success(`Added ${shapeType}`);
         return;

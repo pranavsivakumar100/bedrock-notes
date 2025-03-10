@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Canvas, Object as FabricObject, IText } from 'fabric';
 import { Input } from '@/components/ui/input';
@@ -52,36 +51,30 @@ const StylePanel: React.FC<StylePanelProps> = ({ canvas, selectedElement }) => {
   const handleFontFamilyChange = (fontFamily: string) => {
     if (!canvas || !selectedElement || selectedElement.type !== 'i-text') return;
     
-    // Type guard to ensure we're working with an IText object
-    if (isIText(selectedElement)) {
-      selectedElement.set({ fontFamily });
-      canvas.renderAll();
-    }
+    // Type assertion for IText
+    (selectedElement as unknown as IText).set({ fontFamily });
+    canvas.renderAll();
   };
   
   const handleFontSizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!canvas || !selectedElement || selectedElement.type !== 'i-text') return;
     
-    // Type guard to ensure we're working with an IText object
-    if (isIText(selectedElement)) {
-      const fontSize = parseInt(e.target.value);
-      selectedElement.set({ fontSize });
-      canvas.renderAll();
-    }
+    // Type assertion for IText
+    const fontSize = parseInt(e.target.value);
+    (selectedElement as unknown as IText).set({ fontSize });
+    canvas.renderAll();
   };
   
   const handleTextAlign = (textAlign: string) => {
     if (!canvas || !selectedElement || selectedElement.type !== 'i-text') return;
     
-    // Type guard to ensure we're working with an IText object
-    if (isIText(selectedElement)) {
-      selectedElement.set({ textAlign });
-      canvas.renderAll();
-    }
+    // Type assertion for IText
+    (selectedElement as unknown as IText).set({ textAlign });
+    canvas.renderAll();
   };
   
-  // Helper function to check if an object is an IText
-  const isIText = (obj: FabricObject): obj is IText => {
+  // Helper function to check if an object is an IText type
+  const isIText = (obj: FabricObject): boolean => {
     return obj.type === 'i-text';
   };
   

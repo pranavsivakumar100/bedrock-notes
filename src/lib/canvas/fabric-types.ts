@@ -27,6 +27,9 @@ declare module 'fabric' {
     clone(callback: (cloned: FabricObject) => void): void;
   }
 
+  // Make IText assignable to FabricObject for our setSelectedElement function
+  interface IText extends FabricObject {}
+  
   // Add type casting helper
   namespace util {
     function createObject<T>(klass: any, options?: any): T;
