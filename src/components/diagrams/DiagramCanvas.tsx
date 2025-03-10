@@ -38,20 +38,13 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       backgroundColor: '#ffffff',
       selection: true,
       preserveObjectStacking: true,
-      isDrawingMode: false,
     });
     
-    // Create a fresh drawing brush and set its properties
-    console.log("Setting up the drawing brush...");
-    // Make sure the PencilBrush is properly initialized
-    if (canvas.freeDrawingBrush) {
-      // Set initial brush properties
-      canvas.freeDrawingBrush.width = 2;
-      canvas.freeDrawingBrush.color = '#000000';
-      console.log("Drawing brush initialized:", canvas.freeDrawingBrush);
-    } else {
-      console.error("Failed to initialize drawing brush");
-    }
+    // Initialize the drawing brush manually after canvas creation
+    canvas.freeDrawingBrush = new PencilBrush(canvas);
+    canvas.freeDrawingBrush.width = 2;
+    canvas.freeDrawingBrush.color = '#000000';
+    console.log("Drawing brush initialized:", canvas.freeDrawingBrush);
     
     canvas.customData = {};
     

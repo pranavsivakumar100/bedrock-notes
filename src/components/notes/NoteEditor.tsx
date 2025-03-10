@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Check } from 'lucide-react';
@@ -54,7 +53,6 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
     
     setTimeout(() => {
       if (noteId === 'new' && note) {
-        // For new notes, use addNote which expects certain properties
         const newNote = addNote({
           title: note.title,
           content,
@@ -67,20 +65,14 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
         setNote(newNote);
         navigate(`/editor/${newNote.id}`, { replace: true });
       } else if (note) {
-        // For existing notes, use updateNote which expects a Note object
-        // The issue was that we were passing content directly to updateNote
-        // But updateNote expects a fully formed Note object
-        const updatedNote = updateNote(note);
-        
-        // Since the note hasn't been updated with the new content yet,
-        // we need to create a new object with the updated content
-        const noteWithUpdatedContent: Note = {
-          ...updatedNote as Note,
+        const updatedNote = {
+          ...note,
           content,
           updatedAt: new Date()
         };
         
-        setNote(noteWithUpdatedContent);
+        const savedNote = updateNote(updatedNote) as Note;
+        setNote(savedNote);
       }
       
       setIsSaving(false);
@@ -92,16 +84,13 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
   
   const toggleFavorite = () => {
     if (note) {
-      // Create a new note object with the toggled favorite status
       const updatedNoteWithFavoriteToggled: Note = { 
         ...note, 
         isFavorite: !note.isFavorite
       };
       
-      // Pass the updated note to updateNote and cast the result back to Note
       const result = updateNote(updatedNoteWithFavoriteToggled) as Note;
       
-      // Update the local state with the result
       setNote(result);
       toast.success(note.isFavorite ? "Removed from favorites" : "Added to favorites");
     }

@@ -1,4 +1,3 @@
-
 import { Note, CodeSnippet, Diagram, BaseItem } from '@/lib/types';
 import { Diagram as DiagramType } from '@/lib/diagram-storage';
 
@@ -259,6 +258,16 @@ export const saveNotes = (notes: Note[], userId?: string): void => {
   localStorage.setItem(storageKey, JSON.stringify(notes));
 };
 
+export const saveCodeSnippets = (snippets: CodeSnippet[], userId?: string): void => {
+  const storageKey = getUserStorageKey('codechime_snippets', userId);
+  localStorage.setItem(storageKey, JSON.stringify(snippets));
+};
+
+export const saveDiagrams = (diagrams: Diagram[], userId?: string): void => {
+  const storageKey = getUserStorageKey('codechime_diagrams', userId);
+  localStorage.setItem(storageKey, JSON.stringify(diagrams));
+};
+
 export const addNote = (note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>): Note => {
   const notes = getNotes();
   const newNote: Note = {
@@ -272,6 +281,21 @@ export const addNote = (note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>): Not
   notes.push(newNote);
   saveNotes(notes);
   return newNote;
+};
+
+export const addCodeSnippet = (snippet: Omit<CodeSnippet, 'id' | 'createdAt' | 'updatedAt'>): CodeSnippet => {
+  const snippets = getCodeSnippets();
+  const newSnippet: CodeSnippet = {
+    ...snippet,
+    id: `snippet-${Date.now()}`,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    type: 'code-snippet'
+  };
+  
+  snippets.push(newSnippet);
+  saveCodeSnippets(snippets);
+  return newSnippet;
 };
 
 export const updateNote = (updatedItem: BaseItem): BaseItem => {
@@ -294,8 +318,7 @@ export const updateNote = (updatedItem: BaseItem): BaseItem => {
         : snippet
     );
     
-    const storageKey = getUserStorageKey('codechime_snippets');
-    localStorage.setItem(storageKey, JSON.stringify(updatedSnippets));
+    saveCodeSnippets(updatedSnippets);
     return { ...updatedItem, updatedAt: new Date() };
   } else if (updatedItem.type === 'diagram') {
     // Handle diagram update
@@ -306,8 +329,7 @@ export const updateNote = (updatedItem: BaseItem): BaseItem => {
         : diagram
     );
     
-    const storageKey = getUserStorageKey('codechime_diagrams');
-    localStorage.setItem(storageKey, JSON.stringify(updatedDiagrams));
+    saveDiagrams(updatedDiagrams);
     return { ...updatedItem, updatedAt: new Date() };
   }
   

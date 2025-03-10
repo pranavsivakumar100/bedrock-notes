@@ -1,20 +1,21 @@
-
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Play, Save } from 'lucide-react';
-import { CodeExecutionResult, ContextMenuPosition } from '@/lib/types';
+import { CodeExecutionResult, ContextMenuPosition, CodeSnippet } from '@/lib/types';
 import { toast } from 'sonner';
 import Prism from 'prismjs';
 import CodeEditorContextMenu from '@/components/ui/context-menu/CodeEditorContextMenu';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { addCodeSnippet, getCodeSnippets, updateNote } from '@/lib/storage';
 
 const CodeSnippetEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const isNew = id === 'new';
   
   const [title, setTitle] = useState(isNew ? '' : 'Sample Code Snippet');
@@ -52,6 +53,19 @@ const CodeSnippetEditor: React.FC = () => {
       } catch (error) {
         console.error('Error parsing template data:', error);
       }
+    } else if (!isNew && id) {
+      // Load existing snippet
+      const snippets = getCodeSnippets();
+      const existingSnippet = snippets.find(snippet => snippet.id === id);
+      
+      if (existingSnippet) {
+        setTitle(existingSnippet.title);
+        setLanguage(existingSnippet.language);
+        setCode(existingSnippet.code);
+      } else {
+        toast.error("Snippet not found");
+        navigate('/code-snippets');
+      }
     }
     
     // Apply line numbers and adjust textarea height
@@ -70,11 +84,42 @@ const CodeSnippetEditor: React.FC = () => {
       
       Prism.highlightElement(codeElement);
     }
-  }, [code, language, isNew]);
+  }, [code, language, isNew, id, navigate]);
 
   const handleSave = () => {
-    // This would save to a database in a real app
-    toast.success("Code snippet saved successfully");
+    if (isNew) {
+      // Create new snippet
+      const newSnippet = addCodeSnippet({
+        title: title || 'Untitled Snippet',
+        language,
+        code,
+        description: '',
+        isFavorite: false,
+        type: 'code-snippet',
+      });
+      
+      toast.success("Code snippet saved successfully");
+      navigate(`/code-snippet/${newSnippet.id}`, { replace: true });
+    } else if (id) {
+      // Get existing snippets
+      const snippets = getCodeSnippets();
+      const existingSnippet = snippets.find(snippet => snippet.id === id);
+      
+      if (existingSnippet) {
+        // Update existing snippet
+        const updatedSnippet = {
+          ...existingSnippet,
+          title: title || 'Untitled Snippet',
+          language,
+          code,
+          updatedAt: new Date()
+        };
+        
+        // Use updateNote which handles different types of items
+        updateNote(updatedSnippet);
+        toast.success("Code snippet updated successfully");
+      }
+    }
   };
 
   const handleRunCode = () => {
