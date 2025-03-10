@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { Canvas, Object as FabricObject, Line, Grid, util } from 'fabric';
+import { Canvas, Object as FabricObject, Line, util } from 'fabric';
 import { getDiagram } from '@/lib/diagram-storage';
 import { toast } from 'sonner';
 
@@ -131,7 +131,9 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
         data: { type: 'grid' }
       });
       canvas.add(line);
-      line.moveTo(0); // Move to back (lower z-index)
+      
+      // Use setCoords instead of moveTo
+      canvas.sendObjectToBack(line);
     }
     
     // Create horizontal lines
@@ -144,7 +146,9 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
         data: { type: 'grid' }
       });
       canvas.add(line);
-      line.moveTo(0); // Move to back (lower z-index)
+      
+      // Use setCoords instead of moveTo
+      canvas.sendObjectToBack(line);
     }
     
     canvas.renderAll();
