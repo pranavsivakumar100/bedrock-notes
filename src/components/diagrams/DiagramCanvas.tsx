@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { Canvas, Object as FabricObject, PencilBrush } from 'fabric';
 import { getDiagram } from '@/lib/diagram-storage';
@@ -40,7 +39,6 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       preserveObjectStacking: true,
     });
     
-    // Initialize the drawing brush manually after canvas creation
     canvas.freeDrawingBrush = new PencilBrush(canvas);
     canvas.freeDrawingBrush.width = 2;
     canvas.freeDrawingBrush.color = '#000000';
@@ -59,8 +57,8 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
     if (diagramId && diagramId !== 'new') {
       try {
         const diagram = getDiagram(diagramId);
-        if (diagram && diagram.json) {
-          canvas.loadFromJSON(diagram.json, () => {
+        if (diagram && diagram.content) {
+          canvas.loadFromJSON(diagram.content, () => {
             canvas.renderAll();
           });
         }
@@ -101,7 +99,6 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
 
     window.addEventListener('resize', handleResize);
 
-    // Handle zoom changes to update grid
     canvas.on('zoom:changed', () => {
       createGrid(canvas);
     });

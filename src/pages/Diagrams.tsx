@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { PlusCircle, Search, Trash2, Database, FileCode, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { getDiagrams, deleteDiagram, Diagram } from '@/lib/diagram-storage';
+import { getDiagrams, deleteDiagram } from '@/lib/diagram-storage';
+import { Diagram } from '@/lib/types';
 import { toast } from 'sonner';
 import { 
   AlertDialog,

@@ -1,7 +1,7 @@
 
 import { toast } from 'sonner';
-import { getItems, saveItem, deleteItem } from '@/lib/storage';
 import { Diagram } from '@/lib/types';
+import { getItems, updateNote, deleteNote } from '@/lib/storage';
 
 export interface DiagramData {
   id: string;
@@ -46,8 +46,8 @@ export function saveDiagram(id: string, diagramData: Omit<DiagramData, 'id'>): D
       type: 'diagram'
     };
     
-    // Save to main storage
-    saveItem(diagram);
+    // Save to main storage using updateNote function (which handles all item types)
+    updateNote(diagram);
     
     return diagram;
   } catch (error) {
@@ -59,7 +59,8 @@ export function saveDiagram(id: string, diagramData: Omit<DiagramData, 'id'>): D
 
 export function deleteDiagram(id: string): boolean {
   try {
-    return deleteItem(id);
+    deleteNote(id);
+    return true;
   } catch (error) {
     console.error('Error deleting diagram:', error);
     toast.error('Error deleting diagram');
