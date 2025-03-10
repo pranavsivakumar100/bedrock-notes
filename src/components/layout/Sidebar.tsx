@@ -33,18 +33,7 @@ import FolderContextMenu from '@/components/ui/context-menu/FolderContextMenu';
 import FolderDialog from '@/components/dialog/FolderDialog';
 import MoveFolderDialog from '@/components/dialog/MoveFolderDialog';
 import AuthDialog from '@/components/auth/AuthDialog';
-import { 
-  getFolders, 
-  saveFolders, 
-  addFolder, 
-  updateFolder, 
-  deleteFolder, 
-  getUser, 
-  removeUser, 
-  getNotes, 
-  addNote, 
-  updateNote 
-} from '@/lib/storage';
+import { getFolders, saveFolders, addFolder, updateFolder, deleteFolder, getUser, removeUser, getNotes, addNote, updateNote } from '@/lib/storage';
 import { ContextMenuPosition, Folder, Note } from '@/lib/types';
 import { toast } from 'sonner';
 
