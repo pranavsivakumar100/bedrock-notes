@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -9,16 +10,18 @@ import {
   ArrowLeft, 
   Tag as TagIcon,
   AlertCircle,
-  Check
+  Check,
+  FileCode,
+  Image
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Note, ViewMode, ContextMenuPosition } from '@/lib/types';
-import { cn, renderMarkdown, extractCodeBlocks } from '@/lib/utils';
+import { cn, renderMarkdown, extractCodeBlocks, extractHeadings } from '@/lib/utils';
 import { toast } from 'sonner';
 import CodeSnippet from './CodeSnippet';
 import { addNote, getNotes, updateNote } from '@/lib/storage';
 import EditorContextMenu from '@/components/ui/context-menu/EditorContextMenu';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import ScrollToSection from './ScrollToSection';
 
 interface NoteEditorProps {
   noteId?: string;
@@ -71,6 +74,18 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
             </div>
           `;
           div.appendChild(codeSnippet);
+        }
+      });
+      
+      const headings = extractHeadings(content);
+      headings.forEach(heading => {
+        const headingElements = previewRef.current?.querySelectorAll(`h${heading.level}`);
+        if (headingElements) {
+          headingElements.forEach(el => {
+            if (el.textContent === heading.text) {
+              el.id = heading.id;
+            }
+          });
         }
       });
     }
@@ -207,6 +222,25 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
   const handleFormatBulletList = () => insertAtCursor('- ');
   const handleFormatNumberedList = () => insertAtCursor('1. ');
   const handleFormatBlockquote = () => insertAtCursor('> ');
+  
+  const handleInsertCodeSnippet = () => {
+    insertAtCursor('```javascript\n// Your code here\n```');
+  };
+  
+  const handleInsertDiagram = () => {
+    toast.info("Diagram insertion will open the diagram editor in a future update");
+    // In a real implementation, this would open a diagram modal or navigate to the diagram editor
+    closeContextMenu();
+  };
+  
+  const scrollToHeading = (headingId: string) => {
+    if (previewRef.current) {
+      const headingElement = previewRef.current.querySelector(`#${headingId}`);
+      if (headingElement) {
+        headingElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  };
   
   if (!note && noteId !== 'new') {
     return (
@@ -348,7 +382,14 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
         </div>
       </header>
       
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
+        {(viewMode === ViewMode.PREVIEW || viewMode === ViewMode.SPLIT) && (
+          <ScrollToSection 
+            content={content} 
+            onScrollTo={scrollToHeading} 
+          />
+        )}
+        
         {viewMode === ViewMode.EDIT && (
           <EditorContextMenu
             position={contextMenu}
@@ -364,27 +405,24 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
             onFormatBulletList={handleFormatBulletList}
             onFormatNumberedList={handleFormatNumberedList}
             onFormatBlockquote={handleFormatBlockquote}
+            onInsertCodeSnippet={handleInsertCodeSnippet}
+            onInsertDiagram={handleInsertDiagram}
           >
-            <ScrollArea className="h-full" invisible>
-              <textarea
-                ref={textareaRef}
-                value={content}
-                onChange={handleContentChange}
-                placeholder="Start writing..."
-                className="markdown-editor w-full h-full outline-none resize-none bg-transparent p-4"
-                onContextMenu={handleContextMenu}
-                style={{ overflowY: 'auto' }}
-              />
-            </ScrollArea>
+            <textarea
+              ref={textareaRef}
+              value={content}
+              onChange={handleContentChange}
+              placeholder="Start writing..."
+              className="markdown-editor"
+              onContextMenu={handleContextMenu}
+            />
           </EditorContextMenu>
         )}
         
         {viewMode === ViewMode.PREVIEW && (
-          <ScrollArea className="h-full" invisible>
-            <div ref={previewRef} className="p-4">
-              {renderPreview()}
-            </div>
-          </ScrollArea>
+          <div ref={previewRef} className="h-full overflow-auto p-6">
+            {renderPreview()}
+          </div>
         )}
         
         {viewMode === ViewMode.SPLIT && (
@@ -403,25 +441,21 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
               onFormatBulletList={handleFormatBulletList}
               onFormatNumberedList={handleFormatNumberedList}
               onFormatBlockquote={handleFormatBlockquote}
+              onInsertCodeSnippet={handleInsertCodeSnippet}
+              onInsertDiagram={handleInsertDiagram}
             >
-              <ScrollArea className="h-full" invisible>
-                <textarea
-                  ref={textareaRef}
-                  value={content}
-                  onChange={handleContentChange}
-                  placeholder="Start writing..."
-                  className="markdown-editor w-full h-full outline-none resize-none bg-transparent p-4"
-                  onContextMenu={handleContextMenu}
-                  style={{ overflowY: 'auto' }}
-                />
-              </ScrollArea>
+              <textarea
+                ref={textareaRef}
+                value={content}
+                onChange={handleContentChange}
+                placeholder="Start writing..."
+                className="markdown-editor"
+                onContextMenu={handleContextMenu}
+              />
             </EditorContextMenu>
-            
-            <ScrollArea className="h-full" invisible>
-              <div ref={previewRef} className="p-4">
-                {renderPreview()}
-              </div>
-            </ScrollArea>
+            <div ref={previewRef} className="h-full overflow-auto p-6">
+              {renderPreview()}
+            </div>
           </div>
         )}
       </div>

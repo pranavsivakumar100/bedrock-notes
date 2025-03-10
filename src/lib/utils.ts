@@ -1,9 +1,31 @@
-
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+/**
+ * Extracts headings from markdown content
+ */
+export function extractHeadings(markdown: string): { text: string; level: number; id: string }[] {
+  const headingRegex = /^(#{1,3})\s+(.+)$/gm;
+  const headings: { text: string; level: number; id: string }[] = [];
+  let match;
+
+  while ((match = headingRegex.exec(markdown)) !== null) {
+    const level = match[1].length;
+    const text = match[2].trim();
+    // Create an ID from the heading text
+    const id = text
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '') // Remove special chars
+      .replace(/\s+/g, '-'); // Replace spaces with hyphens
+    
+    headings.push({ text, level, id });
+  }
+
+  return headings;
 }
 
 // Helper function to extract code blocks from markdown

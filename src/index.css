@@ -130,7 +130,7 @@
 }
 
 .markdown-preview {
-  @apply font-sans max-w-none h-full p-4;
+  @apply font-sans max-w-none h-full overflow-auto p-4;
 }
 
 .markdown-preview h1 {

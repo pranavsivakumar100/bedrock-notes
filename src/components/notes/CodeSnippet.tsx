@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
@@ -11,7 +12,25 @@ import { Play, Copy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import Prism from 'prismjs';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
+// Import Prism core styles
+import 'prismjs/themes/prism.css';
+// Import additional languages
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-typescript';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cpp';
+import 'prismjs/components/prism-csharp';
+import 'prismjs/components/prism-ruby';
+import 'prismjs/components/prism-go';
+import 'prismjs/components/prism-rust';
+import 'prismjs/components/prism-markup'; // HTML
+import 'prismjs/components/prism-css';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-sql';
 
 interface CodeSnippetProps {
   code: string;
@@ -37,6 +56,7 @@ const supportedLanguages = [
   { value: 'sql', label: 'SQL' },
 ];
 
+// Map markdown language identifiers to Prism language classes
 const languageMap: Record<string, string> = {
   javascript: 'language-javascript',
   typescript: 'language-typescript',
@@ -84,8 +104,10 @@ const CodeSnippet: React.FC<CodeSnippetProps> = ({
     setOutput(null);
     
     try {
+      // For JavaScript/TypeScript, we can use the browser's eval
       if (selectedLanguage === 'javascript' || selectedLanguage === 'typescript') {
         try {
+          // Create a safe environment for eval
           const console = {
             log: (...args: any[]) => capturedOutput.push(...args.map(arg => String(arg))),
             error: (...args: any[]) => capturedOutput.push(...args.map(arg => String(arg))),
@@ -95,6 +117,8 @@ const CodeSnippet: React.FC<CodeSnippetProps> = ({
           
           const capturedOutput: string[] = [];
           
+          // Execute the code
+          // eslint-disable-next-line no-new-func
           const result = new Function('console', `
             try {
               ${code}
@@ -113,6 +137,7 @@ const CodeSnippet: React.FC<CodeSnippetProps> = ({
           setOutput(`Error: ${error instanceof Error ? error.message : String(error)}`);
         }
       } else {
+        // For other languages, we would need a backend service
         setOutput(`Running ${selectedLanguage} code requires a backend service which is not yet implemented.`);
         toast.info("Backend execution is not available in this preview");
       }
@@ -169,27 +194,23 @@ const CodeSnippet: React.FC<CodeSnippetProps> = ({
         </div>
       </div>
       
-      <ScrollArea invisible className="max-h-[500px]">
-        <div className="p-4 text-[#e2e8f0]">
-          <pre className="!bg-transparent !p-0 !m-0 !overflow-visible">
-            <code 
-              ref={codeRef}
-              className={cn(languageMap[selectedLanguage] || 'language-plaintext')}
-            >
-              {code}
-            </code>
-          </pre>
-        </div>
-      </ScrollArea>
+      <div className="p-4 overflow-auto max-h-[500px] text-[#e2e8f0]">
+        <pre className="!bg-transparent !p-0 !m-0 !overflow-visible">
+          <code 
+            ref={codeRef}
+            className={cn(languageMap[selectedLanguage] || 'language-plaintext')}
+          >
+            {code}
+          </code>
+        </pre>
+      </div>
       
       {output !== null && (
         <div className="border-t border-[#374151] bg-[#111827]">
           <div className="px-4 py-2 text-sm font-medium text-gray-300">Output</div>
-          <ScrollArea invisible className="max-h-60">
-            <pre className="p-4 text-sm font-mono text-gray-300">
-              {output || 'No output'}
-            </pre>
-          </ScrollArea>
+          <pre className="p-4 overflow-auto max-h-60 text-sm font-mono text-gray-300">
+            {output || 'No output'}
+          </pre>
         </div>
       )}
     </div>
