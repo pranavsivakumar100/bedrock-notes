@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -230,7 +229,6 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
   
   const handleInsertDiagram = () => {
     toast.info("Diagram insertion will open the diagram editor in a future update");
-    // In a real implementation, this would open a diagram modal or navigate to the diagram editor
     closeContextMenu();
   };
   
@@ -259,7 +257,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
   }
   
   if (!note && noteId === 'new') {
-    setNote({
+    const newNote: Note = {
       id: 'new',
       title: 'Untitled Note',
       content: '',
@@ -268,7 +266,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
       updatedAt: new Date(),
       isFavorite: false,
       type: 'note'
-    });
+    };
+    setNote(newNote);
   }
   
   const renderPreview = () => {
