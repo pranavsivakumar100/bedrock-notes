@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, Search, Settings, UserCircle } from 'lucide-react';
@@ -17,6 +16,7 @@ import {
 import { getUser, removeUser } from '@/lib/storage';
 import { toast } from 'sonner';
 import AuthDialog from '@/components/auth/AuthDialog';
+import TagSelect from '@/components/tags/TagSelect';
 
 interface NavbarProps {
   toggleSidebar: () => void;
@@ -29,14 +29,22 @@ const Navbar: React.FC<NavbarProps> = ({
   isSidebarOpen,
   className 
 }) => {
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const user = getUser();
 
   const handleLogout = () => {
     removeUser();
     toast.success("Logged out successfully");
-    // Force a page refresh to update all components
     window.location.reload();
+  };
+
+  const handleToggleTag = (tagId: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tagId) 
+        ? prev.filter(id => id !== tagId)
+        : [...prev, tagId]
+    );
   };
 
   return (
@@ -63,8 +71,8 @@ const Navbar: React.FC<NavbarProps> = ({
           </Link>
         </div>
         
-        <div className="flex-1 max-w-md mx-4 hidden md:block">
-          <div className="relative">
+        <div className="flex-1 max-w-md mx-4 hidden md:flex items-center gap-2">
+          <div className="relative flex-1">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
@@ -72,6 +80,10 @@ const Navbar: React.FC<NavbarProps> = ({
               className="w-full pl-8 bg-muted/50 border-none focus-visible:ring-1"
             />
           </div>
+          <TagSelect 
+            selectedTags={selectedTags}
+            onToggleTag={handleToggleTag}
+          />
         </div>
         
         <div className="flex items-center gap-2">
@@ -143,7 +155,6 @@ const Navbar: React.FC<NavbarProps> = ({
         </div>
       </div>
 
-      {/* Auth Dialog */}
       <AuthDialog
         isOpen={authDialogOpen}
         onClose={() => setAuthDialogOpen(false)}
