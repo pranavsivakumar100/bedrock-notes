@@ -70,8 +70,9 @@ const FolderItem: React.FC<{
   onToggle: (folderId: string) => void;
   selectedId?: string;
   onContextMenu: (folder: Folder, e: React.MouseEvent) => void;
+  onFolderClick: (folderId: string) => void;
   depth?: number;
-}> = ({ folder, isOpen, onToggle, selectedId, onContextMenu, depth = 0 }) => {
+}> = ({ folder, isOpen, onToggle, selectedId, onContextMenu, onFolderClick, depth = 0 }) => {
   const navigate = useNavigate();
   const folders = getFolders();
   const hasChildren = folders.some(f => f.parentId === folder.id);
@@ -107,17 +108,7 @@ const FolderItem: React.FC<{
           
           <div 
             className="flex items-center flex-1"
-            onClick={() => {
-              // Create a new note in this folder
-              const newNote = addNote({
-                title: 'Untitled Note',
-                content: '# New Note\n\nStart writing here...',
-                tags: [],
-                isFavorite: false,
-                folderId: folder.id
-              });
-              navigate(`/editor/${newNote.id}`);
-            }}
+            onClick={() => onFolderClick(folder.id)}
           >
             <FolderClosed className="h-4 w-4 mr-2 text-muted-foreground flex-shrink-0" />
             <span className="text-sm text-foreground/90 truncate">{folder.name}</span>
@@ -136,12 +127,45 @@ const FolderItem: React.FC<{
                 onToggle={onToggle}
                 selectedId={selectedId}
                 onContextMenu={onContextMenu}
+                onFolderClick={onFolderClick}
                 depth={depth + 1}
               />
             ))
           }
         </CollapsibleContent>
       </Collapsible>
+    </div>
+  );
+};
+
+const NotesList: React.FC<{
+  notes: Note[];
+  selectedFolderId: string | null;
+}> = ({ notes, selectedFolderId }) => {
+  const navigate = useNavigate();
+  
+  const folderNotes = notes.filter(note => note.folderId === selectedFolderId);
+  
+  if (folderNotes.length === 0) {
+    return (
+      <div className="px-4 py-2 text-sm text-muted-foreground">
+        No notes in this folder
+      </div>
+    );
+  }
+  
+  return (
+    <div className="space-y-1 px-3 py-2">
+      {folderNotes.map(note => (
+        <div 
+          key={note.id}
+          className="flex items-center px-4 py-1 hover:bg-muted/50 rounded-md cursor-pointer"
+          onClick={() => navigate(`/editor/${note.id}`)}
+        >
+          <FileText className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+          <span className="text-sm truncate">{note.title}</span>
+        </div>
+      ))}
     </div>
   );
 };
@@ -171,6 +195,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
     note: null
   });
   
+  const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [folders, setFolders] = useState<Folder[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
@@ -186,6 +211,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
       ...prev,
       [folderId]: !prev[folderId]
     }));
+  };
+  
+  const handleFolderClick = (folderId: string) => {
+    setSelectedFolderId(folderId === selectedFolderId ? null : folderId);
   };
   
   const handleFolderContextMenu = (folder: Folder, e: React.MouseEvent) => {
@@ -381,9 +410,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
                             isOpen={expandedFolders[folder.id] || false}
                             onToggle={toggleFolder}
                             onContextMenu={handleFolderContextMenu}
+                            onFolderClick={handleFolderClick}
                           />
                         </FolderContextMenu>
                       ))}
+                    
+                    {/* Show notes for selected folder */}
+                    {selectedFolderId && isOpen && (
+                      <NotesList notes={notes} selectedFolderId={selectedFolderId} />
+                    )}
                   </div>
                   
                   <Separator className="my-2 opacity-50" />

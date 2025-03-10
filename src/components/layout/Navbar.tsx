@@ -1,11 +1,22 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Search, Settings } from 'lucide-react';
+import { Menu, Search, Settings, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import { cn } from '@/lib/utils';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import { getUser, removeUser } from '@/lib/storage';
+import { toast } from 'sonner';
+import AuthDialog from '@/components/auth/AuthDialog';
 
 interface NavbarProps {
   toggleSidebar: () => void;
@@ -18,6 +29,16 @@ const Navbar: React.FC<NavbarProps> = ({
   isSidebarOpen,
   className 
 }) => {
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const user = getUser();
+
+  const handleLogout = () => {
+    removeUser();
+    toast.success("Logged out successfully");
+    // Force a page refresh to update all components
+    window.location.reload();
+  };
+
   return (
     <header className={cn(
       "h-16 border-b border-border/40 glass-morphism backdrop-blur-lg sticky top-0 z-50 w-full",
@@ -79,8 +100,54 @@ const Navbar: React.FC<NavbarProps> = ({
               <span className="sr-only">Settings</span>
             </Link>
           </Button>
+
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="ml-2">
+                  <UserCircle className="h-5 w-5" />
+                  <span className="sr-only">User menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>
+                  <div className="flex flex-col">
+                    <span>{user.name}</span>
+                    <span className="text-xs text-muted-foreground">{user.email}</span>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link to="/profile">Profile</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/settings">Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                  Sign out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setAuthDialogOpen(true)}
+              className="ml-2"
+            >
+              <UserCircle className="h-5 w-5 mr-1" />
+              Sign in
+            </Button>
+          )}
         </div>
       </div>
+
+      {/* Auth Dialog */}
+      <AuthDialog
+        isOpen={authDialogOpen}
+        onClose={() => setAuthDialogOpen(false)}
+      />
     </header>
   );
 };
