@@ -84,4 +84,28 @@ pre {
   scroll-behavior: smooth;
 }
 
+/* Resize handle styling */
+[data-panel-group-direction="horizontal"] > [data-resize-handle] {
+  width: 4px;
+  background-color: hsl(var(--border));
+  transition: background-color 0.2s;
+}
+
+[data-panel-group-direction="horizontal"] > [data-resize-handle]:hover,
+[data-panel-group-direction="horizontal"] > [data-resize-handle][data-resize-handle-active] {
+  background-color: hsl(var(--primary));
+  width: 4px;
+}
+
+/* Style for resize handle icons */
+[data-panel-group-direction="horizontal"] > [data-resize-handle] > div {
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+[data-panel-group-direction="horizontal"] > [data-resize-handle]:hover > div,
+[data-panel-group-direction="horizontal"] > [data-resize-handle][data-resize-handle-active] > div {
+  opacity: 1;
+}
+
 /* ... keep existing code */
