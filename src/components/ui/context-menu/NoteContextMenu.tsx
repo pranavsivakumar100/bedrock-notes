@@ -39,12 +39,12 @@ const NoteContextMenu: React.FC<NoteContextMenuProps> = ({
         {children}
       </ContextMenuTrigger>
       <ContextMenuContent 
-        className="w-64"
-        style={{
+        className="w-64 bg-popover"
+        style={position ? {
           position: 'absolute',
-          top: `${position?.y || 0}px`,
-          left: `${position?.x || 0}px`,
-        }}
+          top: `${position.y}px`,
+          left: `${position.x}px`,
+        } : undefined}
       >
         <ContextMenuItem 
           className="flex items-center gap-2 cursor-pointer"
