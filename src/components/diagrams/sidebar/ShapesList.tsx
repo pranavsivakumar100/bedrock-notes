@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Canvas, Object as FabricObject, Group, Line, IText, Rect, Circle, Triangle, Ellipse, Path, Polygon } from 'fabric';
 import { Button } from '@/components/ui/button';
@@ -844,4 +845,17 @@ const ShapesList: React.FC<ShapesListProps> = ({
           <AccordionItem value="wireframe">
             <AccordionTrigger className="px-2 py-1 text-sm">
               Wireframe
-            </AccordionTrigger
+            </AccordionTrigger>
+            <AccordionContent className="pt-0 pb-1">
+              <div className="grid grid-cols-5 gap-1 px-2">
+                {/* Add wireframe shapes here */}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </ScrollArea>
+    </>
+  );
+};
+
+export default ShapesList;
