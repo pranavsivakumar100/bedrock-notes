@@ -1,7 +1,9 @@
 
 import { toast } from 'sonner';
+import { getItems, saveItem, deleteItem } from '@/lib/storage';
+import { Diagram } from '@/lib/types';
 
-export interface Diagram {
+export interface DiagramData {
   id: string;
   title: string;
   json: string;
@@ -13,17 +15,8 @@ const STORAGE_KEY = 'cs-diagram-app-diagrams';
 
 export function getDiagrams(): Diagram[] {
   try {
-    const storedDiagrams = localStorage.getItem(STORAGE_KEY);
-    if (!storedDiagrams) return [];
-    
-    const diagrams = JSON.parse(storedDiagrams);
-    
-    // Convert string dates to Date objects
-    return diagrams.map((diagram: any) => ({
-      ...diagram,
-      createdAt: new Date(diagram.createdAt),
-      updatedAt: new Date(diagram.updatedAt)
-    }));
+    const allItems = getItems();
+    return allItems.filter(item => item.type === 'diagram') as Diagram[];
   } catch (error) {
     console.error('Error getting diagrams:', error);
     toast.error('Error loading diagrams');
@@ -36,40 +29,27 @@ export function getDiagram(id: string): Diagram | null {
   return diagrams.find(diagram => diagram.id === id) || null;
 }
 
-export function saveDiagram(id: string, diagramData: Omit<Diagram, 'id'>): Diagram {
+export function saveDiagram(id: string, diagramData: Omit<DiagramData, 'id'>): Diagram {
   try {
-    const diagrams = getDiagrams();
+    const now = new Date();
+    const isNew = id === 'new';
+    const diagramId = isNew ? `diagram-${Date.now()}` : id;
     
-    // Check if diagram with this ID already exists
-    const existingDiagramIndex = diagrams.findIndex(diagram => diagram.id === id);
+    // Create diagram item to be saved in the main storage
+    const diagram: Diagram = {
+      id: diagramId,
+      title: diagramData.title,
+      content: diagramData.json,
+      createdAt: isNew ? now : new Date(diagramData.createdAt),
+      updatedAt: now,
+      isFavorite: false,
+      type: 'diagram'
+    };
     
-    let newDiagram: Diagram;
+    // Save to main storage
+    saveItem(diagram);
     
-    if (existingDiagramIndex >= 0) {
-      // Update existing diagram
-      newDiagram = {
-        ...diagrams[existingDiagramIndex],
-        title: diagramData.title,
-        json: diagramData.json,
-        updatedAt: new Date()
-      };
-      
-      diagrams[existingDiagramIndex] = newDiagram;
-    } else {
-      // Create new diagram
-      newDiagram = {
-        id: id === 'new' ? `diagram-${Date.now()}` : id,
-        title: diagramData.title,
-        json: diagramData.json,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      };
-      
-      diagrams.push(newDiagram);
-    }
-    
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(diagrams));
-    return newDiagram;
+    return diagram;
   } catch (error) {
     console.error('Error saving diagram:', error);
     toast.error('Error saving diagram');
@@ -79,15 +59,7 @@ export function saveDiagram(id: string, diagramData: Omit<Diagram, 'id'>): Diagr
 
 export function deleteDiagram(id: string): boolean {
   try {
-    const diagrams = getDiagrams();
-    const filteredDiagrams = diagrams.filter(diagram => diagram.id !== id);
-    
-    if (filteredDiagrams.length === diagrams.length) {
-      return false; // No diagram with that ID found
-    }
-    
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filteredDiagrams));
-    return true;
+    return deleteItem(id);
   } catch (error) {
     console.error('Error deleting diagram:', error);
     toast.error('Error deleting diagram');
