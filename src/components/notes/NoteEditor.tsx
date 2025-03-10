@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Check } from 'lucide-react';
@@ -65,10 +66,13 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
         setNote(newNote);
         navigate(`/editor/${newNote.id}`, { replace: true });
       } else if (note) {
+        // Explicitly specify the type to ensure all required properties are included
         const updatedNote = updateNote({
           ...note,
-          content
-        });
+          content,
+          type: 'note', // Ensure type property is present
+          tags: note.tags // Ensure tags property is present
+        }) as Note; // Cast the result to Note type
         
         setNote(updatedNote);
       }
@@ -84,10 +88,13 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
     if (note) {
       const updatedNote: Note = { 
         ...note, 
-        isFavorite: !note.isFavorite 
+        isFavorite: !note.isFavorite,
+        type: 'note',  // Ensure type property is present
+        content: note.content, // Ensure content is included
+        tags: note.tags // Ensure tags is included
       };
-      updateNote(updatedNote);
-      setNote(updatedNote);
+      const result = updateNote(updatedNote) as Note; // Cast the result to Note
+      setNote(result);
       toast.success(note.isFavorite ? "Removed from favorites" : "Added to favorites");
     }
   };
