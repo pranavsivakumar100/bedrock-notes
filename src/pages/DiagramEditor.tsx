@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Canvas, util, Object as FabricObject } from 'fabric';
@@ -63,11 +62,6 @@ import {
 } from "@/components/ui/tabs";
 import { useCanvasHistory } from '@/hooks/useCanvasHistory';
 
-// Define an interface for the clone method to help TypeScript understand it
-interface FabricObjectWithClone extends FabricObject {
-  clone(callback?: (cloned: FabricObject) => void): FabricObject;
-}
-
 const DiagramEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -89,10 +83,8 @@ const DiagramEditor: React.FC = () => {
   useEffect(() => {
     document.title = `${title} - Diagram Editor`;
     
-    // Apply a class to the body to ensure full viewport usage
     document.body.classList.add('overflow-hidden');
     
-    // Check for template data
     const storedTemplateData = localStorage.getItem('diagram_template');
     
     if (id === 'new' && storedTemplateData) {
@@ -107,10 +99,8 @@ const DiagramEditor: React.FC = () => {
           setTemplateData(template.json);
         }
         
-        // Show a toast notification
         toast.success('Template applied!');
         
-        // Clear the template data to prevent applying it again on refresh
         localStorage.removeItem('diagram_template');
       } catch (error) {
         console.error('Error parsing template data:', error);
@@ -131,13 +121,12 @@ const DiagramEditor: React.FC = () => {
     };
   }, [id, title, canvas]);
   
-  // Apply template to canvas when canvas and template data are available
   useEffect(() => {
     if (canvas && templateData) {
       try {
         canvas.loadFromJSON(templateData, () => {
           canvas.renderAll();
-          setTemplateData(null); // Clear template data after applying
+          setTemplateData(null);
         });
       } catch (error) {
         console.error('Error applying template to canvas:', error);
@@ -196,13 +185,12 @@ const DiagramEditor: React.FC = () => {
     const activeObject = canvas.getActiveObject();
     if (!activeObject) return;
     
-    // Cast the object to our interface that properly defines the clone method
-    const objectWithClone = activeObject as unknown as FabricObjectWithClone;
-    
-    // Now we can call clone with a callback
-    objectWithClone.clone((clonedObj: FabricObject) => {
+    activeObject.clone().then((clonedObj: FabricObject) => {
       localStorage.setItem('cs-diagram-clipboard', JSON.stringify(clonedObj.toJSON()));
       toast.success("Copied to clipboard");
+    }).catch((error: any) => {
+      console.error("Clone error:", error);
+      toast.error("Failed to copy to clipboard");
     });
   };
   
@@ -216,7 +204,6 @@ const DiagramEditor: React.FC = () => {
     }
     
     try {
-      // Import util from fabric to use enlivenObjects
       util.enlivenObjects([JSON.parse(clipboard)]).then((objects: FabricObject[]) => {
         objects.forEach(obj => {
           obj.set({
@@ -352,12 +339,10 @@ const DiagramEditor: React.FC = () => {
   
   const toggleGrid = () => {
     setShowGrid(!showGrid);
-    // Logic to show/hide grid would go here using canvas
   };
   
   const togglePage = () => {
     setShowPage(!showPage);
-    // Logic to show/hide page would go here using canvas
   };
   
   return (
@@ -551,12 +536,10 @@ const DiagramEditor: React.FC = () => {
               </TabsContent>
               
               <TabsContent value="style" className="p-4">
-                {/* Style options would go here */}
                 <p className="text-muted-foreground text-sm">Select an element to view style options</p>
               </TabsContent>
               
               <TabsContent value="outline" className="p-4">
-                {/* Outline/layers view would go here */}
                 <p className="text-muted-foreground text-sm">Layer structure will appear here</p>
               </TabsContent>
             </Tabs>
