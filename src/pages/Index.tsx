@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, BookText, Code, File, Tag as TagIcon, Clock, Heart, User } from 'lucide-react';
+import { Plus, BookText, Code, File, Tag as TagIcon, Clock, Heart, User, Database, LayoutTemplate } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import NoteCard from '@/components/notes/NoteCard';
@@ -183,6 +183,60 @@ const Index: React.FC = () => {
             </div>
           </TabsContent>
         </Tabs>
+      </div>
+      
+      {/* New Navigation Section */}
+      <div className="mt-10 space-y-6">
+        <h2 className="text-xl font-semibold">Navigation</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+          <Link to="/notes" className="block">
+            <div className="flex items-center p-4 bg-muted/30 hover:bg-muted/50 rounded-lg transition-colors">
+              <div className="bg-primary/10 h-10 w-10 rounded-full flex items-center justify-center mr-3">
+                <BookText className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-medium">Notes</h3>
+                <p className="text-sm text-muted-foreground">View all notes</p>
+              </div>
+            </div>
+          </Link>
+          
+          <Link to="/code-snippets" className="block">
+            <div className="flex items-center p-4 bg-muted/30 hover:bg-muted/50 rounded-lg transition-colors">
+              <div className="bg-primary/10 h-10 w-10 rounded-full flex items-center justify-center mr-3">
+                <Code className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-medium">Code Snippets</h3>
+                <p className="text-sm text-muted-foreground">Manage snippets</p>
+              </div>
+            </div>
+          </Link>
+          
+          <Link to="/diagrams" className="block">
+            <div className="flex items-center p-4 bg-muted/30 hover:bg-muted/50 rounded-lg transition-colors">
+              <div className="bg-primary/10 h-10 w-10 rounded-full flex items-center justify-center mr-3">
+                <Database className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-medium">Diagrams</h3>
+                <p className="text-sm text-muted-foreground">View all diagrams</p>
+              </div>
+            </div>
+          </Link>
+          
+          <Link to="/templates" className="block">
+            <div className="flex items-center p-4 bg-muted/30 hover:bg-muted/50 rounded-lg transition-colors">
+              <div className="bg-primary/10 h-10 w-10 rounded-full flex items-center justify-center mr-3">
+                <LayoutTemplate className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-medium">Templates</h3>
+                <p className="text-sm text-muted-foreground">Use templates</p>
+              </div>
+            </div>
+          </Link>
+        </div>
       </div>
       
       {/* Auth Dialog */}
