@@ -1,480 +1,420 @@
 
-import { Canvas, Object as FabricObject, Group, Line, IText, Rect, Circle, Triangle, Ellipse, Path, Polygon } from 'fabric';
-import { toast } from 'sonner';
+import { Canvas, Object as FabricObject, util, XY, Line, Rect, Circle, IText, Triangle, Polygon } from 'fabric';
 
-export interface CreateShapeOptions {
+export interface ShapeCreationOptions {
   canvas: Canvas | null;
   shapeType: string;
   setSelectedElement: (element: FabricObject | null) => void;
 }
 
-export const handleAddShape = ({ canvas, shapeType, setSelectedElement }: CreateShapeOptions) => {
-  if (!canvas) {
-    toast.error("Canvas not initialized");
-    return;
-  }
+export const handleAddShape = ({ canvas, shapeType, setSelectedElement }: ShapeCreationOptions) => {
+  if (!canvas) return;
   
   let shape: FabricObject | null = null;
-  const centerX = canvas.getWidth() / 2;
-  const centerY = canvas.getHeight() / 2;
-  
+
   switch (shapeType) {
     case 'rectangle':
-      shape = new Rect({
-        left: centerX - 50,
-        top: centerY - 50,
-        width: 100,
-        height: 100,
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-        objectCaching: false,
-      });
+      shape = createRectangle();
       break;
-      
-    case 'square':
-      shape = new Rect({
-        left: centerX - 50,
-        top: centerY - 50,
-        width: 100,
-        height: 100,
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-        objectCaching: false,
-      });
-      break;
-      
-    case 'round-rectangle':
-      shape = new Rect({
-        left: centerX - 50,
-        top: centerY - 50,
-        width: 100,
-        height: 70,
-        rx: 10,
-        ry: 10,
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-        objectCaching: false,
-      });
-      break;
-      
-    case 'text-box':
-      shape = new Rect({
-        left: centerX - 60,
-        top: centerY - 30,
-        width: 120,
-        height: 60,
-        rx: 0,
-        ry: 0,
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-        objectCaching: false,
-      });
-      
-      const text = new IText('Text', {
-        left: centerX,
-        top: centerY,
-        originX: 'center',
-        originY: 'center',
-        fill: '#333333',
-        fontSize: 16,
-        fontFamily: 'Arial',
-        objectCaching: false,
-      });
-      
-      canvas.add(shape);
-      canvas.add(text as unknown as FabricObject);
-      canvas.setActiveObject(text as unknown as FabricObject);
-      canvas.renderAll();
-      setSelectedElement(text as unknown as FabricObject);
-      toast.success(`Added text box`);
-      return;
-      
     case 'circle':
-      shape = new Circle({
-        left: centerX - 50,
-        top: centerY - 50,
-        radius: 50,
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-        objectCaching: false,
-      });
+      shape = createCircle();
       break;
-      
-    case 'ellipse':
-      shape = new Ellipse({
-        left: centerX - 60,
-        top: centerY - 40,
-        rx: 60,
-        ry: 40,
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-        objectCaching: false,
-      });
-      break;
-      
     case 'triangle':
-      shape = new Triangle({
-        left: centerX - 50,
-        top: centerY - 50,
-        width: 100,
-        height: 100,
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-        objectCaching: false,
-      });
+      shape = createTriangle();
       break;
-      
-    case 'right-triangle':
-      shape = new Polygon({
-        left: centerX - 50,
-        top: centerY - 50,
-        points: [
-          { x: 0, y: 0 },
-          { x: 100, y: 100 },
-          { x: 0, y: 100 }
-        ],
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-        objectCaching: false,
-      });
-      break;
-      
     case 'diamond':
-      shape = new Polygon({
-        left: centerX - 50,
-        top: centerY - 50,
-        points: [
-          { x: 50, y: 0 },
-          { x: 100, y: 50 },
-          { x: 50, y: 100 },
-          { x: 0, y: 50 }
-        ],
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-        objectCaching: false,
-      });
+      shape = createDiamond();
       break;
-      
-    case 'pentagon':
-      shape = new Polygon({
-        left: centerX - 50,
-        top: centerY - 50,
-        points: [
-          { x: 50, y: 0 },
-          { x: 100, y: 40 },
-          { x: 80, y: 100 },
-          { x: 20, y: 100 },
-          { x: 0, y: 40 }
-        ],
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-        objectCaching: false,
-      });
-      break;
-      
-    case 'hexagon':
-      shape = new Polygon({
-        left: centerX - 50,
-        top: centerY - 50,
-        points: [
-          { x: 25, y: 0 },
-          { x: 75, y: 0 },
-          { x: 100, y: 50 },
-          { x: 75, y: 100 },
-          { x: 25, y: 100 },
-          { x: 0, y: 50 }
-        ],
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-        objectCaching: false,
-      });
-      break;
-      
-    case 'octagon':
-      shape = new Polygon({
-        left: centerX - 50,
-        top: centerY - 50,
-        points: [
-          { x: 30, y: 0 },
-          { x: 70, y: 0 },
-          { x: 100, y: 30 },
-          { x: 100, y: 70 },
-          { x: 70, y: 100 },
-          { x: 30, y: 100 },
-          { x: 0, y: 70 },
-          { x: 0, y: 30 }
-        ],
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-        objectCaching: false,
-      });
-      break;
-      
-    case 'trapezoid':
-      shape = new Polygon({
-        left: centerX - 50,
-        top: centerY - 50,
-        points: [
-          { x: 20, y: 0 },
-          { x: 80, y: 0 },
-          { x: 100, y: 100 },
-          { x: 0, y: 100 }
-        ],
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-        objectCaching: false,
-      });
-      break;
-      
-    case 'parallelogram':
-      shape = new Polygon({
-        left: centerX - 50,
-        top: centerY - 50,
-        points: [
-          { x: 25, y: 0 },
-          { x: 100, y: 0 },
-          { x: 75, y: 100 },
-          { x: 0, y: 100 }
-        ],
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-        objectCaching: false,
-      });
-      break;
-      
-    case 'cylinder':
-      const cylinderRect = new Rect({
-        left: 0,
-        top: 15,
-        width: 80,
-        height: 70,
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-      });
-      const topEllipse = new Ellipse({
-        left: 0,
-        top: 0,
-        rx: 40,
-        ry: 15,
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-      });
-      const bottomEllipse = new Ellipse({
-        left: 0,
-        top: 70,
-        rx: 40,
-        ry: 15,
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-      });
-      
-      shape = new Group([cylinderRect, topEllipse, bottomEllipse], {
-        left: centerX - 40,
-        top: centerY - 50,
-        objectCaching: false,
-      });
-      break;
-      
-    case 'document':
-      const documentShape = new Polygon({
-        points: [
-          { x: 0, y: 0 },
-          { x: 80, y: 0 },
-          { x: 100, y: 20 },
-          { x: 100, y: 100 },
-          { x: 0, y: 100 }
-        ],
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-      });
-      
-      const foldLine = new Line([80, 0, 100, 20], {
-        stroke: '#333333',
-        strokeWidth: 1,
-      });
-      
-      shape = new Group([documentShape, foldLine], {
-        left: centerX - 50,
-        top: centerY - 50,
-        objectCaching: false,
-      });
-      break;
-      
-    case 'cloud':
-      const cloudPath = new Path('M25,60 C10,60 10,45 25,35 C10,35 10,10 40,10 C80,10 80,35 95,35 C95,50 95,60 80,60 Z', {
-        left: centerX - 50,
-        top: centerY - 35,
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-        objectCaching: false,
-      });
-      shape = cloudPath;
-      break;
-      
-    case 'speech-bubble':
-      const speechBubblePath = new Path('M10,0 C0,0 0,10 0,10 L0,70 C0,80 10,80 10,80 L50,80 L60,100 L70,80 L90,80 C100,80 100,70 100,70 L100,10 C100,0 90,0 90,0 Z', {
-        left: centerX - 50,
-        top: centerY - 50,
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-        objectCaching: false,
-      });
-      shape = speechBubblePath;
-      break;
-      
-    case 'note':
-      const notePath = new Path('M0,0 L70,0 L70,70 L85,55 L85,100 L0,100 Z', {
-        left: centerX - 42.5,
-        top: centerY - 50,
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-        objectCaching: false,
-      });
-      shape = notePath;
-      break;
-      
-    case 'person':
-      const head = new Circle({
-        radius: 15,
-        left: 0,
-        top: 0,
-        fill: '#f0f0f0',
-        stroke: '#333333',
-        strokeWidth: 1,
-      });
-      
-      const body = new Line([15, 30, 15, 70], {
-        stroke: '#333333',
-        strokeWidth: 2,
-      });
-      
-      const leftArm = new Line([15, 40, 0, 55], {
-        stroke: '#333333',
-        strokeWidth: 2,
-      });
-      
-      const rightArm = new Line([15, 40, 30, 55], {
-        stroke: '#333333',
-        strokeWidth: 2,
-      });
-      
-      const leftLeg = new Line([15, 70, 0, 100], {
-        stroke: '#333333',
-        strokeWidth: 2,
-      });
-      
-      const rightLeg = new Line([15, 70, 30, 100], {
-        stroke: '#333333',
-        strokeWidth: 2,
-      });
-      
-      shape = new Group([head, body, leftArm, rightArm, leftLeg, rightLeg], {
-        left: centerX - 20,
-        top: centerY - 50,
-        objectCaching: false,
-      });
-      break;
-      
     case 'arrow':
-      const arrowLine = new Line([0, 0, 100, 0], {
-        stroke: '#333333',
-        strokeWidth: 2,
-        objectCaching: false,
-      });
-      
-      (arrowLine as any).strokeLineCap = 'round';
-      (arrowLine as any).strokeLineJoin = 'round';
-      
-      const arrowHead = new Triangle({
-        width: 16,
-        height: 16,
-        left: 100,
-        top: 0,
-        angle: 90,
-        fill: '#333333',
-        originX: 'center',
-        originY: 'center',
-      });
-      
-      shape = new Group([arrowLine, arrowHead], {
-        left: centerX - 50,
-        top: centerY,
-        objectCaching: false,
-      });
+      shape = createArrow();
       break;
-      
-    case 'line':
-      shape = new Line([0, 0, 100, 0], {
-        stroke: '#333333',
-        strokeWidth: 2,
-        left: centerX - 50,
-        top: centerY,
-        objectCaching: false,
-      });
+    case 'database':
+      shape = createDatabase();
       break;
-      
-    case 'curved-line':
-      const curvedLinePath = new Path('M0,0 Q50,-50 100,0', {
-        fill: '',
-        stroke: '#333333',
-        strokeWidth: 2,
-        left: centerX - 50,
-        top: centerY,
-        objectCaching: false,
-      });
-      shape = curvedLinePath;
+    case 'cloud':
+      shape = createCloud();
       break;
-      
+    case 'document':
+      shape = createDocument();
+      break;
+    case 'actor':
+      shape = createActor();
+      break;
     case 'text':
-      const textObject = new IText('Text', {
-        left: centerX - 50,
-        top: centerY - 25,
-        fill: '#333333',
-        fontSize: 20,
-        fontFamily: 'Arial',
-        objectCaching: false,
-      });
-      
-      canvas.add(textObject as unknown as FabricObject);
-      canvas.setActiveObject(textObject as unknown as FabricObject);
-      canvas.renderAll();
-      setSelectedElement(textObject as unknown as FabricObject);
-      
-      toast.success(`Added ${shapeType}`);
-      return;
-      
+      shape = createText();
+      break;
+    case 'line':
+      shape = createLine();
+      break;
+    case 'process':
+      shape = createProcess();
+      break;
     default:
-      toast.error("Unknown shape type");
+      console.warn('Unknown shape type:', shapeType);
       return;
   }
-  
+
   if (shape) {
     canvas.add(shape);
     canvas.setActiveObject(shape);
     canvas.renderAll();
     setSelectedElement(shape);
-    
-    toast.success(`Added ${shapeType}`);
   }
 };
+
+// Shape creation functions
+function createRectangle(): Rect {
+  return new Rect({
+    left: 100,
+    top: 100,
+    fill: 'rgba(255, 255, 255, 0.0)',
+    stroke: '#333',
+    strokeWidth: 1,
+    width: 100,
+    height: 50,
+    rx: 0,
+    ry: 0,
+    data: { type: 'rectangle' },
+  });
+}
+
+function createCircle(): Circle {
+  return new Circle({
+    left: 100,
+    top: 100,
+    fill: 'rgba(255, 255, 255, 0.0)',
+    stroke: '#333',
+    strokeWidth: 1,
+    radius: 30,
+    data: { type: 'circle' },
+  });
+}
+
+function createTriangle(): Triangle {
+  return new Triangle({
+    left: 100,
+    top: 100,
+    fill: 'rgba(255, 255, 255, 0.0)',
+    stroke: '#333',
+    strokeWidth: 1,
+    width: 60,
+    height: 60,
+    data: { type: 'triangle' },
+  });
+}
+
+function createDiamond(): Polygon {
+  return new Polygon(
+    [
+      {x: 50, y: 0},
+      {x: 100, y: 50},
+      {x: 50, y: 100},
+      {x: 0, y: 50}
+    ],
+    {
+      left: 100,
+      top: 100,
+      fill: 'rgba(255, 255, 255, 0.0)',
+      stroke: '#333',
+      strokeWidth: 1,
+      data: { type: 'diamond' },
+    }
+  );
+}
+
+function createLine(): Line {
+  // Create a Line with proper array of points
+  return new Line(
+    [50, 50, 200, 50],
+    {
+      stroke: '#333',
+      strokeWidth: 2,
+      data: { type: 'line' },
+      // This is important to fix the TypeScript error - use an array calculation function not a string
+      calcLinePoints: function() {
+        return { x1: this.x1, x2: this.x2, y1: this.y1, y2: this.y2 };
+      }
+    }
+  );
+}
+
+function createArrow(): Line {
+  // Create an arrow as a Line with proper array of points
+  return new Line(
+    [50, 50, 200, 50],
+    {
+      stroke: '#333',
+      strokeWidth: 2,
+      data: { type: 'arrow' },
+      // Add arrow head
+      strokeLineCap: 'round',
+      // This is important to fix the TypeScript error - use an array calculation function not a string
+      calcLinePoints: function() {
+        return { x1: this.x1, x2: this.x2, y1: this.y1, y2: this.y2 };
+      }
+    }
+  );
+}
+
+function createText(): IText {
+  return new IText('Text', {
+    left: 100,
+    top: 100,
+    fontFamily: 'Arial',
+    fontSize: 16,
+    fill: '#333',
+    data: { type: 'text' },
+  });
+}
+
+function createProcess(): Rect {
+  return new Rect({
+    left: 100,
+    top: 100,
+    fill: 'rgba(255, 255, 255, 0.0)',
+    stroke: '#333',
+    strokeWidth: 1,
+    width: 120,
+    height: 60,
+    rx: 0,
+    ry: 0,
+    data: { type: 'process' },
+  });
+}
+
+function createDatabase(): FabricObject {
+  // Create compound object for database
+  const top = new Circle({
+    radius: 40,
+    top: -40,
+    left: -40,
+    originX: 'center',
+    originY: 'center',
+    fill: 'rgba(255, 255, 255, 0.0)',
+    stroke: '#333',
+    strokeWidth: 1,
+    startAngle: 0,
+    endAngle: Math.PI,
+  });
+
+  const bottom = new Circle({
+    radius: 40,
+    top: 40,
+    left: -40,
+    originX: 'center',
+    originY: 'center',
+    fill: 'rgba(255, 255, 255, 0.0)',
+    stroke: '#333',
+    strokeWidth: 1,
+    startAngle: Math.PI,
+    endAngle: Math.PI * 2,
+  });
+  
+  const leftLine = new Line(
+    [-40, 0, -40, 80], 
+    {
+      stroke: '#333',
+      strokeWidth: 1,
+      calcLinePoints: function() {
+        return { x1: this.x1, x2: this.x2, y1: this.y1, y2: this.y2 };
+      }
+    }
+  );
+  
+  const rightLine = new Line(
+    [40, 0, 40, 80], 
+    {
+      stroke: '#333',
+      strokeWidth: 1,
+      calcLinePoints: function() {
+        return { x1: this.x1, x2: this.x2, y1: this.y1, y2: this.y2 };
+      }
+    }
+  );
+
+  // Group all elements together
+  const group = util.createObject<FabricObject>('group', {
+    left: 100,
+    top: 100,
+    width: 80,
+    height: 120,
+    data: { type: 'database' },
+    subTargetCheck: true,
+  });
+
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(top);
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(bottom);
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(leftLine);
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(rightLine);
+
+  return group;
+}
+
+function createCloud(): FabricObject {
+  // Cloud shape is complex, we'll use a simple placeholder
+  const circle1 = new Circle({
+    radius: 25,
+    top: -20,
+    left: -20,
+    fill: 'rgba(255, 255, 255, 0.0)',
+    stroke: '#333',
+    strokeWidth: 1,
+  });
+  
+  const circle2 = new Circle({
+    radius: 25,
+    top: -30,
+    left: 20,
+    fill: 'rgba(255, 255, 255, 0.0)',
+    stroke: '#333',
+    strokeWidth: 1,
+  });
+  
+  const circle3 = new Circle({
+    radius: 25,
+    top: 0,
+    left: 30,
+    fill: 'rgba(255, 255, 255, 0.0)',
+    stroke: '#333',
+    strokeWidth: 1,
+  });
+  
+  const rect = new Rect({
+    width: 90,
+    height: 40,
+    top: 10,
+    left: -25,
+    fill: 'rgba(255, 255, 255, 0.0)',
+    stroke: 'rgba(255, 255, 255, 0.0)',
+  });
+
+  // Group all elements together
+  const group = util.createObject<FabricObject>('group', {
+    left: 100,
+    top: 100,
+    width: 100,
+    height: 70,
+    data: { type: 'cloud' },
+    subTargetCheck: true,
+  });
+
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(circle1);
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(circle2);
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(circle3);
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(rect);
+
+  return group;
+}
+
+function createDocument(): FabricObject {
+  // Create a document shape (rectangle with folded corner)
+  const points = [
+    { x: 0, y: 0 },
+    { x: 90, y: 0 },
+    { x: 90, y: 90 },
+    { x: 70, y: 90 },
+    { x: 90, y: 70 },
+    { x: 70, y: 70 },
+    { x: 70, y: 90 },
+    { x: 0, y: 90 }
+  ];
+  
+  const polygon = new Polygon(points, {
+    left: 100,
+    top: 100,
+    fill: 'rgba(255, 255, 255, 0.0)',
+    stroke: '#333',
+    strokeWidth: 1,
+    data: { type: 'document' }
+  });
+  
+  return polygon;
+}
+
+function createActor(): FabricObject {
+  // Create a simple actor figure (circle for head + rectangle for body)
+  const head = new Circle({
+    radius: 15,
+    top: -30,
+    left: 0,
+    originX: 'center',
+    originY: 'center',
+    fill: 'rgba(255, 255, 255, 0.0)',
+    stroke: '#333',
+    strokeWidth: 1,
+  });
+  
+  const body = new Triangle({
+    width: 40,
+    height: 40,
+    top: 0,
+    left: -20,
+    fill: 'rgba(255, 255, 255, 0.0)',
+    stroke: '#333',
+    strokeWidth: 1,
+  });
+  
+  const legs = new Line(
+    [0, 40, 0, 70], 
+    {
+      stroke: '#333',
+      strokeWidth: 1,
+      calcLinePoints: function() {
+        return { x1: this.x1, x2: this.x2, y1: this.y1, y2: this.y2 };
+      }
+    }
+  );
+  
+  const leftLeg = new Line(
+    [0, 70, -15, 90], 
+    {
+      stroke: '#333',
+      strokeWidth: 1,
+      calcLinePoints: function() {
+        return { x1: this.x1, x2: this.x2, y1: this.y1, y2: this.y2 };
+      }
+    }
+  );
+  
+  const rightLeg = new Line(
+    [0, 70, 15, 90], 
+    {
+      stroke: '#333',
+      strokeWidth: 1,
+      calcLinePoints: function() {
+        return { x1: this.x1, x2: this.x2, y1: this.y1, y2: this.y2 };
+      }
+    }
+  );
+  
+  // Group all elements together
+  const group = util.createObject<FabricObject>('group', {
+    left: 100,
+    top: 100,
+    width: 50,
+    height: 100,
+    data: { type: 'actor' },
+    subTargetCheck: true,
+  });
+
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(head);
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(body);
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(legs);
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(leftLeg);
+  // @ts-ignore - we know these methods exist
+  group.addWithUpdate(rightLeg);
+
+  return group;
+}

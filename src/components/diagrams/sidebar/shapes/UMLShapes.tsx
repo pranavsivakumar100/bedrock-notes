@@ -12,7 +12,6 @@ interface UMLShapesProps {
 const UMLShapes: React.FC<UMLShapesProps> = ({ canvas, setSelectedElement }) => {
   return (
     <div className="grid grid-cols-5 gap-1 px-2">
-      {/* Add UML shapes here - for now just placeholder content */}
       <Button 
         variant="outline" 
         size="icon" 
@@ -28,6 +27,16 @@ const UMLShapes: React.FC<UMLShapesProps> = ({ canvas, setSelectedElement }) => 
         onClick={() => handleAddShape({ canvas, shapeType: 'line', setSelectedElement })}
       >
         <div className="w-full h-0.5 bg-foreground"></div>
+      </Button>
+      <Button 
+        variant="outline" 
+        size="icon" 
+        className="h-10 w-full aspect-square flex items-center justify-center p-1"
+        onClick={() => handleAddShape({ canvas, shapeType: 'actor', setSelectedElement })}
+      >
+        <div className="w-full h-full flex items-center justify-center">
+          <span className="text-xs">Actor</span>
+        </div>
       </Button>
     </div>
   );

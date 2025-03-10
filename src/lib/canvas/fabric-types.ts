@@ -27,6 +27,11 @@ declare module 'fabric' {
     clone(callback: (cloned: FabricObject) => void): void;
   }
 
+  // Add proper type for calcLinePoints
+  interface Line {
+    calcLinePoints(): { x1: number; x2: number; y1: number; y2: number; };
+  }
+
   // Instead of extending IText, use type casting helpers
   // This avoids the conflicting _setFillStyles property error
   
