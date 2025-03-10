@@ -551,8 +551,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'cylinder':
-        // Create group with rect and two ellipses
-        const cylinderRect = new Rect({
+        shape = new Group([new Rect({
           left: 0,
           top: 15,
           width: 80,
@@ -560,9 +559,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           fill: '#f0f0f0',
           stroke: '#333333',
           strokeWidth: 1,
-        });
-        
-        const topEllipse = new Ellipse({
+        }), new Ellipse({
           left: 0,
           top: 0,
           rx: 40,
@@ -570,9 +567,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           fill: '#f0f0f0',
           stroke: '#333333',
           strokeWidth: 1,
-        });
-        
-        const bottomEllipse = new Ellipse({
+        }), new Ellipse({
           left: 0,
           top: 70,
           rx: 40,
@@ -580,19 +575,14 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           fill: '#f0f0f0',
           stroke: '#333333',
           strokeWidth: 1,
-        });
-        
-        const cylinderGroup = new Group([cylinderRect, topEllipse, bottomEllipse], {
+        })], {
           left: centerX - 40,
           top: centerY - 50,
           objectCaching: false,
         });
-        
-        shape = cylinderGroup;
         break;
         
       case 'document':
-        // Shape with folded corner
         const points = [
           { x: 0, y: 0 },
           { x: 80, y: 0 },
@@ -608,7 +598,6 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           strokeWidth: 1,
         });
         
-        // Fix Line constructor - it needs exactly 4 values
         const foldLine = new Line([
           80, 0, 
           100, 20
@@ -628,8 +617,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'cloud':
-        // Create a cloud shape using path string
-        shape = new Path('M25,60 C10,60 10,45 25,35 C10,35 10,10 40,10 C80,10 80,35 95,35 C95,50 95,60 80,60 Z', {
+        const cloudPath = new Path('M25,60 C10,60 10,45 25,35 C10,35 10,10 40,10 C80,10 80,35 95,35 C95,50 95,60 80,60 Z', {
           left: centerX - 50,
           top: centerY - 35,
           fill: '#f0f0f0',
@@ -637,11 +625,11 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           strokeWidth: 1,
           objectCaching: false,
         });
+        shape = cloudPath;
         break;
         
       case 'speech-bubble':
-        // Create speech bubble using SVG path string
-        shape = new Path('M10,0 C0,0 0,10 0,10 L0,70 C0,80 10,80 10,80 L50,80 L60,100 L70,80 L90,80 C100,80 100,70 100,70 L100,10 C100,0 90,0 90,0 Z', {
+        const speechBubblePath = new Path('M10,0 C0,0 0,10 0,10 L0,70 C0,80 10,80 10,80 L50,80 L60,100 L70,80 L90,80 C100,80 100,70 100,70 L100,10 C100,0 90,0 90,0 Z', {
           left: centerX - 50,
           top: centerY - 50,
           fill: '#f0f0f0',
@@ -649,11 +637,11 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           strokeWidth: 1,
           objectCaching: false,
         });
+        shape = speechBubblePath;
         break;
         
       case 'note':
-        // Create note using SVG path string
-        shape = new Path('M0,0 L70,0 L70,70 L85,55 L85,100 L0,100 Z', {
+        const notePath = new Path('M0,0 L70,0 L70,70 L85,55 L85,100 L0,100 Z', {
           left: centerX - 42.5,
           top: centerY - 50,
           fill: '#f0f0f0',
@@ -661,10 +649,10 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           strokeWidth: 1,
           objectCaching: false,
         });
+        shape = notePath;
         break;
         
       case 'person':
-        // Create simple stick figure
         const head = new Circle({
           radius: 15,
           left: 0,
@@ -674,7 +662,6 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           strokeWidth: 1,
         });
         
-        // Fix Line constructor to use proper format
         const body = new Line([
           15, 30, 
           15, 70
@@ -725,7 +712,6 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'arrow':
-        // Fix Line constructor to use proper format
         const arrowLine = new Line([
           0, 0, 
           100, 0
@@ -738,7 +724,6 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         (arrowLine as any).strokeLineCap = 'round';
         (arrowLine as any).strokeLineJoin = 'round';
         
-        // Add arrowhead
         const arrowHead = new Triangle({
           width: 16,
           height: 16,
@@ -750,7 +735,6 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           originY: 'center',
         });
         
-        // Group arrow with arrowhead
         const arrowGroup = new Group([arrowLine, arrowHead], {
           left: centerX - 50,
           top: centerY,
@@ -761,7 +745,6 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'line':
-        // Fix Line constructor to use proper format
         shape = new Line([
           0, 0, 
           100, 0
@@ -775,8 +758,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'curved-line':
-        // Create curved line using SVG path string
-        shape = new Path('M0,0 Q50,-50 100,0', {
+        const curvedLinePath = new Path('M0,0 Q50,-50 100,0', {
           fill: '',
           stroke: '#333333',
           strokeWidth: 2,
@@ -784,6 +766,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           top: centerY,
           objectCaching: false,
         });
+        shape = curvedLinePath;
         break;
         
       case 'text':

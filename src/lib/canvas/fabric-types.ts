@@ -24,8 +24,6 @@ declare module 'fabric' {
     }
   }
   
-  // Add correct Path type extensions
-  interface Path {
-    path: string | Array<{ x: number; y: number; }>;
-  }
+  // We won't redefine the Path interface directly since it already exists in fabric
+  // Instead we'll add our custom types if needed without conflicting with the original types
 }
