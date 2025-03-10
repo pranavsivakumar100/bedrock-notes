@@ -23,7 +23,4 @@ declare module 'fabric' {
       [key: string]: any;
     }
   }
-  
-  // We won't redefine the Path interface directly since it already exists in fabric
-  // Instead we'll add our custom types if needed without conflicting with the original types
 }
