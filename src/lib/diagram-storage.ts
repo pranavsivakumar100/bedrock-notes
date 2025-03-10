@@ -1,4 +1,3 @@
-
 import { toast } from 'sonner';
 import { Diagram } from '@/lib/types';
 import { getItems, updateNote, deleteNote } from '@/lib/storage';
