@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Canvas, util } from 'fabric';
@@ -71,6 +72,9 @@ const DiagramEditor: React.FC = () => {
   useEffect(() => {
     document.title = `${title} - Diagram Editor`;
     
+    // Apply a class to the body to ensure full viewport usage
+    document.body.classList.add('overflow-hidden');
+    
     if (id && id !== 'new' && canvas) {
       try {
         const diagram = getDiagram(id);
@@ -81,6 +85,10 @@ const DiagramEditor: React.FC = () => {
         console.error("Error loading diagram details:", error);
       }
     }
+    
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
   }, [id, title, canvas]);
   
   useEffect(() => {
@@ -322,8 +330,8 @@ const DiagramEditor: React.FC = () => {
   };
   
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden diagram-editor-container">
-      <header className="border-b border-border/40 p-4 flex items-center justify-between glass-morphism">
+    <div className="diagram-editor-container">
+      <header className="border-b border-border/40 p-4 flex items-center justify-between glass-morphism relative z-10">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
             <a href="/diagrams">
@@ -445,7 +453,7 @@ const DiagramEditor: React.FC = () => {
         </div>
       </header>
       
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 h-[calc(100vh-65px)] relative">
         {sidebarOpen && (
           <DiagramSidebar 
             canvas={canvas} 
@@ -454,13 +462,15 @@ const DiagramEditor: React.FC = () => {
           />
         )}
         
-        <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="flex-1 flex flex-col relative h-full">
           <DiagramToolbar canvas={canvas} />
-          <DiagramCanvas 
-            setCanvas={setCanvas} 
-            diagramId={id} 
-            setSelectedElement={setSelectedElement}
-          />
+          <div className="flex-1 relative">
+            <DiagramCanvas 
+              setCanvas={setCanvas} 
+              diagramId={id} 
+              setSelectedElement={setSelectedElement}
+            />
+          </div>
         </div>
       </div>
       
