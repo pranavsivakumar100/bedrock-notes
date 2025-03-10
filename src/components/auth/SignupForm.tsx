@@ -21,6 +21,11 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess, onSwitchTab }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    if (!name || !email || !password) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    
     if (password !== confirmPassword) {
       toast.error('Passwords do not match');
       return;
@@ -32,20 +37,18 @@ const SignupForm: React.FC<SignupFormProps> = ({ onSuccess, onSwitchTab }) => {
     setTimeout(() => {
       setIsLoading(false);
       
-      // For demo purposes, just check if all fields are filled in
-      if (name && email && password) {
-        // Mock successful signup
-        saveUser({
-          id: Date.now().toString(),
-          name,
-          email
-        });
-        
-        toast.success('Account created successfully');
-        onSuccess();
-      } else {
-        toast.error('Please fill in all fields');
-      }
+      // Create a unique user ID based on email
+      const userId = btoa(email).replace(/[^a-zA-Z0-9]/g, '');
+      
+      // Mock successful signup
+      saveUser({
+        id: userId,
+        name,
+        email
+      });
+      
+      toast.success('Account created successfully');
+      onSuccess();
     }, 1000);
   };
 

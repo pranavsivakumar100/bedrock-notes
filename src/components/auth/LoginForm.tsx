@@ -24,20 +24,25 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onSwitchTab }) => {
     setTimeout(() => {
       setIsLoading(false);
       
-      // For demo purposes, just check if email and password are filled in
-      if (email && password) {
-        // Mock successful login
-        saveUser({
-          id: '1',
-          name: email.split('@')[0],
-          email
-        });
-        
-        toast.success('Logged in successfully');
-        onSuccess();
-      } else {
-        toast.error('Invalid email or password');
+      // For demo purposes, validate the email and password
+      if (!email || !password) {
+        toast.error('Please enter both email and password');
+        return;
       }
+      
+      // In a real app, you would validate credentials against a database
+      // Here we're just checking that they're not empty and creating a unique user ID based on email
+      // Mock successful login with a unique user ID for each email
+      const userId = btoa(email).replace(/[^a-zA-Z0-9]/g, '');
+      
+      saveUser({
+        id: userId,
+        name: email.split('@')[0],
+        email
+      });
+      
+      toast.success('Logged in successfully');
+      onSuccess();
     }, 1000);
   };
 

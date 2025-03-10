@@ -73,17 +73,27 @@ const defaultFolders: Folder[] = [
 ];
 
 // Storage keys
-const NOTES_STORAGE_KEY = 'codechime_notes';
-const FOLDERS_STORAGE_KEY = 'codechime_folders';
 const USER_STORAGE_KEY = 'codechime_user';
 
+// Create storage keys with user ID prefix
+const getUserStorageKey = (key: string, userId?: string): string => {
+  const user = userId || getUser()?.id;
+  return user ? `${key}_${user}` : key;
+};
+
 // Notes storage functions
-export const getNotes = (): Note[] => {
-  const storedNotes = localStorage.getItem(NOTES_STORAGE_KEY);
+export const getNotes = (userId?: string): Note[] => {
+  const storageKey = getUserStorageKey('codechime_notes', userId);
+  const storedNotes = localStorage.getItem(storageKey);
+  
   if (!storedNotes) {
-    // Initialize with default notes
-    localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(defaultNotes));
-    return defaultNotes;
+    // Initialize with default notes for new users
+    const user = getUser();
+    if (user) {
+      localStorage.setItem(storageKey, JSON.stringify(defaultNotes));
+      return defaultNotes;
+    }
+    return [];
   }
 
   // Parse dates when retrieving from localStorage
@@ -95,8 +105,9 @@ export const getNotes = (): Note[] => {
   });
 };
 
-export const saveNotes = (notes: Note[]): void => {
-  localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes));
+export const saveNotes = (notes: Note[], userId?: string): void => {
+  const storageKey = getUserStorageKey('codechime_notes', userId);
+  localStorage.setItem(storageKey, JSON.stringify(notes));
 };
 
 export const addNote = (note: Omit<Note, 'id' | 'createdAt' | 'updatedAt'>): Note => {
@@ -132,19 +143,26 @@ export const deleteNote = (id: string): void => {
 };
 
 // Folder storage functions
-export const getFolders = (): Folder[] => {
-  const storedFolders = localStorage.getItem(FOLDERS_STORAGE_KEY);
+export const getFolders = (userId?: string): Folder[] => {
+  const storageKey = getUserStorageKey('codechime_folders', userId);
+  const storedFolders = localStorage.getItem(storageKey);
+  
   if (!storedFolders) {
-    // Initialize with default folders
-    localStorage.setItem(FOLDERS_STORAGE_KEY, JSON.stringify(defaultFolders));
-    return defaultFolders;
+    // Initialize with default folders for new users
+    const user = getUser();
+    if (user) {
+      localStorage.setItem(storageKey, JSON.stringify(defaultFolders));
+      return defaultFolders;
+    }
+    return [];
   }
   
   return JSON.parse(storedFolders);
 };
 
-export const saveFolders = (folders: Folder[]): void => {
-  localStorage.setItem(FOLDERS_STORAGE_KEY, JSON.stringify(folders));
+export const saveFolders = (folders: Folder[], userId?: string): void => {
+  const storageKey = getUserStorageKey('codechime_folders', userId);
+  localStorage.setItem(storageKey, JSON.stringify(folders));
 };
 
 export const addFolder = (name: string, parentId: string | null = null): Folder => {
@@ -215,6 +233,18 @@ export const getUser = (): User | null => {
 
 export const saveUser = (user: User): void => {
   localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+  
+  // Initialize notes and folders for new user if they don't exist yet
+  const notesKey = getUserStorageKey('codechime_notes', user.id);
+  const foldersKey = getUserStorageKey('codechime_folders', user.id);
+  
+  if (!localStorage.getItem(notesKey)) {
+    localStorage.setItem(notesKey, JSON.stringify(defaultNotes));
+  }
+  
+  if (!localStorage.getItem(foldersKey)) {
+    localStorage.setItem(foldersKey, JSON.stringify(defaultFolders));
+  }
 };
 
 export const removeUser = (): void => {
