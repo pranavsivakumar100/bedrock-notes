@@ -134,8 +134,17 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
   }, [diagramId, setCanvas, setSelectedElement]);
 
   const setupPanning = (canvas: Canvas, container: HTMLDivElement) => {
+    // Prevent context menu from appearing during panning
+    container.addEventListener('contextmenu', (e) => {
+      if (isPanning.current || e.ctrlKey) {
+        e.preventDefault();
+        return false;
+      }
+    });
+
     container.addEventListener('mousedown', (e) => {
-      if (e.ctrlKey) {
+      // Only trigger panning on left mouse button (button 0) with Ctrl key
+      if (e.ctrlKey && e.button === 0) {
         isPanning.current = true;
         lastPanPoint.current = { x: e.clientX, y: e.clientY };
         container.style.cursor = 'grabbing';
