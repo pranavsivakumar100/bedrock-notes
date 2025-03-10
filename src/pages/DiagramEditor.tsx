@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Canvas, util } from 'fabric';
@@ -407,8 +408,12 @@ const DiagramEditor: React.FC = () => {
         </div>
       </header>
       
-      <div className="relative h-[calc(100vh-48px)]">
-        <div className="w-full h-full">
+      <ResizablePanelGroup 
+        direction="horizontal" 
+        className="flex-1 h-[calc(100vh-48px)] relative"
+      >
+        {/* Canvas Panel (First) */}
+        <ResizablePanel defaultSize={sidebarOpen ? 80 : 100}>
           <div className="flex-1 flex flex-col relative h-full">
             <DiagramToolbar canvas={canvas} />
             <div className="flex-1 relative bg-white">
@@ -419,18 +424,27 @@ const DiagramEditor: React.FC = () => {
               />
             </div>
           </div>
-        </div>
+        </ResizablePanel>
         
+        {/* Sidebar Panel (Second) */}
         {sidebarOpen && (
-          <div className="absolute right-0 top-0 h-full border-l border-border/40 bg-background shadow-lg" style={{ width: '300px' }}>
-            <DiagramSidebar 
-              canvas={canvas} 
-              selectedElement={selectedElement} 
-              setSelectedElement={setSelectedElement}
-            />
-          </div>
+          <>
+            <ResizableHandle withHandle />
+            <ResizablePanel 
+              defaultSize={20} 
+              minSize={15}
+              maxSize={40}
+              className="border-l border-border/40"
+            >
+              <DiagramSidebar 
+                canvas={canvas} 
+                selectedElement={selectedElement} 
+                setSelectedElement={setSelectedElement}
+              />
+            </ResizablePanel>
+          </>
         )}
-      </div>
+      </ResizablePanelGroup>
       
       <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <DialogContent>
