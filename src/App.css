@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -41,16 +42,22 @@ html {
   display: block !important;
 }
 
-/* Fix for the diagram canvas container */
-.diagram-editor-container .flex-1.flex.flex-col.relative.h-full {
+/* Ensure canvas containers have a white background */
+.diagram-editor-container .flex-1.flex.flex-col.relative.h-full,
+.diagram-editor-container .flex-1.relative,
+.diagram-editor-container .ResizablePanel {
   overflow: hidden;
   background-color: #ffffff;
 }
 
-/* Fix for the diagram canvas container */
-.diagram-editor-container .flex-1.relative {
-  overflow: hidden;
+/* Background color for the whole editor */
+.diagram-editor-container {
   background-color: #ffffff;
+}
+
+/* Force white background on the canvas area */
+.diagram-editor-container .flex-1.relative {
+  background-color: #ffffff !important;
 }
 
 /* Prevent browser default zooming with Ctrl+wheel */
@@ -61,6 +68,7 @@ html {
 /* Ensure grid lines for fabric.js canvas extend beyond viewport */
 .canvas-container {
   overflow: visible !important;
+  background-color: #ffffff;
 }
 
 /* Invisible scrollbar styles for all browsers */
