@@ -13,11 +13,12 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Note, ViewMode, ContextMenuPosition } from '@/lib/types';
-import { cn, renderMarkdown, extractCodeBlocks } from '@/lib/utils';
+import { cn, renderMarkdown, extractCodeBlocks, extractHeadings } from '@/lib/utils';
 import { toast } from 'sonner';
 import CodeSnippet from './CodeSnippet';
 import { addNote, getNotes, updateNote } from '@/lib/storage';
 import EditorContextMenu from '@/components/ui/context-menu/EditorContextMenu';
+import ScrollToSection from './ScrollToSection';
 
 interface NoteEditorProps {
   noteId?: string;
@@ -70,6 +71,18 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
             </div>
           `;
           div.appendChild(codeSnippet);
+        }
+      });
+      
+      const headings = extractHeadings(content);
+      headings.forEach(heading => {
+        const headingElements = previewRef.current?.querySelectorAll(`h${heading.level}`);
+        if (headingElements) {
+          headingElements.forEach(el => {
+            if (el.textContent === heading.text) {
+              el.id = heading.id;
+            }
+          });
         }
       });
     }
@@ -206,6 +219,15 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
   const handleFormatBulletList = () => insertAtCursor('- ');
   const handleFormatNumberedList = () => insertAtCursor('1. ');
   const handleFormatBlockquote = () => insertAtCursor('> ');
+  
+  const scrollToHeading = (headingId: string) => {
+    if (previewRef.current) {
+      const headingElement = previewRef.current.querySelector(`#${headingId}`);
+      if (headingElement) {
+        headingElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  };
   
   if (!note && noteId !== 'new') {
     return (
@@ -347,7 +369,14 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
         </div>
       </header>
       
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
+        {(viewMode === ViewMode.PREVIEW || viewMode === ViewMode.SPLIT) && (
+          <ScrollToSection 
+            content={content} 
+            onScrollTo={scrollToHeading} 
+          />
+        )}
+        
         {viewMode === ViewMode.EDIT && (
           <EditorContextMenu
             position={contextMenu}
@@ -376,7 +405,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
         )}
         
         {viewMode === ViewMode.PREVIEW && (
-          <div ref={previewRef}>
+          <div ref={previewRef} className="h-full overflow-auto p-6">
             {renderPreview()}
           </div>
         )}
@@ -407,7 +436,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
                 onContextMenu={handleContextMenu}
               />
             </EditorContextMenu>
-            <div ref={previewRef}>
+            <div ref={previewRef} className="h-full overflow-auto p-6">
               {renderPreview()}
             </div>
           </div>

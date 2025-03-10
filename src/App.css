@@ -6,6 +6,11 @@
   text-align: center;
 }
 
+/* Add smooth scrolling behavior */
+html {
+  scroll-behavior: smooth;
+}
+
 /* Remove max-width and padding for diagram pages */
 .diagram-editor-container {
   max-width: 100% !important;
