@@ -28,6 +28,17 @@
   height: 100%;
 }
 
+/* Invisible scroll styles */
+.invisible-scroll {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scroll-behavior: smooth;
+}
+
+.invisible-scroll::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;

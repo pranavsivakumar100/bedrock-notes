@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import CodeSnippet from './CodeSnippet';
 import { addNote, getNotes, updateNote } from '@/lib/storage';
 import EditorContextMenu from '@/components/ui/context-menu/EditorContextMenu';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface NoteEditorProps {
   noteId?: string;
@@ -364,21 +365,25 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
             onFormatNumberedList={handleFormatNumberedList}
             onFormatBlockquote={handleFormatBlockquote}
           >
-            <textarea
-              ref={textareaRef}
-              value={content}
-              onChange={handleContentChange}
-              placeholder="Start writing..."
-              className="markdown-editor"
-              onContextMenu={handleContextMenu}
-            />
+            <ScrollArea invisible className="h-full">
+              <textarea
+                ref={textareaRef}
+                value={content}
+                onChange={handleContentChange}
+                placeholder="Start writing..."
+                className="markdown-editor invisible-scroll"
+                onContextMenu={handleContextMenu}
+              />
+            </ScrollArea>
           </EditorContextMenu>
         )}
         
         {viewMode === ViewMode.PREVIEW && (
-          <div ref={previewRef}>
-            {renderPreview()}
-          </div>
+          <ScrollArea invisible className="h-full">
+            <div ref={previewRef}>
+              {renderPreview()}
+            </div>
+          </ScrollArea>
         )}
         
         {viewMode === ViewMode.SPLIT && (
@@ -398,18 +403,23 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
               onFormatNumberedList={handleFormatNumberedList}
               onFormatBlockquote={handleFormatBlockquote}
             >
-              <textarea
-                ref={textareaRef}
-                value={content}
-                onChange={handleContentChange}
-                placeholder="Start writing..."
-                className="markdown-editor"
-                onContextMenu={handleContextMenu}
-              />
+              <ScrollArea invisible className="h-full">
+                <textarea
+                  ref={textareaRef}
+                  value={content}
+                  onChange={handleContentChange}
+                  placeholder="Start writing..."
+                  className="markdown-editor invisible-scroll"
+                  onContextMenu={handleContextMenu}
+                />
+              </ScrollArea>
             </EditorContextMenu>
-            <div ref={previewRef}>
-              {renderPreview()}
-            </div>
+            
+            <ScrollArea invisible className="h-full">
+              <div ref={previewRef}>
+                {renderPreview()}
+              </div>
+            </ScrollArea>
           </div>
         )}
       </div>

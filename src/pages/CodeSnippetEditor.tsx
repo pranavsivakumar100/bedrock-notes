@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { Play, Save } from 'lucide-react';
 import { CodeExecutionResult } from '@/lib/types';
 import { toast } from 'sonner';
 import Prism from 'prismjs';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const CodeSnippetEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,7 +22,6 @@ const CodeSnippetEditor: React.FC = () => {
   const editorRef = useRef<HTMLTextAreaElement>(null);
   
   useEffect(() => {
-    // Check for template data
     const templateData = localStorage.getItem('code_snippet_template');
     
     if (isNew && templateData) {
@@ -41,23 +40,19 @@ const CodeSnippetEditor: React.FC = () => {
           setCode(template.code);
         }
         
-        // Show a toast notification
         toast.success('Template applied!');
         
-        // Clear the template data to prevent applying it again on refresh
         localStorage.removeItem('code_snippet_template');
       } catch (error) {
         console.error('Error parsing template data:', error);
       }
     }
     
-    // Apply line numbers and adjust textarea height
     if (editorRef.current) {
       editorRef.current.style.height = 'auto';
       editorRef.current.style.height = `${editorRef.current.scrollHeight}px`;
     }
     
-    // Highlight code after it changes
     if (editorRef.current) {
       const preElement = document.createElement('pre');
       const codeElement = document.createElement('code');
@@ -70,27 +65,22 @@ const CodeSnippetEditor: React.FC = () => {
   }, [code, language, isNew]);
 
   const handleSave = () => {
-    // This would save to a database in a real app
     toast.success("Code snippet saved successfully");
   };
 
   const handleRunCode = () => {
     if (language === 'javascript' || language === 'typescript') {
       try {
-        // Create a function from the code string and execute it
         const output: string[] = [];
         const originalConsoleLog = console.log;
         
-        // Override console.log to capture output
         console.log = (...args) => {
           output.push(args.map(arg => 
             typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
           ).join(' '));
         };
         
-        // Execute the code
         try {
-          // eslint-disable-next-line no-new-func
           const executableCode = new Function(code);
           executableCode();
           setResult({ 
@@ -107,7 +97,6 @@ const CodeSnippetEditor: React.FC = () => {
           }
         }
         
-        // Restore original console.log
         console.log = originalConsoleLog;
       } catch (error) {
         if (error instanceof Error) {
@@ -181,15 +170,17 @@ const CodeSnippetEditor: React.FC = () => {
         <div className="flex flex-col">
           <Label htmlFor="code-editor" className="mb-2">Code</Label>
           <div className="font-mono text-sm flex-1 rounded-md border min-h-[400px] bg-[#1f2937] overflow-hidden relative">
-            <textarea
-              ref={editorRef}
-              id="code-editor"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              className="font-mono text-sm w-full h-full p-4 resize-none absolute inset-0 bg-transparent text-gray-300 border-0 focus:ring-0 outline-none"
-              placeholder="Write your code here..."
-              spellCheck="false"
-            />
+            <ScrollArea invisible className="absolute inset-0">
+              <textarea
+                ref={editorRef}
+                id="code-editor"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                className="font-mono text-sm w-full h-full p-4 resize-none bg-transparent text-gray-300 border-0 focus:ring-0 outline-none invisible-scroll"
+                placeholder="Write your code here..."
+                spellCheck="false"
+              />
+            </ScrollArea>
           </div>
         </div>
 
@@ -197,13 +188,15 @@ const CodeSnippetEditor: React.FC = () => {
           <Label className="mb-2">Output</Label>
           <Card className="flex-1 border-[#374151] bg-[#1f2937] min-h-[400px]">
             <CardContent className="p-0 h-full">
-              <pre 
-                className={`font-mono text-sm p-4 overflow-auto h-full ${
-                  result?.isError ? 'text-red-400' : 'text-gray-300'
-                }`}
-              >
-                {result ? result.output : 'Code output will appear here after running'}
-              </pre>
+              <ScrollArea invisible className="h-full">
+                <pre 
+                  className={`font-mono text-sm p-4 h-full ${
+                    result?.isError ? 'text-red-400' : 'text-gray-300'
+                  }`}
+                >
+                  {result ? result.output : 'Code output will appear here after running'}
+                </pre>
+              </ScrollArea>
             </CardContent>
           </Card>
         </div>
