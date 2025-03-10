@@ -1,7 +1,6 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Canvas } from 'fabric';
+import { Canvas, util } from 'fabric';
 import { 
   Database, 
   Server, 
@@ -70,10 +69,8 @@ const DiagramEditor: React.FC = () => {
   const [lastSavedState, setLastSavedState] = useState<string | null>(null);
   
   useEffect(() => {
-    // Set document title
     document.title = `${title} - Diagram Editor`;
     
-    // Load diagram details if ID is provided
     if (id && id !== 'new' && canvas) {
       try {
         const diagram = getDiagram(id);
@@ -89,7 +86,6 @@ const DiagramEditor: React.FC = () => {
   useEffect(() => {
     if (!canvas) return;
     
-    // Capture state for undo/redo
     const captureCanvasState = () => {
       if (canvas) {
         const jsonState = JSON.stringify(canvas.toJSON());
@@ -98,7 +94,6 @@ const DiagramEditor: React.FC = () => {
       }
     };
     
-    // Setup undo/redo keyboard shortcuts
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey) {
         if (e.key === 'z') {
@@ -134,7 +129,6 @@ const DiagramEditor: React.FC = () => {
       }
     };
     
-    // Add event listeners for object modifications
     canvas.on('object:modified', captureCanvasState);
     canvas.on('object:added', captureCanvasState);
     canvas.on('object:removed', captureCanvasState);
@@ -179,8 +173,11 @@ const DiagramEditor: React.FC = () => {
   const handleCopy = () => {
     if (!canvas) return;
     
-    canvas.getActiveObject().clone((cloned: any) => {
-      localStorage.setItem('cs-diagram-clipboard', JSON.stringify(cloned.toJSON()));
+    const activeObject = canvas.getActiveObject();
+    if (!activeObject) return;
+    
+    activeObject.clone((clonedObj: any) => {
+      localStorage.setItem('cs-diagram-clipboard', JSON.stringify(clonedObj.toJSON()));
       toast.success("Copied to clipboard");
     });
   };
@@ -195,7 +192,7 @@ const DiagramEditor: React.FC = () => {
     }
     
     try {
-      fabric.util.enlivenObjects([JSON.parse(clipboard)], (objects: any[]) => {
+      util.enlivenObjects([JSON.parse(clipboard)], (objects: any[]) => {
         objects.forEach(obj => {
           obj.set({
             left: obj.left + 20,
@@ -231,7 +228,6 @@ const DiagramEditor: React.FC = () => {
       const json = canvas.toJSON();
       const jsonString = JSON.stringify(json);
       
-      // Check if diagram content has changed
       if (lastSavedState === jsonString) {
         toast.info("No changes to save");
         return;
@@ -295,7 +291,6 @@ const DiagramEditor: React.FC = () => {
           return;
       }
       
-      // Create download link
       const a = document.createElement('a');
       a.href = dataUrl;
       a.download = filename;
@@ -469,7 +464,6 @@ const DiagramEditor: React.FC = () => {
         </div>
       </div>
       
-      {/* Delete Confirmation Dialog */}
       <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <DialogContent>
           <DialogHeader>

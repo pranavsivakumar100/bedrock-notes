@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { Canvas } from 'fabric';
+import { Canvas, Object as FabricObject, Line, Grid, util } from 'fabric';
 import { getDiagram } from '@/lib/diagram-storage';
 import { toast } from 'sonner';
 
@@ -8,6 +8,24 @@ interface DiagramCanvasProps {
   setCanvas: (canvas: Canvas) => void;
   diagramId?: string;
   setSelectedElement: (element: any | null) => void;
+}
+
+// Add custom data property to Canvas
+declare module 'fabric' {
+  interface Canvas {
+    _objects: FabricObject[];
+    customData?: {
+      connectionStart?: FabricObject;
+      [key: string]: any;
+    }
+  }
+  
+  interface Object {
+    data?: {
+      type?: string;
+      [key: string]: any;
+    }
+  }
 }
 
 const DiagramCanvas: React.FC<DiagramCanvasProps> = ({ 
@@ -29,6 +47,9 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       selection: true,
       preserveObjectStacking: true,
     });
+    
+    // Initialize custom data property
+    canvas.customData = {};
     
     fabricCanvasRef.current = canvas;
     setCanvas(canvas);
@@ -102,7 +123,7 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
     
     // Create vertical lines
     for (let i = 0; i < width / gridSize; i++) {
-      const line = new fabric.Line([i * gridSize, 0, i * gridSize, height], {
+      const line = new Line([i * gridSize, 0, i * gridSize, height], {
         stroke: '#e0e0e0',
         selectable: false,
         evented: false,
@@ -110,12 +131,12 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
         data: { type: 'grid' }
       });
       canvas.add(line);
-      canvas.sendToBack(line);
+      line.moveTo(0); // Move to back (lower z-index)
     }
     
     // Create horizontal lines
     for (let i = 0; i < height / gridSize; i++) {
-      const line = new fabric.Line([0, i * gridSize, width, i * gridSize], {
+      const line = new Line([0, i * gridSize, width, i * gridSize], {
         stroke: '#e0e0e0',
         selectable: false,
         evented: false,
@@ -123,7 +144,7 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
         data: { type: 'grid' }
       });
       canvas.add(line);
-      canvas.sendToBack(line);
+      line.moveTo(0); // Move to back (lower z-index)
     }
     
     canvas.renderAll();
@@ -137,7 +158,8 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       if (!e.target) return;
       
       // Skip grid snapping if Shift key is pressed (for free movement)
-      if (e.e && (e.e as KeyboardEvent).shiftKey) return;
+      const evt = e.e as MouseEvent;
+      if (evt && evt.shiftKey) return;
       
       const target = e.target;
       
@@ -152,7 +174,8 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       if (!e.target) return;
       
       // Skip grid snapping if Shift key is pressed
-      if (e.e && (e.e as KeyboardEvent).shiftKey) return;
+      const evt = e.e as MouseEvent;
+      if (evt && evt.shiftKey) return;
       
       const target = e.target;
       const w = target.getScaledWidth();

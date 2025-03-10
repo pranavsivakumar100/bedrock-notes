@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Canvas, Rect, Circle as FabricCircle, Triangle as FabricTriangle, Path, IText, Group, Line } from 'fabric';
 import { 
@@ -80,7 +79,8 @@ type Tool =
   | 'cable'
   | 'lineConnect'
   | 'bezierConnect'
-  | 'eraser';
+  | 'eraser'
+  | 'settings';
 
 type ConnectionStyle = 'straight' | 'curved' | 'orthogonal';
 
@@ -113,15 +113,15 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
       // Store the connection starting object
       canvas.on('mouse:down', (options) => {
         if (options.target) {
-          canvas.data = { ...canvas.data, connectionStart: options.target };
+          canvas.customData = { ...canvas.customData, connectionStart: options.target };
         }
       });
       
       // Create connection on mouse up
       canvas.on('mouse:up', (options) => {
-        if (options.target && canvas.data?.connectionStart && options.target !== canvas.data.connectionStart) {
-          createConnection(canvas.data.connectionStart, options.target, tool === 'bezierConnect' ? 'curved' : connectionStyle);
-          canvas.data = { ...canvas.data, connectionStart: null };
+        if (options.target && canvas.customData?.connectionStart && options.target !== canvas.customData.connectionStart) {
+          createConnection(canvas.customData.connectionStart, options.target, tool === 'bezierConnect' ? 'curved' : connectionStyle);
+          canvas.customData = { ...canvas.customData, connectionStart: null };
         }
       });
     } else {
@@ -149,7 +149,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
     setFill(e.target.value);
   };
 
-  // Create a connection between two objects
   const createConnection = (fromObj: any, toObj: any, style: ConnectionStyle = 'straight') => {
     if (!canvas) return;
     
