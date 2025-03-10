@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Canvas, Object as FabricObject, Group, Line, IText, Rect, Circle, Triangle, Ellipse, Path, Polygon } from 'fabric';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -925,4 +926,528 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="h-10 w-full aspect-square flex items-
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('circle')}
+                    >
+                      <div className="border border-foreground w-full h-full rounded-full"></div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('triangle')}
+                    >
+                      <div className="border border-foreground w-0 h-0 border-l-[20px] border-r-[20px] border-b-[30px] border-l-transparent border-r-transparent mx-auto my-auto"></div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('right-triangle')}
+                    >
+                      <div className="border-b border-r border-foreground w-full h-full"></div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('diamond')}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="w-2/3 h-2/3 border border-foreground rotate-45"></div>
+                      </div>
+                    </Button>
+                    
+                    {/* Third row */}
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('pentagon')}
+                    >
+                      <Pentagon className="w-6 h-6 text-foreground" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('hexagon')}
+                    >
+                      <Hexagon className="w-6 h-6 text-foreground" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('octagon')}
+                    >
+                      <div className="w-5 h-5 border border-foreground relative">
+                        <div className="absolute -top-[3px] -left-[3px] -right-[3px] -bottom-[3px] overflow-hidden">
+                          <div className="absolute top-0 left-0 w-[5px] h-[5px] bg-background"></div>
+                          <div className="absolute top-0 right-0 w-[5px] h-[5px] bg-background"></div>
+                          <div className="absolute bottom-0 left-0 w-[5px] h-[5px] bg-background"></div>
+                          <div className="absolute bottom-0 right-0 w-[5px] h-[5px] bg-background"></div>
+                        </div>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('trapezoid')}
+                    >
+                      <div className="w-full h-1/2 border-t border-l border-r border-foreground" style={{ borderLeft: '5px solid transparent', borderRight: '5px solid transparent', width: '100%', height: '0', borderTop: '20px solid currentColor' }}></div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('parallelogram')}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="w-5/6 h-2/3 border border-foreground skew-x-12"></div>
+                      </div>
+                    </Button>
+                    
+                    {/* Fourth row */}
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('cylinder')}
+                    >
+                      <div className="relative w-4/5 h-4/5">
+                        <div className="w-full h-3/4 border-l border-r border-foreground mt-1"></div>
+                        <div className="w-full h-[6px] border border-foreground rounded-full absolute top-1"></div>
+                        <div className="w-full h-[6px] border border-foreground rounded-full absolute bottom-1"></div>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('cloud')}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="w-5 h-3 border border-foreground rounded-full relative">
+                          <div className="absolute -top-1.5 -left-1 w-3 h-3 border border-foreground rounded-full"></div>
+                          <div className="absolute -top-1 left-1.5 w-2.5 h-2.5 border border-foreground rounded-full"></div>
+                          <div className="absolute -top-0.5 right-0 w-2 h-2 border border-foreground rounded-full"></div>
+                        </div>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('speech-bubble')}
+                    >
+                      <div className="relative w-4/5 h-3/5 border border-foreground rounded-md">
+                        <div className="absolute -bottom-1.5 left-1/4 w-0 h-0 border-l-8 border-t-8 border-r-0 border-l-transparent border-t-foreground transform rotate-10"></div>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('document')}
+                    >
+                      <div className="relative w-4/5 h-4/5 border border-foreground">
+                        <div className="absolute top-0 right-0 w-0 h-0 border-t-8 border-r-8 border-t-background border-r-background"></div>
+                        <div className="absolute top-0 right-0 w-2 h-2 border-b border-l border-foreground transform rotate-45"></div>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('note')}
+                    >
+                      <div className="relative w-4/5 h-4/5 border border-foreground">
+                        <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-background"></div>
+                        <div className="absolute bottom-0 right-0 w-0 h-0 border-b-8 border-r-8 border-b-foreground border-r-foreground transform rotate-0"></div>
+                      </div>
+                    </Button>
+                    
+                    {/* Fifth row */}
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('person')}
+                    >
+                      <div className="flex flex-col items-center">
+                        <div className="w-3 h-3 border border-foreground rounded-full"></div>
+                        <div className="w-0.5 h-5 bg-foreground mt-0.5"></div>
+                        <div className="flex w-4 justify-between mt-[-8px]">
+                          <div className="w-0.5 h-2.5 bg-foreground rotate-45 origin-top"></div>
+                          <div className="w-0.5 h-2.5 bg-foreground -rotate-45 origin-top"></div>
+                        </div>
+                        <div className="flex w-4 justify-between">
+                          <div className="w-0.5 h-3 bg-foreground rotate-25 origin-top"></div>
+                          <div className="w-0.5 h-3 bg-foreground -rotate-25 origin-top"></div>
+                        </div>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('arrow')}
+                    >
+                      <ArrowRightIcon className="w-6 h-6 text-foreground" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('line')}
+                    >
+                      <div className="w-full h-0.5 bg-foreground"></div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('curved-line')}
+                    >
+                      <div className="w-4/5 h-4/5 flex items-center justify-center">
+                        <div className="w-full h-3/5 border-t border-foreground rounded-t-full"></div>
+                      </div>
+                    </Button>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="basic">
+                <AccordionTrigger className="px-2 py-1 text-sm">
+                  Basic
+                </AccordionTrigger>
+                <AccordionContent className="pt-0 pb-1">
+                  <div className="grid grid-cols-5 gap-1 px-2">
+                    {/* Add basic shapes here */}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="flowchart">
+                <AccordionTrigger className="px-2 py-1 text-sm">
+                  Flowchart
+                </AccordionTrigger>
+                <AccordionContent className="pt-0 pb-1">
+                  <div className="grid grid-cols-5 gap-1 px-2">
+                    {/* Add flowchart shapes here */}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="uml">
+                <AccordionTrigger className="px-2 py-1 text-sm">
+                  UML
+                </AccordionTrigger>
+                <AccordionContent className="pt-0 pb-1">
+                  <div className="grid grid-cols-5 gap-1 px-2">
+                    {/* Add UML shapes here */}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+              
+              <AccordionItem value="wireframe">
+                <AccordionTrigger className="px-2 py-1 text-sm">
+                  Wireframe
+                </AccordionTrigger>
+                <AccordionContent className="pt-0 pb-1">
+                  <div className="grid grid-cols-5 gap-1 px-2">
+                    {/* Add wireframe shapes here */}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </ScrollArea>
+        </TabsContent>
+        
+        <TabsContent value="properties" className="flex-1 overflow-hidden p-0 m-0">
+          <ScrollArea className="h-full p-4">
+            {selectedElement ? (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Position</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label htmlFor="position-x" className="text-xs">X</Label>
+                      <Input
+                        id="position-x"
+                        type="number"
+                        value={position.x}
+                        onChange={(e) => handlePositionChange('x', e.target.value)}
+                        className="h-8"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="position-y" className="text-xs">Y</Label>
+                      <Input
+                        id="position-y"
+                        type="number"
+                        value={position.y}
+                        onChange={(e) => handlePositionChange('y', e.target.value)}
+                        className="h-8"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Size</h3>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label htmlFor="size-width" className="text-xs">Width</Label>
+                      <Input
+                        id="size-width"
+                        type="number"
+                        value={dimensions.width}
+                        onChange={(e) => handleSizeChange('width', e.target.value)}
+                        className="h-8"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="size-height" className="text-xs">Height</Label>
+                      <Input
+                        id="size-height"
+                        type="number"
+                        value={dimensions.height}
+                        onChange={(e) => handleSizeChange('height', e.target.value)}
+                        className="h-8"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Actions</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleDelete}
+                      className="flex items-center gap-1"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      Delete
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleDuplicate}
+                      className="flex items-center gap-1"
+                    >
+                      <Copy className="h-3.5 w-3.5" />
+                      Duplicate
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleBringForward}
+                      className="flex items-center gap-1"
+                    >
+                      Bring Forward
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={handleSendBackward}
+                      className="flex items-center gap-1"
+                    >
+                      Send Backward
+                    </Button>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Alignment</h3>
+                  <div className="flex flex-wrap gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-8 w-8" 
+                      onClick={() => handleAlign('left')}
+                    >
+                      <AlignLeft className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-8 w-8" 
+                      onClick={() => handleAlign('center')}
+                    >
+                      <AlignCenter className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-8 w-8" 
+                      onClick={() => handleAlign('right')}
+                    >
+                      <AlignRight className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-8 w-8" 
+                      onClick={() => handleAlign('top')}
+                    >
+                      <AlignLeft className="h-3.5 w-3.5 rotate-90" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-8 w-8" 
+                      onClick={() => handleAlign('middle')}
+                    >
+                      <AlignCenter className="h-3.5 w-3.5 rotate-90" />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-8 w-8" 
+                      onClick={() => handleAlign('bottom')}
+                    >
+                      <AlignRight className="h-3.5 w-3.5 rotate-90" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                <Settings className="h-12 w-12 mb-4 opacity-20" />
+                <p className="text-sm">Select an element to edit its properties</p>
+              </div>
+            )}
+          </ScrollArea>
+        </TabsContent>
+        
+        <TabsContent value="style" className="flex-1 overflow-hidden p-0 m-0">
+          <ScrollArea className="h-full p-4">
+            {selectedElement ? (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Fill & Stroke</h3>
+                  <div className="space-y-2">
+                    <div>
+                      <Label htmlFor="color" className="text-xs">Color</Label>
+                      <div className="flex gap-2">
+                        <div className="w-8 h-8 border rounded-md overflow-hidden">
+                          <input
+                            type="color"
+                            id="color"
+                            onChange={handleColorChange}
+                            className="w-10 h-10 -ml-1 -mt-1 cursor-pointer"
+                          />
+                        </div>
+                        <Input
+                          value="#333333"
+                          className="h-8 flex-1"
+                          readOnly
+                        />
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="stroke-width" className="text-xs">Stroke Width</Label>
+                      <Input
+                        id="stroke-width"
+                        type="number"
+                        min="0"
+                        max="20"
+                        defaultValue="1"
+                        onChange={handleStrokeWidthChange}
+                        className="h-8"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Opacity</h3>
+                  <div className="space-y-2">
+                    <Slider
+                      value={[opacity]}
+                      min={0}
+                      max={100}
+                      step={1}
+                      onValueChange={handleOpacityChange}
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>0%</span>
+                      <span>{opacity}%</span>
+                      <span>100%</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {selectedElement.type === 'i-text' && (
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Text Options</h3>
+                    <div className="space-y-2">
+                      <div>
+                        <Label htmlFor="font-family" className="text-xs">Font Family</Label>
+                        <Select defaultValue="Arial">
+                          <SelectTrigger className="h-8">
+                            <SelectValue placeholder="Select font" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Arial">Arial</SelectItem>
+                            <SelectItem value="Times New Roman">Times New Roman</SelectItem>
+                            <SelectItem value="Courier New">Courier New</SelectItem>
+                            <SelectItem value="Georgia">Georgia</SelectItem>
+                            <SelectItem value="Verdana">Verdana</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="font-size" className="text-xs">Font Size</Label>
+                        <Input
+                          id="font-size"
+                          type="number"
+                          min="8"
+                          max="72"
+                          defaultValue="16"
+                          className="h-8"
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label className="text-xs">Text Alignment</Label>
+                        <div className="flex border rounded-md mt-1 divide-x">
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none flex-1">
+                            <AlignLeft className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none flex-1">
+                            <AlignCenter className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none flex-1">
+                            <AlignRight className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-none flex-1">
+                            <AlignJustify className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
+                <Palette className="h-12 w-12 mb-4 opacity-20" />
+                <p className="text-sm">Select an element to edit its style</p>
+              </div>
+            )}
+          </ScrollArea>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
+
+export default DiagramSidebar;
