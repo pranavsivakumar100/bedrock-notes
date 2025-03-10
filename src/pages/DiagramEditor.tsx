@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Canvas, util } from 'fabric';
@@ -90,7 +89,6 @@ const DiagramEditor: React.FC = () => {
     
     // Apply a class to the body to ensure full viewport usage
     document.body.classList.add('overflow-hidden');
-    document.body.classList.add('diagram-editor-dark');
     
     // Check for template data
     const storedTemplateData = localStorage.getItem('diagram_template');
@@ -128,7 +126,6 @@ const DiagramEditor: React.FC = () => {
     
     return () => {
       document.body.classList.remove('overflow-hidden');
-      document.body.classList.remove('diagram-editor-dark');
     };
   }, [id, title, canvas]);
   
@@ -345,30 +342,11 @@ const DiagramEditor: React.FC = () => {
     setRightSidebarOpen(!rightSidebarOpen);
   };
   
-  // Calculate the panel layout based on which sidebars are open
-  const getMainPanelDefaultSize = () => {
-    if (sidebarOpen && rightSidebarOpen) return 60;
-    if (sidebarOpen || rightSidebarOpen) return 80;
-    return 100;
-  };
-
-  // Correct panel sizes based on which sidebars are open
-  const getPanelSizes = () => {
-    if (sidebarOpen && rightSidebarOpen) {
-      return [20, 60, 20]; // Left, Main, Right
-    } else if (sidebarOpen) {
-      return [20, 80]; // Left, Main
-    } else if (rightSidebarOpen) {
-      return [80, 20]; // Main, Right
-    }
-    return [100]; // Main only
-  };
-  
   return (
     <div className="diagram-editor-container">
-      <header className="diagram-header p-2 flex items-center justify-between relative z-10">
+      <header className="border-b border-border/40 p-2 flex items-center justify-between glass-morphism relative z-10">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" asChild className="text-foreground">
+          <Button variant="ghost" size="icon" asChild>
             <a href="/diagrams">
               <ArrowLeft className="h-4 w-4" />
               <span className="sr-only">Back</span>
@@ -380,7 +358,7 @@ const DiagramEditor: React.FC = () => {
             placeholder="Untitled Diagram"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="bg-transparent border-none outline-none focus:ring-0 text-xl font-medium w-full max-w-md text-foreground"
+            className="bg-transparent border-none outline-none focus:ring-0 text-xl font-medium w-full max-w-md"
           />
         </div>
         
@@ -451,156 +429,141 @@ const DiagramEditor: React.FC = () => {
         </div>
       </header>
       
-      <div className="flex-1 h-[calc(100vh-48px)] relative bg-white">
-        {sidebarOpen || rightSidebarOpen ? (
-          <ResizablePanelGroup direction="horizontal" className="h-full">
-            {sidebarOpen && (
-              <>
-                <ResizablePanel 
-                  defaultSize={20} 
-                  minSize={15}
-                  maxSize={30}
-                  className="diagram-sidebar border-r border-border/40"
-                >
-                  <DiagramSidebar 
-                    canvas={canvas} 
-                    selectedElement={selectedElement} 
-                    setSelectedElement={setSelectedElement}
-                  />
-                </ResizablePanel>
-                <ResizableHandle withHandle />
-              </>
-            )}
-            
-            <ResizablePanel defaultSize={getMainPanelDefaultSize()}>
-              <div className="flex-1 flex flex-col relative h-full">
-                <DiagramToolbar canvas={canvas} />
-                <div className="flex-1 relative bg-white">
-                  <DiagramCanvas 
-                    setCanvas={setCanvas} 
-                    diagramId={id} 
-                    setSelectedElement={setSelectedElement}
-                  />
-                </div>
-              </div>
+      <ResizablePanelGroup 
+        direction="horizontal" 
+        className="flex-1 h-[calc(100vh-48px)] relative"
+      >
+        {sidebarOpen && (
+          <>
+            <ResizablePanel 
+              defaultSize={20} 
+              minSize={15}
+              maxSize={40}
+              className="border-r border-border/40"
+            >
+              <DiagramSidebar 
+                canvas={canvas} 
+                selectedElement={selectedElement} 
+                setSelectedElement={setSelectedElement}
+              />
             </ResizablePanel>
-            
-            {rightSidebarOpen && (
-              <>
-                <ResizableHandle withHandle />
-                <ResizablePanel 
-                  defaultSize={20}
-                  minSize={15}
-                  maxSize={30}
-                  className="diagram-sidebar border-l border-border/40"
-                >
-                  <Tabs defaultValue="diagram" value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
-                    <TabsList className="w-full rounded-none border-b">
-                      <TabsTrigger value="diagram" className="flex-1">Diagram</TabsTrigger>
-                      <TabsTrigger value="style" className="flex-1">Style</TabsTrigger>
-                      <TabsTrigger value="outline" className="flex-1">Outline</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="diagram" className="p-4 space-y-4">
-                      <div className="space-y-2">
-                        <h3 className="text-sm font-medium">View</h3>
-                        <div className="space-y-2">
-                          <div className="flex items-center space-x-2">
-                            <input type="checkbox" id="grid" className="checkbox" defaultChecked />
-                            <label htmlFor="grid" className="text-sm">Grid</label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <input type="checkbox" id="page-view" className="checkbox" defaultChecked />
-                            <label htmlFor="page-view" className="text-sm">Page View</label>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <h3 className="text-sm font-medium">Background</h3>
-                        <Button variant="outline" size="sm" className="w-full">Change...</Button>
-                        <div className="flex items-center space-x-2">
-                          <input type="checkbox" id="background-color" className="checkbox" />
-                          <label htmlFor="background-color" className="text-sm">Background Color</label>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <h3 className="text-sm font-medium">Options</h3>
-                        <div className="space-y-2">
-                          <div className="flex items-center space-x-2">
-                            <input type="checkbox" id="connection-arrows" className="checkbox" defaultChecked />
-                            <label htmlFor="connection-arrows" className="text-sm">Connection Arrows</label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <input type="checkbox" id="connection-points" className="checkbox" defaultChecked />
-                            <label htmlFor="connection-points" className="text-sm">Connection Points</label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <input type="checkbox" id="guides" className="checkbox" defaultChecked />
-                            <label htmlFor="guides" className="text-sm">Guides</label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <input type="checkbox" id="autosave" className="checkbox" defaultChecked />
-                            <label htmlFor="autosave" className="text-sm">Autosave</label>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <h3 className="text-sm font-medium">Paper Size</h3>
-                        <select className="w-full p-2 bg-background border rounded">
-                          <option>US-Letter (8.5" x 11")</option>
-                          <option>A4 (210mm x 297mm)</option>
-                          <option>A3 (297mm x 420mm)</option>
-                        </select>
-                        
-                        <div className="flex gap-2 mt-2">
-                          <div className="flex items-center space-x-2">
-                            <input type="radio" id="portrait" name="orientation" className="radio" defaultChecked />
-                            <label htmlFor="portrait" className="text-sm">Portrait</label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <input type="radio" id="landscape" name="orientation" className="radio" />
-                            <label htmlFor="landscape" className="text-sm">Landscape</label>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="pt-4 space-y-2">
-                        <Button variant="outline" size="sm" className="w-full">Edit Data...</Button>
-                        <Button variant="outline" size="sm" className="w-full">Clear Default Style</Button>
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="style" className="p-4">
-                      <p className="text-muted-foreground text-sm">Select an element to view style options</p>
-                    </TabsContent>
-                    
-                    <TabsContent value="outline" className="p-4">
-                      <p className="text-muted-foreground text-sm">Layer structure will appear here</p>
-                    </TabsContent>
-                  </Tabs>
-                </ResizablePanel>
-              </>
-            )}
-          </ResizablePanelGroup>
-        ) : (
-          // When both sidebars are closed, render just the canvas directly
-          <div className="w-full h-full canvas-only">
-            <div className="flex-1 flex flex-col relative h-full">
-              <DiagramToolbar canvas={canvas} />
-              <div className="flex-1 relative diagram-canvas">
-                <DiagramCanvas 
-                  setCanvas={setCanvas} 
-                  diagramId={id} 
-                  setSelectedElement={setSelectedElement}
-                />
-              </div>
+            <ResizableHandle withHandle />
+          </>
+        )}
+        
+        <ResizablePanel defaultSize={sidebarOpen && rightSidebarOpen ? 60 : (sidebarOpen || rightSidebarOpen ? 80 : 100)}>
+          <div className="flex-1 flex flex-col relative h-full">
+            <DiagramToolbar canvas={canvas} />
+            <div className="flex-1 relative">
+              <DiagramCanvas 
+                setCanvas={setCanvas} 
+                diagramId={id} 
+                setSelectedElement={setSelectedElement}
+              />
             </div>
           </div>
+        </ResizablePanel>
+        
+        {rightSidebarOpen && (
+          <>
+            <ResizableHandle withHandle />
+            <ResizablePanel 
+              defaultSize={20}
+              minSize={15}
+              maxSize={40}
+              className="border-l border-border/40"
+            >
+              <Tabs defaultValue="diagram" value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+                <TabsList className="w-full rounded-none border-b">
+                  <TabsTrigger value="diagram" className="flex-1">Diagram</TabsTrigger>
+                  <TabsTrigger value="style" className="flex-1">Style</TabsTrigger>
+                  <TabsTrigger value="outline" className="flex-1">Outline</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="diagram" className="p-4 space-y-4">
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-medium">View</h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="grid" className="checkbox" checked />
+                        <label htmlFor="grid" className="text-sm">Grid</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="page-view" className="checkbox" checked />
+                        <label htmlFor="page-view" className="text-sm">Page View</label>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-medium">Background</h3>
+                    <Button variant="outline" size="sm" className="w-full">Change...</Button>
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" id="background-color" className="checkbox" />
+                      <label htmlFor="background-color" className="text-sm">Background Color</label>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-medium">Options</h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="connection-arrows" className="checkbox" checked />
+                        <label htmlFor="connection-arrows" className="text-sm">Connection Arrows</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="connection-points" className="checkbox" checked />
+                        <label htmlFor="connection-points" className="text-sm">Connection Points</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="guides" className="checkbox" checked />
+                        <label htmlFor="guides" className="text-sm">Guides</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="autosave" className="checkbox" checked />
+                        <label htmlFor="autosave" className="text-sm">Autosave</label>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-medium">Paper Size</h3>
+                    <select className="w-full p-2 bg-background border rounded">
+                      <option>US-Letter (8.5" x 11")</option>
+                      <option>A4 (210mm x 297mm)</option>
+                      <option>A3 (297mm x 420mm)</option>
+                    </select>
+                    
+                    <div className="flex gap-2 mt-2">
+                      <div className="flex items-center space-x-2">
+                        <input type="radio" id="portrait" name="orientation" className="radio" checked />
+                        <label htmlFor="portrait" className="text-sm">Portrait</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="radio" id="landscape" name="orientation" className="radio" />
+                        <label htmlFor="landscape" className="text-sm">Landscape</label>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="pt-4 space-y-2">
+                    <Button variant="outline" size="sm" className="w-full">Edit Data...</Button>
+                    <Button variant="outline" size="sm" className="w-full">Clear Default Style</Button>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="style" className="p-4">
+                  <p className="text-muted-foreground text-sm">Select an element to view style options</p>
+                </TabsContent>
+                
+                <TabsContent value="outline" className="p-4">
+                  <p className="text-muted-foreground text-sm">Layer structure will appear here</p>
+                </TabsContent>
+              </Tabs>
+            </ResizablePanel>
+          </>
         )}
-      </div>
+      </ResizablePanelGroup>
       
       <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
         <DialogContent>
