@@ -27,17 +27,35 @@ import {
   Wifi,
   Cable,
   Settings,
-  BookOpen,
-  FileText,
-  Table,
   BoxSelect,
   Eraser,
-  Diamond
+  Diamond,
+  Undo,
+  Redo,
+  Trash2,
+  ZoomIn,
+  ZoomOut,
+  Copy,
+  Scissors,
+  Grid,
+  FileOutput,
+  Plus,
+  Minus,
+  Move,
+  Shapes
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Toggle } from '@/components/ui/toggle';
 import { Separator } from '@/components/ui/separator';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Tabs,
   TabsContent,
@@ -91,6 +109,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
   const [fill, setFill] = useState('transparent');
   const [connectionStyle, setConnectionStyle] = useState<ConnectionStyle>('straight');
   const [activeCategory, setActiveCategory] = useState('basic');
+  const [zoomPercent, setZoomPercent] = useState(100);
 
   const handleToolSelect = (tool: Tool) => {
     if (!canvas) return;
@@ -110,14 +129,12 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
       }
       canvas.isDrawingMode = true;
     } else if (tool === 'lineConnect' || tool === 'bezierConnect') {
-      // Store the connection starting object
       canvas.on('mouse:down', (options) => {
         if (options.target) {
           canvas.customData = { ...canvas.customData, connectionStart: options.target };
         }
       });
       
-      // Create connection on mouse up
       canvas.on('mouse:up', (options) => {
         if (options.target && canvas.customData?.connectionStart && options.target !== canvas.customData.connectionStart) {
           createConnection(canvas.customData.connectionStart, options.target, tool === 'bezierConnect' ? 'curved' : connectionStyle);
@@ -126,12 +143,10 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
       });
     } else {
       canvas.selection = tool === 'select';
-      // Remove any connection event handlers
       canvas.off('mouse:down');
       canvas.off('mouse:up');
     }
     
-    // Deselect any selected objects when switching tools
     canvas.discardActiveObject();
     canvas.renderAll();
   };
@@ -159,7 +174,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
     
     switch (style) {
       case 'straight':
-        // Create a straight line with arrow
         path = new Path(`M ${fromCenter.x} ${fromCenter.y} L ${toCenter.x} ${toCenter.y}`, {
           stroke: drawingColor,
           strokeWidth: 2,
@@ -167,7 +181,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
           selectable: true
         });
         
-        // Add arrow head
         const dx = toCenter.x - fromCenter.x;
         const dy = toCenter.y - fromCenter.y;
         const angle = Math.atan2(dy, dx);
@@ -191,12 +204,10 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         break;
         
       case 'curved':
-        // Create a Bezier curve
         const midX = (fromCenter.x + toCenter.x) / 2;
         const midY = (fromCenter.y + toCenter.y) / 2;
         const offset = 50;
         
-        // Create control point offset from the midpoint
         const ctrlX = midX + offset;
         const ctrlY = midY - offset;
         
@@ -214,7 +225,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         break;
         
       case 'orthogonal':
-        // Create an orthogonal (right-angled) connection
         const x1 = fromCenter.x;
         const y1 = fromCenter.y;
         const x2 = toCenter.x;
@@ -289,7 +299,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         break;
         
       case 'database':
-        // Create database shape using path
         shape = new Path('M 0 20 Q 0 0 50 0 Q 100 0 100 20 L 100 80 Q 100 100 50 100 Q 0 100 0 80 Z M 0 20 Q 0 40 50 40 Q 100 40 100 20 M 0 40 Q 0 60 50 60 Q 100 60 100 40 M 0 60 Q 0 80 50 80 Q 100 80 100 60', {
           fill: fill,
           stroke: drawingColor,
@@ -314,7 +323,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
           ry: 5
         });
         
-        // Add server detail lines
         const serverDetails = new Group([
           new Line([10, 30, 70, 30], {
             stroke: drawingColor,
@@ -337,7 +345,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         break;
         
       case 'cloud':
-        // Simplified cloud shape
         shape = new Path('M 25,60 a 20,20 0 0,1 0,-40 a 30,30 0 0,1 50,0 a 20,20 0 0,1 0,40 z', {
           fill: fill,
           stroke: drawingColor,
@@ -350,7 +357,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         break;
         
       case 'cylinder':
-        // Cylinder shape for storage
         shape = new Path('M 10,10 h 80 v 80 h -80 z M 10,10 a 40,10 0 0,0 80,0 a 40,10 0 0,0 -80,0 M 10,90 a 40,10 0 0,0 80,0', {
           fill: fill,
           stroke: drawingColor,
@@ -361,9 +367,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         break;
         
       case 'laptop':
-        // Simplified laptop shape
         shape = new Group([
-          // screen part
           new Rect({
             width: 100,
             height: 70,
@@ -371,7 +375,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
             stroke: drawingColor,
             strokeWidth: 2
           }),
-          // base part
           new Path('M 0,70 L 0,80 L 10,90 L 90,90 L 100,80 L 100,70', {
             fill: fill,
             stroke: drawingColor,
@@ -384,9 +387,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         break;
         
       case 'monitor':
-        // Monitor shape
         shape = new Group([
-          // screen
           new Rect({
             width: 100,
             height: 80,
@@ -396,7 +397,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
             rx: 2,
             ry: 2
           }),
-          // stand
           new Path('M 40,80 L 40,90 L 60,90 L 60,80 M 30,90 L 70,90 L 70,95 L 30,95', {
             fill: fill,
             stroke: drawingColor,
@@ -409,7 +409,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         break;
         
       case 'smartphone':
-        // Smartphone shape
         shape = new Rect({
           width: 50,
           height: 90,
@@ -424,7 +423,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         break;
         
       case 'arrow':
-        // Create arrow
         shape = new Path('M 0 10 L 180 10 L 170 0 L 180 10 L 170 20', {
           fill: 'transparent',
           stroke: drawingColor,
@@ -446,7 +444,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         break;
         
       case 'component':
-        // Create component symbol
         shape = new Rect({
           width: 120,
           height: 80,
@@ -459,7 +456,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
           ry: 2
         });
         
-        // Add component ports
         const componentPorts = new Group([
           new Rect({
             width: 10,
@@ -488,7 +484,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         break;
         
       case 'message':
-        // Message bubble shape
         shape = new Path('M 0,0 h 100 v 70 h -30 l -20,20 l 0,-20 h -50 z', {
           fill: fill,
           stroke: drawingColor,
@@ -499,7 +494,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         break;
         
       case 'router':
-        // Router shape
         shape = new Group([
           new Rect({
             width: 100,
@@ -510,12 +504,10 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
             rx: 2,
             ry: 2
           }),
-          // Antenna 1
           new Path('M 20,0 L 20,-20', {
             stroke: drawingColor,
             strokeWidth: 2
           }),
-          // Antenna 2
           new Path('M 80,0 L 80,-20', {
             stroke: drawingColor,
             strokeWidth: 2
@@ -569,114 +561,448 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
     }
   };
 
+  const handleZoom = (direction: 'in' | 'out' | 'reset') => {
+    if (!canvas) return;
+    
+    let newZoom: number;
+    
+    if (direction === 'reset') {
+      newZoom = 1;
+    } else {
+      const zoomFactor = direction === 'in' ? 1.1 : 0.9;
+      newZoom = canvas.getZoom() * zoomFactor;
+    }
+    
+    if (newZoom > 0.1 && newZoom < 10) {
+      canvas.setZoom(newZoom);
+      setZoomPercent(Math.round(newZoom * 100));
+      canvas.renderAll();
+    }
+  };
+  
+  const handleUndo = () => {
+    if (!canvas) return;
+    if (typeof canvas.undo === 'function') {
+      (canvas as any).undo();
+    } else {
+      toast.error("Undo operation not supported");
+    }
+  };
+  
+  const handleRedo = () => {
+    if (!canvas) return;
+    if (typeof canvas.redo === 'function') {
+      (canvas as any).redo();
+    } else {
+      toast.error("Redo operation not supported");
+    }
+  };
+  
+  const handleDelete = () => {
+    if (!canvas) return;
+    
+    const activeObject = canvas.getActiveObject();
+    if (activeObject) {
+      canvas.remove(activeObject);
+      canvas.renderAll();
+    }
+  };
+  
+  const handleCopy = () => {
+    if (!canvas) return;
+    
+    const activeObject = canvas.getActiveObject();
+    if (!activeObject) return;
+    
+    canvas.getActiveObject()?.clone().then((clonedObj: any) => {
+      localStorage.setItem('cs-diagram-clipboard', JSON.stringify(clonedObj.toJSON()));
+      toast.success("Copied to clipboard");
+    });
+  };
+  
+  const handlePaste = () => {
+    if (!canvas) return;
+    
+    const clipboard = localStorage.getItem('cs-diagram-clipboard');
+    if (!clipboard) {
+      toast.error("Nothing to paste");
+      return;
+    }
+    
+    try {
+      util.enlivenObjects([JSON.parse(clipboard)]).then((objects: any[]) => {
+        objects.forEach(obj => {
+          obj.set({
+            left: obj.left + 20,
+            top: obj.top + 20,
+          });
+          canvas.add(obj);
+          canvas.setActiveObject(obj);
+        });
+        canvas.renderAll();
+      });
+      toast.success("Pasted from clipboard");
+    } catch (error) {
+      toast.error("Failed to paste object");
+      console.error("Paste error:", error);
+    }
+  };
+  
+  const handleCut = () => {
+    if (!canvas) return;
+    
+    const activeObject = canvas.getActiveObject();
+    if (!activeObject) return;
+    
+    handleCopy();
+    canvas.remove(activeObject);
+    canvas.renderAll();
+  };
+
   return (
-    <div className="border-b border-border/40 p-2 flex flex-col bg-background/80 backdrop-blur-sm">
-      <div className="flex items-center gap-1 mb-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Toggle
-                pressed={activeTool === 'select'}
-                onPressedChange={() => handleToolSelect('select')}
-                aria-label="Select tool"
-              >
-                <MousePointer className="h-4 w-4" />
-              </Toggle>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Select (V)</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+    <div className="border-b border-border/40 bg-background/80 backdrop-blur-sm">
+      <div className="flex items-center px-1 py-0.5">
+        <div className="flex items-center gap-0.5 mr-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <FileOutput className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>File</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>New</DropdownMenuItem>
+              <DropdownMenuItem>Open</DropdownMenuItem>
+              <DropdownMenuItem>Save</DropdownMenuItem>
+              <DropdownMenuItem>Export</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Toggle
-                pressed={activeTool === 'draw'}
-                onPressedChange={() => handleToolSelect('draw')}
-                aria-label="Draw tool"
-              >
-                <Pencil className="h-4 w-4" />
-              </Toggle>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Pencil (P)</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Separator orientation="vertical" className="h-8 mx-1" />
         
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Toggle
-                pressed={activeTool === 'eraser'}
-                onPressedChange={() => handleToolSelect('eraser')}
-                aria-label="Eraser tool"
-              >
-                <Eraser className="h-4 w-4" />
-              </Toggle>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Eraser (E)</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <div className="flex items-center gap-0.5 mr-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleZoom('out')}>
+                  <ZoomOut className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Zoom Out</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <div className="min-w-[48px] text-xs text-center">{zoomPercent}%</div>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleZoom('in')}>
+                  <ZoomIn className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Zoom In</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
         
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Toggle
-                pressed={activeTool === 'text'}
-                onPressedChange={() => handleAddShape('text')}
-                aria-label="Text tool"
-              >
-                <Type className="h-4 w-4" />
-              </Toggle>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Text (T)</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Separator orientation="vertical" className="h-8 mx-1" />
         
-        <Separator orientation="vertical" className="h-8 mx-2" />
+        <div className="flex items-center gap-0.5 mr-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleUndo}>
+                  <Undo className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Undo (Ctrl+Z)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleRedo}>
+                  <Redo className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Redo (Ctrl+Y)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
         
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Toggle
-                pressed={activeTool === 'lineConnect'}
-                onPressedChange={() => handleToolSelect('lineConnect')}
-                aria-label="Connect tool"
-              >
-                <ArrowRight className="h-4 w-4" />
-              </Toggle>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Connect Objects</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Separator orientation="vertical" className="h-8 mx-1" />
         
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Toggle
-                pressed={activeTool === 'bezierConnect'}
-                onPressedChange={() => handleToolSelect('bezierConnect')}
-                aria-label="Bezier Connect tool"
-              >
-                <GitBranch className="h-4 w-4" />
-              </Toggle>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Curved Connection</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <div className="flex items-center gap-0.5 mr-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDelete}>
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Delete (Del)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCopy}>
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Copy (Ctrl+C)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCut}>
+                  <Scissors className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Cut (Ctrl+X)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
         
-        <Separator orientation="vertical" className="h-8 mx-2" />
+        <Separator orientation="vertical" className="h-8 mx-1" />
+        
+        <div className="flex items-center gap-0.5 mr-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Toggle
+                  pressed={activeTool === 'select'}
+                  onPressedChange={() => handleToolSelect('select')}
+                  aria-label="Select tool"
+                  className="h-8 w-8 data-[state=on]:bg-accent"
+                >
+                  <MousePointer className="h-4 w-4" />
+                </Toggle>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Select (V)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Toggle
+                  pressed={activeTool === 'draw'}
+                  onPressedChange={() => handleToolSelect('draw')}
+                  aria-label="Draw tool"
+                  className="h-8 w-8 data-[state=on]:bg-accent"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Toggle>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Pencil (P)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Toggle
+                  pressed={activeTool === 'eraser'}
+                  onPressedChange={() => handleToolSelect('eraser')}
+                  aria-label="Eraser tool"
+                  className="h-8 w-8 data-[state=on]:bg-accent"
+                >
+                  <Eraser className="h-4 w-4" />
+                </Toggle>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Eraser (E)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Toggle
+                  pressed={activeTool === 'text'}
+                  onPressedChange={() => handleAddShape('text')}
+                  aria-label="Text tool"
+                  className="h-8 w-8 data-[state=on]:bg-accent"
+                >
+                  <Type className="h-4 w-4" />
+                </Toggle>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Text (T)</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+        
+        <Separator orientation="vertical" className="h-8 mx-1" />
+        
+        <div className="flex items-center gap-0.5 mr-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Toggle
+                  pressed={activeTool === 'lineConnect'}
+                  onPressedChange={() => handleToolSelect('lineConnect')}
+                  aria-label="Connect tool"
+                  className="h-8 w-8 data-[state=on]:bg-accent"
+                >
+                  <ArrowRight className="h-4 w-4" />
+                </Toggle>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Connect Objects</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Toggle
+                  pressed={activeTool === 'bezierConnect'}
+                  onPressedChange={() => handleToolSelect('bezierConnect')}
+                  aria-label="Bezier Connect tool"
+                  className="h-8 w-8 data-[state=on]:bg-accent"
+                >
+                  <GitBranch className="h-4 w-4" />
+                </Toggle>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Curved Connection</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+        
+        <Separator orientation="vertical" className="h-8 mx-1" />
+        
+        <div className="flex items-center gap-0.5 mr-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleAddShape('square')}>
+                  <Square className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Square</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleAddShape('circle')}>
+                  <CircleIcon className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Circle</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleAddShape('triangle')}>
+                  <TriangleIcon className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Triangle</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleAddShape('diamond')}>
+                  <Diamond className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Diamond</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Shapes className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>More Shapes</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleAddShape('database')}>Database</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleAddShape('server')}>Server</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleAddShape('cloud')}>Cloud</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleAddShape('cylinder')}>Storage</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleAddShape('component')}>Component</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        
+        <Separator orientation="vertical" className="h-8 mx-1" />
+        
+        <div className="flex items-center gap-0.5 mr-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Grid className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Toggle Grid</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <Move className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Pan Tool</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
         
         <div className="ml-auto flex items-center gap-4">
           <div className="flex items-center gap-2">
@@ -730,7 +1056,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         </div>
       </div>
       
-      <Tabs defaultValue="basic" value={activeCategory} onValueChange={setActiveCategory}>
+      <Tabs defaultValue="basic" value={activeCategory} onValueChange={setActiveCategory} className="hidden">
         <TabsList className="grid grid-cols-5 w-96">
           <TabsTrigger value="basic">Basic</TabsTrigger>
           <TabsTrigger value="flowchart">Flowchart</TabsTrigger>

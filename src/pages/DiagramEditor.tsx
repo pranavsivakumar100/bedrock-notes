@@ -55,11 +55,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
 
 const DiagramEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
   const [canvas, setCanvas] = useState<Canvas | null>(null);
   const [title, setTitle] = useState('Untitled Diagram');
   const [selectedElement, setSelectedElement] = useState<any | null>(null);
@@ -69,6 +76,7 @@ const DiagramEditor: React.FC = () => {
   const [redoStack, setRedoStack] = useState<any[]>([]);
   const [lastSavedState, setLastSavedState] = useState<string | null>(null);
   const [templateData, setTemplateData] = useState<any | null>(null);
+  const [activeTab, setActiveTab] = useState<"diagram" | "style" | "outline">("diagram");
   
   useEffect(() => {
     document.title = `${title} - Diagram Editor`;
@@ -410,9 +418,13 @@ const DiagramEditor: React.FC = () => {
     setSidebarOpen(!sidebarOpen);
   };
   
+  const toggleRightSidebar = () => {
+    setRightSidebarOpen(!rightSidebarOpen);
+  };
+  
   return (
     <div className="diagram-editor-container">
-      <header className="border-b border-border/40 p-4 flex items-center justify-between glass-morphism relative z-10">
+      <header className="border-b border-border/40 p-2 flex items-center justify-between glass-morphism relative z-10">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" asChild>
             <a href="/diagrams">
@@ -433,55 +445,8 @@ const DiagramEditor: React.FC = () => {
         <div className="flex items-center gap-2">
           <Button 
             variant="outline" 
-            size="sm" 
-            onClick={handleUndo}
-            disabled={undoStack.length <= 1}
-          >
-            <Undo className="h-4 w-4" />
-            <span className="sr-only">Undo</span>
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleRedo}
-            disabled={redoStack.length === 0}
-          >
-            <Redo className="h-4 w-4" />
-            <span className="sr-only">Redo</span>
-          </Button>
-          
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Clipboard className="h-4 w-4 mr-1" />
-                Edit
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={handleCopy} disabled={!selectedElement}>
-                <Copy className="h-4 w-4 mr-2" />
-                Copy
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handlePaste}>
-                <Clipboard className="h-4 w-4 mr-2" />
-                Paste
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleCut} disabled={!selectedElement}>
-                <Scissors className="h-4 w-4 mr-2" />
-                Cut
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={() => canvas?.clear()}>
-                <Trash2 className="h-4 w-4 mr-2 text-destructive" />
-                <span className="text-destructive">Clear Canvas</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
+            size="sm"
+            className="h-8 gap-1"
             onClick={toggleSidebar}
           >
             <PanelLeft className="h-4 w-4 mr-1" />
@@ -490,7 +455,7 @@ const DiagramEditor: React.FC = () => {
           
           <Button 
             onClick={handleSaveDiagram} 
-            className="h-9 gap-1"
+            className="h-8 gap-1"
           >
             <Save className="h-4 w-4" />
             Save
@@ -500,7 +465,7 @@ const DiagramEditor: React.FC = () => {
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="outline"
-                className="h-9 gap-1"
+                className="h-8 gap-1"
               >
                 <Download className="h-4 w-4" />
                 Export
@@ -524,7 +489,7 @@ const DiagramEditor: React.FC = () => {
           {id && id !== 'new' && (
             <Button 
               variant="outline"
-              className="h-9 gap-1 text-destructive hover:bg-destructive/10"
+              className="h-8 gap-1 text-destructive hover:bg-destructive/10"
               onClick={() => setConfirmDelete(true)}
             >
               <Trash2 className="h-4 w-4" />
@@ -534,7 +499,7 @@ const DiagramEditor: React.FC = () => {
         </div>
       </header>
       
-      <div className="flex flex-1 h-[calc(100vh-65px)] relative">
+      <div className="flex flex-1 h-[calc(100vh-48px)] relative">
         {sidebarOpen && (
           <DiagramSidebar 
             canvas={canvas} 
@@ -553,6 +518,100 @@ const DiagramEditor: React.FC = () => {
             />
           </div>
         </div>
+        
+        {rightSidebarOpen && (
+          <div className="w-64 border-l border-border/40 flex flex-col">
+            <Tabs defaultValue="diagram" value={activeTab} onValueChange={(v) => setActiveTab(v as any)}>
+              <TabsList className="w-full rounded-none border-b">
+                <TabsTrigger value="diagram" className="flex-1">Diagram</TabsTrigger>
+                <TabsTrigger value="style" className="flex-1">Style</TabsTrigger>
+                <TabsTrigger value="outline" className="flex-1">Outline</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="diagram" className="p-4 space-y-4">
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">View</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" id="grid" className="checkbox" checked />
+                      <label htmlFor="grid" className="text-sm">Grid</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" id="page-view" className="checkbox" checked />
+                      <label htmlFor="page-view" className="text-sm">Page View</label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Background</h3>
+                  <Button variant="outline" size="sm" className="w-full">Change...</Button>
+                  <div className="flex items-center space-x-2">
+                    <input type="checkbox" id="background-color" className="checkbox" />
+                    <label htmlFor="background-color" className="text-sm">Background Color</label>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Options</h3>
+                  <div className="space-y-2">
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" id="connection-arrows" className="checkbox" checked />
+                      <label htmlFor="connection-arrows" className="text-sm">Connection Arrows</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" id="connection-points" className="checkbox" checked />
+                      <label htmlFor="connection-points" className="text-sm">Connection Points</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" id="guides" className="checkbox" checked />
+                      <label htmlFor="guides" className="text-sm">Guides</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input type="checkbox" id="autosave" className="checkbox" checked />
+                      <label htmlFor="autosave" className="text-sm">Autosave</label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-sm font-medium">Paper Size</h3>
+                  <select className="w-full p-2 bg-background border rounded">
+                    <option>US-Letter (8.5" x 11")</option>
+                    <option>A4 (210mm x 297mm)</option>
+                    <option>A3 (297mm x 420mm)</option>
+                  </select>
+                  
+                  <div className="flex gap-2 mt-2">
+                    <div className="flex items-center space-x-2">
+                      <input type="radio" id="portrait" name="orientation" className="radio" checked />
+                      <label htmlFor="portrait" className="text-sm">Portrait</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <input type="radio" id="landscape" name="orientation" className="radio" />
+                      <label htmlFor="landscape" className="text-sm">Landscape</label>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="pt-4 space-y-2">
+                  <Button variant="outline" size="sm" className="w-full">Edit Data...</Button>
+                  <Button variant="outline" size="sm" className="w-full">Clear Default Style</Button>
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="style" className="p-4">
+                {/* Style options would go here */}
+                <p className="text-muted-foreground text-sm">Select an element to view style options</p>
+              </TabsContent>
+              
+              <TabsContent value="outline" className="p-4">
+                {/* Outline/layers view would go here */}
+                <p className="text-muted-foreground text-sm">Layer structure will appear here</p>
+              </TabsContent>
+            </Tabs>
+          </div>
+        )}
       </div>
       
       <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
