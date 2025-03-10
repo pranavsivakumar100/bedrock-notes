@@ -12,23 +12,9 @@ import {
   Server,
   GitBranch,
   Component,
-  Lock,
   MessageSquare,
-  Terminal,
   Router,
   Code,
-  Key,
-  Cloud,
-  Cylinder,
-  Laptop,
-  Monitor,
-  Smartphone,
-  HardDrive,
-  Wifi,
-  Cable,
-  Settings,
-  BoxSelect,
-  Eraser,
   Diamond,
   Undo as UndoIcon,
   Redo as RedoIcon,
@@ -39,10 +25,9 @@ import {
   Scissors,
   Grid,
   FileOutput,
-  Plus,
-  Minus,
   Move,
-  Shapes
+  Shapes,
+  BoxSelect
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -56,12 +41,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
 import { toast } from 'sonner';
 
 interface DiagramToolbarProps {
@@ -83,22 +62,10 @@ type Tool =
   | 'component'
   | 'message'
   | 'router'
-  | 'terminal'
   | 'code'
-  | 'lock'
-  | 'key'
-  | 'cloud'
-  | 'cylinder'
-  | 'laptop'
-  | 'monitor'
-  | 'smartphone'
-  | 'harddrive'
-  | 'wifi'
-  | 'cable'
   | 'lineConnect'
   | 'bezierConnect'
-  | 'eraser'
-  | 'settings';
+  | 'eraser';
 
 type ConnectionStyle = 'straight' | 'curved' | 'orthogonal';
 
@@ -108,10 +75,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
   const [drawingColor, setDrawingColor] = useState('#000000');
   const [fill, setFill] = useState('transparent');
   const [connectionStyle, setConnectionStyle] = useState<ConnectionStyle>('straight');
-  const [activeCategory, setActiveCategory] = useState('basic');
   const [zoomPercent, setZoomPercent] = useState(100);
-  const [undoStack, setUndoStack] = useState<any[]>([]);
-  const [redoStack, setRedoStack] = useState<any[]>([]);
 
   const handleToolSelect = (tool: Tool) => {
     if (!canvas) return;
@@ -346,105 +310,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         canvas.add(serverDetails);
         break;
         
-      case 'cloud':
-        shape = new Path('M 25,60 a 20,20 0 0,1 0,-40 a 30,30 0 0,1 50,0 a 20,20 0 0,1 0,40 z', {
-          fill: fill,
-          stroke: drawingColor,
-          strokeWidth: 2,
-          left: 100,
-          top: 100,
-          scaleX: 1.5,
-          scaleY: 1.5
-        });
-        break;
-        
-      case 'cylinder':
-        shape = new Path('M 10,10 h 80 v 80 h -80 z M 10,10 a 40,10 0 0,0 80,0 a 40,10 0 0,0 -80,0 M 10,90 a 40,10 0 0,0 80,0', {
-          fill: fill,
-          stroke: drawingColor,
-          strokeWidth: 2,
-          left: 100,
-          top: 100
-        });
-        break;
-        
-      case 'laptop':
-        shape = new Group([
-          new Rect({
-            width: 100,
-            height: 70,
-            fill: fill,
-            stroke: drawingColor,
-            strokeWidth: 2
-          }),
-          new Path('M 0,70 L 0,80 L 10,90 L 90,90 L 100,80 L 100,70', {
-            fill: fill,
-            stroke: drawingColor,
-            strokeWidth: 2
-          })
-        ], {
-          left: 100,
-          top: 100
-        });
-        break;
-        
-      case 'monitor':
-        shape = new Group([
-          new Rect({
-            width: 100,
-            height: 80,
-            fill: fill,
-            stroke: drawingColor,
-            strokeWidth: 2,
-            rx: 2,
-            ry: 2
-          }),
-          new Path('M 40,80 L 40,90 L 60,90 L 60,80 M 30,90 L 70,90 L 70,95 L 30,95', {
-            fill: fill,
-            stroke: drawingColor,
-            strokeWidth: 2
-          })
-        ], {
-          left: 100,
-          top: 100
-        });
-        break;
-        
-      case 'smartphone':
-        shape = new Rect({
-          width: 50,
-          height: 90,
-          fill: fill,
-          stroke: drawingColor,
-          strokeWidth: 2,
-          rx: 5,
-          ry: 5,
-          left: 100,
-          top: 100
-        });
-        break;
-        
-      case 'arrow':
-        shape = new Path('M 0 10 L 180 10 L 170 0 L 180 10 L 170 20', {
-          fill: 'transparent',
-          stroke: drawingColor,
-          strokeWidth: 2,
-          left: 100,
-          top: 100
-        });
-        break;
-        
-      case 'text':
-        shape = new IText('Text', {
-          left: 100,
-          top: 100,
-          fontFamily: 'Arial',
-          fill: drawingColor,
-          fontSize: 20,
-          editable: true
-        });
-        break;
-        
       case 'component':
         shape = new Rect({
           width: 120,
@@ -520,6 +385,17 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         });
         break;
         
+      case 'text':
+        shape = new IText('Text', {
+          left: 100,
+          top: 100,
+          fontFamily: 'Arial',
+          fill: drawingColor,
+          fontSize: 20,
+          editable: true
+        });
+        break;
+        
       default:
         toast.error("Unknown shape type");
         return;
@@ -541,12 +417,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
       case 'diamond':
       case 'database':
       case 'server':
-      case 'cloud':
-      case 'cylinder':
-      case 'laptop':
-      case 'monitor':
-      case 'smartphone':
-      case 'arrow':
       case 'component':
       case 'message':
       case 'router':
@@ -584,37 +454,22 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
   
   const handleUndo = () => {
     if (!canvas) return;
-    if (undoStack.length <= 1) {
+    try {
+      canvas.undo();
+      toast.info("Undo successful");
+    } catch (error) {
       toast.info("Nothing to undo");
-      return;
     }
-    
-    const currentState = undoStack[undoStack.length - 1];
-    const previousState = undoStack[undoStack.length - 2];
-    
-    setRedoStack(prev => [...prev, currentState]);
-    setUndoStack(prev => prev.slice(0, -1));
-    
-    canvas.loadFromJSON(previousState, () => {
-      canvas.renderAll();
-    });
   };
   
   const handleRedo = () => {
     if (!canvas) return;
-    if (redoStack.length === 0) {
+    try {
+      canvas.redo();
+      toast.info("Redo successful");
+    } catch (error) {
       toast.info("Nothing to redo");
-      return;
     }
-    
-    const nextState = redoStack[redoStack.length - 1];
-    
-    setUndoStack(prev => [...prev, nextState]);
-    setRedoStack(prev => prev.slice(0, -1));
-    
-    canvas.loadFromJSON(nextState, () => {
-      canvas.renderAll();
-    });
   };
   
   const handleDelete = () => {
@@ -636,6 +491,9 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
     canvas.getActiveObject()?.clone().then((clonedObj: any) => {
       localStorage.setItem('cs-diagram-clipboard', JSON.stringify(clonedObj.toJSON()));
       toast.success("Copied to clipboard");
+    }).catch((error) => {
+      console.error("Copy error:", error);
+      toast.error("Failed to copy object");
     });
   };
   
@@ -681,26 +539,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
   return (
     <div className="border-b border-border/40 bg-background/80 backdrop-blur-sm">
       <div className="flex items-center px-1 py-0.5">
-        <div className="flex items-center gap-0.5 mr-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <FileOutput className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>File</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>New</DropdownMenuItem>
-              <DropdownMenuItem>Open</DropdownMenuItem>
-              <DropdownMenuItem>Save</DropdownMenuItem>
-              <DropdownMenuItem>Export</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        
-        <Separator orientation="vertical" className="h-8 mx-1" />
-        
         <div className="flex items-center gap-0.5 mr-2">
           <TooltipProvider>
             <Tooltip>
@@ -847,24 +685,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Toggle
-                  pressed={activeTool === 'eraser'}
-                  onPressedChange={() => handleToolSelect('eraser')}
-                  aria-label="Eraser tool"
-                  className="h-8 w-8 data-[state=on]:bg-accent"
-                >
-                  <Eraser className="h-4 w-4" />
-                </Toggle>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Eraser (E)</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Toggle
                   pressed={activeTool === 'text'}
                   onPressedChange={() => handleAddShape('text')}
                   aria-label="Text tool"
@@ -949,32 +769,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
             </Tooltip>
           </TooltipProvider>
           
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleAddShape('triangle')}>
-                  <TriangleIcon className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Triangle</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleAddShape('diamond')}>
-                  <Diamond className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Diamond</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
@@ -984,43 +778,15 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
             <DropdownMenuContent>
               <DropdownMenuLabel>More Shapes</DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => handleAddShape('triangle')}>Triangle</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleAddShape('diamond')}>Diamond</DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleAddShape('database')}>Database</DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleAddShape('server')}>Server</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleAddShape('cloud')}>Cloud</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleAddShape('cylinder')}>Storage</DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleAddShape('component')}>Component</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleAddShape('message')}>Message</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleAddShape('router')}>Router</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
-        
-        <Separator orientation="vertical" className="h-8 mx-1" />
-        
-        <div className="flex items-center gap-0.5 mr-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Grid className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Toggle Grid</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <Move className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Pan Tool</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
         </div>
         
         <div className="ml-auto flex items-center gap-4">
@@ -1053,263 +819,8 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
               <BoxSelect className="h-4 w-4" />
             </Toggle>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <label htmlFor="stroke-width" className="text-sm">Width:</label>
-            <input 
-              type="range" 
-              id="stroke-width"
-              min="1"
-              max="20"
-              value={drawingWidth}
-              onChange={(e) => {
-                const width = parseInt(e.target.value);
-                setDrawingWidth(width);
-                if (canvas && canvas.freeDrawingBrush) {
-                  canvas.freeDrawingBrush.width = width;
-                }
-              }}
-              className="w-24"
-            />
-          </div>
         </div>
       </div>
-      
-      <Tabs defaultValue="basic" value={activeCategory} onValueChange={setActiveCategory} className="hidden">
-        <TabsList className="grid grid-cols-5 w-96">
-          <TabsTrigger value="basic">Basic</TabsTrigger>
-          <TabsTrigger value="flowchart">Flowchart</TabsTrigger>
-          <TabsTrigger value="network">Network</TabsTrigger>
-          <TabsTrigger value="system">System</TabsTrigger>
-          <TabsTrigger value="other">Other</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="basic" className="mt-1 flex flex-wrap gap-1">
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('square')}
-            aria-label="Square shape"
-            className="h-8 w-8 p-0"
-          >
-            <Square className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('circle')}
-            aria-label="Circle shape"
-            className="h-8 w-8 p-0"
-          >
-            <CircleIcon className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('triangle')}
-            aria-label="Triangle shape"
-            className="h-8 w-8 p-0"
-          >
-            <TriangleIcon className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('diamond')}
-            aria-label="Diamond shape"
-            className="h-8 w-8 p-0"
-          >
-            <Diamond className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('arrow')}
-            aria-label="Arrow"
-            className="h-8 w-8 p-0"
-          >
-            <ArrowRight className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('text')}
-            aria-label="Text"
-            className="h-8 w-8 p-0"
-          >
-            <Type className="h-4 w-4" />
-          </Toggle>
-        </TabsContent>
-        
-        <TabsContent value="flowchart" className="mt-1 flex flex-wrap gap-1">
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('diamond')}
-            aria-label="Decision"
-            className="h-8 w-8 p-0"
-          >
-            <Diamond className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('database')}
-            aria-label="Database"
-            className="h-8 w-8 p-0"
-          >
-            <Database className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('component')}
-            aria-label="Component"
-            className="h-8 w-8 p-0"
-          >
-            <Component className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('message')}
-            aria-label="Message"
-            className="h-8 w-8 p-0"
-          >
-            <MessageSquare className="h-4 w-4" />
-          </Toggle>
-        </TabsContent>
-        
-        <TabsContent value="network" className="mt-1 flex flex-wrap gap-1">
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('cloud')}
-            aria-label="Cloud"
-            className="h-8 w-8 p-0"
-          >
-            <Cloud className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('server')}
-            aria-label="Server"
-            className="h-8 w-8 p-0"
-          >
-            <Server className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('router')}
-            aria-label="Router"
-            className="h-8 w-8 p-0"
-          >
-            <Router className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('wifi')}
-            aria-label="WiFi"
-            className="h-8 w-8 p-0"
-          >
-            <Wifi className="h-4 w-4" />
-          </Toggle>
-        </TabsContent>
-        
-        <TabsContent value="system" className="mt-1 flex flex-wrap gap-1">
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('laptop')}
-            aria-label="Laptop"
-            className="h-8 w-8 p-0"
-          >
-            <Laptop className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('monitor')}
-            aria-label="Monitor"
-            className="h-8 w-8 p-0"
-          >
-            <Monitor className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('smartphone')}
-            aria-label="Smartphone"
-            className="h-8 w-8 p-0"
-          >
-            <Smartphone className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('cylinder')}
-            aria-label="Storage"
-            className="h-8 w-8 p-0"
-          >
-            <Cylinder className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('harddrive')}
-            aria-label="Hard Drive"
-            className="h-8 w-8 p-0"
-          >
-            <HardDrive className="h-4 w-4" />
-          </Toggle>
-        </TabsContent>
-        
-        <TabsContent value="other" className="mt-1 flex flex-wrap gap-1">
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('lock')}
-            aria-label="Lock"
-            className="h-8 w-8 p-0"
-          >
-            <Lock className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('key')}
-            aria-label="Key"
-            className="h-8 w-8 p-0"
-          >
-            <Key className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('code')}
-            aria-label="Code"
-            className="h-8 w-8 p-0"
-          >
-            <Code className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('terminal')}
-            aria-label="Terminal"
-            className="h-8 w-8 p-0"
-          >
-            <Terminal className="h-4 w-4" />
-          </Toggle>
-          
-          <Toggle
-            pressed={false}
-            onPressedChange={() => handleAddShape('settings')}
-            aria-label="Settings"
-            className="h-8 w-8 p-0"
-          >
-            <Settings className="h-4 w-4" />
-          </Toggle>
-        </TabsContent>
-      </Tabs>
     </div>
   );
 };
