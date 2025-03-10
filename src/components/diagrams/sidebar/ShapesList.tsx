@@ -91,6 +91,7 @@ const ShapesList: React.FC<ShapesListProps> = ({
           strokeWidth: 1,
           objectCaching: false,
         });
+        
         const text = new IText('Text', {
           left: centerX,
           top: centerY,
@@ -488,7 +489,7 @@ const ShapesList: React.FC<ShapesListProps> = ({
         break;
         
       case 'text':
-        shape = new IText('Text', {
+        const textObject = new IText('Text', {
           left: centerX - 50,
           top: centerY - 25,
           fill: '#333333',
@@ -496,7 +497,14 @@ const ShapesList: React.FC<ShapesListProps> = ({
           fontFamily: 'Arial',
           objectCaching: false,
         });
-        break;
+        
+        canvas.add(textObject as any);
+        canvas.setActiveObject(textObject as any);
+        canvas.renderAll();
+        setSelectedElement(textObject as any);
+        
+        toast.success(`Added ${shapeType}`);
+        return;
         
       default:
         toast.error("Unknown shape type");

@@ -1,6 +1,6 @@
 
 // Type definitions for fabric.js extensions
-import { Canvas, Object as FabricObject } from 'fabric';
+import { Canvas, Object as FabricObject, IText, util, XY, TPointerEvent, InteractiveFabricObject } from 'fabric';
 
 // Extend Canvas events to add our custom events
 declare module 'fabric' {
@@ -25,5 +25,10 @@ declare module 'fabric' {
     
     // Add missing method signatures
     clone(callback: (cloned: FabricObject) => void): void;
+  }
+
+  // Add type casting helper
+  namespace util {
+    function createObject<T>(klass: any, options?: any): T;
   }
 }

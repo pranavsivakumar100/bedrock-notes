@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Canvas, util } from 'fabric';
@@ -181,7 +180,7 @@ const DiagramEditor: React.FC = () => {
     const activeObject = canvas.getActiveObject();
     if (!activeObject) return;
     
-    canvas.getActiveObject()?.clone().then((clonedObj: any) => {
+    activeObject.clone((clonedObj) => {
       localStorage.setItem('cs-diagram-clipboard', JSON.stringify(clonedObj.toJSON()));
       toast.success("Copied to clipboard");
     });

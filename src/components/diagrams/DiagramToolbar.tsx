@@ -296,12 +296,9 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
     const activeObject = canvas.getActiveObject();
     if (!activeObject) return;
     
-    canvas.getActiveObject()?.clone().then((clonedObj: any) => {
+    activeObject.clone((clonedObj) => {
       localStorage.setItem('cs-diagram-clipboard', JSON.stringify(clonedObj.toJSON()));
       toast.success("Copied to clipboard");
-    }).catch((error) => {
-      console.error("Copy error:", error);
-      toast.error("Failed to copy object");
     });
   };
   
