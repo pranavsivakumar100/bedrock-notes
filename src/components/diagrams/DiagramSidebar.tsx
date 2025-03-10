@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Canvas, Object as FabricObject, Group, Line, IText, Rect, Circle, Triangle, Ellipse, Path, Polygon } from 'fabric';
+import { Canvas, Object as FabricObject, Group, Line, IText, Rect, Circle, Triangle, Ellipse, Path, Polygon, XY } from 'fabric';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Palette,
@@ -609,7 +608,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           strokeWidth: 1,
         });
         
-        // Fix: Use arrays of numbers instead of strings for Line constructor
+        // Fix: Use proper format for Line constructor (points array)
         const foldLine = new Line([
           80, 0, 
           100, 20, 
@@ -631,17 +630,8 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'cloud':
-        // Fix: Create cloud with Path object using points instead of SVG path string
-        shape = new Path([
-          { x: 25, y: 60 },
-          { x: 10, y: 60, control: { x: 10, y: 50 } },
-          { x: 25, y: 35, control: { x: 10, y: 35 } },
-          { x: 50, y: 10, control: { x: 25, y: 10 } },
-          { x: 80, y: 35, control: { x: 80, y: 10 } },
-          { x: 95, y: 50, control: { x: 95, y: 35 } },
-          { x: 80, y: 60, control: { x: 95, y: 60 } },
-          { x: 25, y: 60 }
-        ], {
+        // Create a cloud shape using path data
+        const cloudPath = new Path('M25,60 C10,60 10,45 25,35 C10,35 10,10 40,10 C80,10 80,35 95,35 C95,50 95,60 80,60 Z', {
           left: centerX - 50,
           top: centerY - 35,
           fill: '#f0f0f0',
@@ -649,24 +639,12 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           strokeWidth: 1,
           objectCaching: false,
         });
+        shape = cloudPath;
         break;
         
       case 'speech-bubble':
-        // Fix: Create speech bubble with Path object using points instead of SVG path string
-        shape = new Path([
-          { x: 10, y: 0 },
-          { x: 0, y: 10, control: { x: 0, y: 0 } },
-          { x: 0, y: 70 },
-          { x: 10, y: 80, control: { x: 0, y: 80 } },
-          { x: 50, y: 80 },
-          { x: 60, y: 100 },
-          { x: 70, y: 80 },
-          { x: 90, y: 80 },
-          { x: 100, y: 70, control: { x: 100, y: 80 } },
-          { x: 100, y: 10 },
-          { x: 90, y: 0, control: { x: 100, y: 0 } },
-          { x: 10, y: 0 }
-        ], {
+        // Create speech bubble using path data
+        const bubblePath = new Path('M10,0 C0,0 0,10 0,10 L0,70 C0,80 10,80 10,80 L50,80 L60,100 L70,80 L90,80 C100,80 100,70 100,70 L100,10 C100,0 90,0 90,0 Z', {
           left: centerX - 50,
           top: centerY - 50,
           fill: '#f0f0f0',
@@ -674,19 +652,12 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           strokeWidth: 1,
           objectCaching: false,
         });
+        shape = bubblePath;
         break;
         
       case 'note':
-        // Fix: Create note with Path object using points instead of SVG path string
-        shape = new Path([
-          { x: 0, y: 0 },
-          { x: 70, y: 0 },
-          { x: 70, y: 70 },
-          { x: 85, y: 55 },
-          { x: 85, y: 100 },
-          { x: 0, y: 100 },
-          { x: 0, y: 0 }
-        ], {
+        // Create note using path data
+        const notePath = new Path('M0,0 L70,0 L70,70 L85,55 L85,100 L0,100 Z', {
           left: centerX - 42.5,
           top: centerY - 50,
           fill: '#f0f0f0',
@@ -694,6 +665,7 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           strokeWidth: 1,
           objectCaching: false,
         });
+        shape = notePath;
         break;
         
       case 'person':
@@ -707,28 +679,43 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
           strokeWidth: 1,
         });
         
-        // Fix: Use arrays of numbers for Line constructors
-        const body = new Line([15, 30, 15, 70], {
+        // Use proper format for Line constructor (array of points)
+        const body = new Line([
+          15, 30, 
+          15, 70
+        ], {
           stroke: '#333333',
           strokeWidth: 2,
         });
         
-        const leftArm = new Line([15, 40, 0, 55], {
+        const leftArm = new Line([
+          15, 40, 
+          0, 55
+        ], {
           stroke: '#333333',
           strokeWidth: 2,
         });
         
-        const rightArm = new Line([15, 40, 30, 55], {
+        const rightArm = new Line([
+          15, 40, 
+          30, 55
+        ], {
           stroke: '#333333',
           strokeWidth: 2,
         });
         
-        const leftLeg = new Line([15, 70, 0, 100], {
+        const leftLeg = new Line([
+          15, 70, 
+          0, 100
+        ], {
           stroke: '#333333',
           strokeWidth: 2,
         });
         
-        const rightLeg = new Line([15, 70, 30, 100], {
+        const rightLeg = new Line([
+          15, 70, 
+          30, 100
+        ], {
           stroke: '#333333',
           strokeWidth: 2,
         });
@@ -743,8 +730,11 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'arrow':
-        // Fix: Use arrays of numbers for Line constructor
-        const arrowLine = new Line([0, 0, 100, 0], {
+        // Use proper format for Line constructor
+        const arrowLine = new Line([
+          0, 0, 
+          100, 0
+        ], {
           stroke: '#333333',
           strokeWidth: 2,
           objectCaching: false,
@@ -776,8 +766,11 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'line':
-        // Fix: Use arrays of numbers for Line constructor
-        shape = new Line([0, 0, 100, 0], {
+        // Use proper format for Line constructor
+        shape = new Line([
+          0, 0, 
+          100, 0
+        ], {
           stroke: '#333333',
           strokeWidth: 2,
           left: centerX - 50,
@@ -787,11 +780,8 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'curved-line':
-        // Fix: Create curved line with Path object using points instead of SVG path string
-        shape = new Path([
-          { x: 0, y: 0 },
-          { x: 100, y: 0, control: { x: 50, y: -50 } }
-        ], {
+        // Create curved line using path data
+        shape = new Path('M0,0 Q50,-50 100,0', {
           fill: '',
           stroke: '#333333',
           strokeWidth: 2,
