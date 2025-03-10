@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Canvas, Rect, Circle as FabricCircle, Triangle as FabricTriangle, Path, IText, Group, Line } from 'fabric';
+import { Canvas, Rect, Circle as FabricCircle, Triangle as FabricTriangle, Path, IText, Group, Line, util as fabricUtil } from 'fabric';
 import { 
   MousePointer, 
   Pencil, 
@@ -30,8 +30,8 @@ import {
   BoxSelect,
   Eraser,
   Diamond,
-  Undo,
-  Redo,
+  Undo as UndoIcon,
+  Redo as RedoIcon,
   Trash2,
   ZoomIn,
   ZoomOut,
@@ -110,6 +110,8 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
   const [connectionStyle, setConnectionStyle] = useState<ConnectionStyle>('straight');
   const [activeCategory, setActiveCategory] = useState('basic');
   const [zoomPercent, setZoomPercent] = useState(100);
+  const [undoStack, setUndoStack] = useState<any[]>([]);
+  const [redoStack, setRedoStack] = useState<any[]>([]);
 
   const handleToolSelect = (tool: Tool) => {
     if (!canvas) return;
@@ -582,20 +584,37 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
   
   const handleUndo = () => {
     if (!canvas) return;
-    if (typeof canvas.undo === 'function') {
-      (canvas as any).undo();
-    } else {
-      toast.error("Undo operation not supported");
+    if (undoStack.length <= 1) {
+      toast.info("Nothing to undo");
+      return;
     }
+    
+    const currentState = undoStack[undoStack.length - 1];
+    const previousState = undoStack[undoStack.length - 2];
+    
+    setRedoStack(prev => [...prev, currentState]);
+    setUndoStack(prev => prev.slice(0, -1));
+    
+    canvas.loadFromJSON(previousState, () => {
+      canvas.renderAll();
+    });
   };
   
   const handleRedo = () => {
     if (!canvas) return;
-    if (typeof canvas.redo === 'function') {
-      (canvas as any).redo();
-    } else {
-      toast.error("Redo operation not supported");
+    if (redoStack.length === 0) {
+      toast.info("Nothing to redo");
+      return;
     }
+    
+    const nextState = redoStack[redoStack.length - 1];
+    
+    setUndoStack(prev => [...prev, nextState]);
+    setRedoStack(prev => prev.slice(0, -1));
+    
+    canvas.loadFromJSON(nextState, () => {
+      canvas.renderAll();
+    });
   };
   
   const handleDelete = () => {
@@ -630,7 +649,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
     }
     
     try {
-      util.enlivenObjects([JSON.parse(clipboard)]).then((objects: any[]) => {
+      fabricUtil.enlivenObjects([JSON.parse(clipboard)]).then((objects: any[]) => {
         objects.forEach(obj => {
           obj.set({
             left: obj.left + 20,
@@ -719,7 +738,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleUndo}>
-                  <Undo className="h-4 w-4" />
+                  <UndoIcon className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -732,7 +751,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleRedo}>
-                  <Redo className="h-4 w-4" />
+                  <RedoIcon className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
