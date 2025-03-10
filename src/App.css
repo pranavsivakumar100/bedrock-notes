@@ -1,4 +1,3 @@
-
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -28,7 +27,7 @@
   height: 100%;
 }
 
-/* Invisible scroll styles */
+/* Enhanced invisible scroll styles */
 .invisible-scroll {
   scrollbar-width: none !important; /* Firefox */
   -ms-overflow-style: none !important; /* IE and Edge */
@@ -40,6 +39,17 @@
   display: none !important; /* Chrome, Safari, Opera */
   width: 0 !important;
   height: 0 !important;
+  background: transparent !important;
+}
+
+.invisible-scroll::-webkit-scrollbar-thumb {
+  background: transparent !important;
+  border: none !important;
+}
+
+.invisible-scroll::-webkit-scrollbar-track {
+  background: transparent !important;
+  border: none !important;
 }
 
 .logo {

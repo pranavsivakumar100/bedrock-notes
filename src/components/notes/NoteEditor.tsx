@@ -365,7 +365,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
             onFormatNumberedList={handleFormatNumberedList}
             onFormatBlockquote={handleFormatBlockquote}
           >
-            <div className="h-full overflow-auto invisible-scroll">
+            <ScrollArea className="h-full" invisible>
               <textarea
                 ref={textareaRef}
                 value={content}
@@ -374,16 +374,16 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
                 className="markdown-editor w-full h-full outline-none resize-none bg-transparent p-4"
                 onContextMenu={handleContextMenu}
               />
-            </div>
+            </ScrollArea>
           </EditorContextMenu>
         )}
         
         {viewMode === ViewMode.PREVIEW && (
-          <div className="h-full overflow-auto invisible-scroll p-4">
-            <div ref={previewRef}>
+          <ScrollArea className="h-full" invisible>
+            <div ref={previewRef} className="p-4">
               {renderPreview()}
             </div>
-          </div>
+          </ScrollArea>
         )}
         
         {viewMode === ViewMode.SPLIT && (
@@ -403,7 +403,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
               onFormatNumberedList={handleFormatNumberedList}
               onFormatBlockquote={handleFormatBlockquote}
             >
-              <div className="h-full overflow-auto invisible-scroll">
+              <ScrollArea className="h-full" invisible>
                 <textarea
                   ref={textareaRef}
                   value={content}
@@ -412,14 +412,14 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
                   className="markdown-editor w-full h-full outline-none resize-none bg-transparent p-4"
                   onContextMenu={handleContextMenu}
                 />
-              </div>
+              </ScrollArea>
             </EditorContextMenu>
             
-            <div className="h-full overflow-auto invisible-scroll p-4">
-              <div ref={previewRef}>
+            <ScrollArea className="h-full" invisible>
+              <div ref={previewRef} className="p-4">
                 {renderPreview()}
               </div>
-            </div>
+            </ScrollArea>
           </div>
         )}
       </div>
