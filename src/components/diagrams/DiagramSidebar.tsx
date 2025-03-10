@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Canvas, Object as FabricObject, Group, Line, IText, Rect, Circle, Triangle, Ellipse, Path, Polygon } from 'fabric';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -617,7 +618,10 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'cloud':
-        const cloudPath = new Path('M25,60 C10,60 10,45 25,35 C10,35 10,10 40,10 C80,10 80,35 95,35 C95,50 95,60 80,60 Z', {
+        // Create cloud shape using proper Path instantiation
+        const cloudPathData = 'M25,60 C10,60 10,45 25,35 C10,35 10,10 40,10 C80,10 80,35 95,35 C95,50 95,60 80,60 Z';
+        const cloudPath = new Path({
+          path: cloudPathData,
           left: centerX - 50,
           top: centerY - 35,
           fill: '#f0f0f0',
@@ -629,7 +633,10 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'speech-bubble':
-        const speechBubblePath = new Path('M10,0 C0,0 0,10 0,10 L0,70 C0,80 10,80 10,80 L50,80 L60,100 L70,80 L90,80 C100,80 100,70 100,70 L100,10 C100,0 90,0 90,0 Z', {
+        // Create speech bubble using proper Path instantiation
+        const speechBubblePathData = 'M10,0 C0,0 0,10 0,10 L0,70 C0,80 10,80 10,80 L50,80 L60,100 L70,80 L90,80 C100,80 100,70 100,70 L100,10 C100,0 90,0 90,0 Z';
+        const speechBubblePath = new Path({
+          path: speechBubblePathData,
           left: centerX - 50,
           top: centerY - 50,
           fill: '#f0f0f0',
@@ -641,7 +648,10 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'note':
-        const notePath = new Path('M0,0 L70,0 L70,70 L85,55 L85,100 L0,100 Z', {
+        // Create note using proper Path instantiation
+        const notePathData = 'M0,0 L70,0 L70,70 L85,55 L85,100 L0,100 Z';
+        const notePath = new Path({
+          path: notePathData,
           left: centerX - 42.5,
           top: centerY - 50,
           fill: '#f0f0f0',
@@ -758,7 +768,10 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         break;
         
       case 'curved-line':
-        const curvedLinePath = new Path('M0,0 Q50,-50 100,0', {
+        // Create curved line using proper Path instantiation
+        const curvedLinePathData = 'M0,0 Q50,-50 100,0';
+        const curvedLinePath = new Path({
+          path: curvedLinePathData,
           fill: '',
           stroke: '#333333',
           strokeWidth: 2,
