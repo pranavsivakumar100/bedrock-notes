@@ -27,7 +27,7 @@ declare module 'fabric' {
     clone(callback: (cloned: FabricObject) => void): void;
   }
 
-  // Instead of extending IText, we'll just create a type assertion helper
+  // Instead of extending IText, use type casting helpers
   // This avoids the conflicting _setFillStyles property error
   
   // Add type casting helper
