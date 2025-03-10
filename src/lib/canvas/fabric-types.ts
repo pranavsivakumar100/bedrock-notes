@@ -27,8 +27,8 @@ declare module 'fabric' {
     clone(callback: (cloned: FabricObject) => void): void;
   }
 
-  // Make IText assignable to FabricObject for our setSelectedElement function
-  interface IText extends FabricObject {}
+  // Instead of extending IText, we'll just create a type assertion helper
+  // This avoids the conflicting _setFillStyles property error
   
   // Add type casting helper
   namespace util {

@@ -73,7 +73,6 @@ const StylePanel: React.FC<StylePanelProps> = ({ canvas, selectedElement }) => {
     canvas.renderAll();
   };
   
-  // Helper function to check if an object is an IText type
   const isIText = (obj: FabricObject): boolean => {
     return obj.type === 'i-text';
   };
