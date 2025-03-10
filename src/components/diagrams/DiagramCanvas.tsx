@@ -1,38 +1,17 @@
 
 import React, { useEffect, useRef } from 'react';
-import { Canvas, Object as FabricObject, Line, util, Point } from 'fabric';
+import { Canvas, Object as FabricObject } from 'fabric';
 import { getDiagram } from '@/lib/diagram-storage';
 import { toast } from 'sonner';
+import { createGrid, enableSnapToGrid } from '@/lib/canvas/grid-utils';
+import { setupPanning } from '@/lib/canvas/pan-utils';
+import { setupZoomWithMouseWheel } from '@/lib/canvas/zoom-utils';
+import '@/lib/canvas/fabric-types';
 
 interface DiagramCanvasProps {
   setCanvas: (canvas: Canvas) => void;
   diagramId?: string;
   setSelectedElement: (element: any | null) => void;
-}
-
-declare module 'fabric' {
-  interface Canvas {
-    _objects: FabricObject[];
-    customData?: {
-      connectionStart?: FabricObject;
-      [key: string]: any;
-    }
-  }
-  
-  interface Object {
-    data?: {
-      type?: string;
-      [key: string]: any;
-    }
-  }
-}
-
-// Extend Canvas events to add our custom events
-declare module 'fabric' {
-  interface CanvasEvents {
-    'zoom:changed': any;
-    'pan:moved': any;
-  }
 }
 
 const DiagramCanvas: React.FC<DiagramCanvasProps> = ({ 
@@ -67,11 +46,9 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
     setCanvas(canvas);
 
     createGrid(canvas);
-
     enableSnapToGrid(canvas);
-
     setupZoomWithMouseWheel(canvas, container);
-    setupPanning(canvas, container);
+    setupPanning(canvas, container, isPanning, lastPanPoint);
 
     if (diagramId && diagramId !== 'new') {
       try {
@@ -132,182 +109,6 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       canvas.dispose();
     };
   }, [diagramId, setCanvas, setSelectedElement]);
-
-  const setupPanning = (canvas: Canvas, container: HTMLDivElement) => {
-    // Prevent context menu from appearing during panning
-    container.addEventListener('contextmenu', (e) => {
-      if (isPanning.current || e.ctrlKey) {
-        e.preventDefault();
-        return false;
-      }
-    });
-
-    container.addEventListener('mousedown', (e) => {
-      // Only trigger panning on mouse button with Ctrl key
-      if (e.ctrlKey) {
-        isPanning.current = true;
-        lastPanPoint.current = { x: e.clientX, y: e.clientY };
-        container.style.cursor = 'grabbing';
-        e.preventDefault();
-      }
-    });
-
-    container.addEventListener('mousemove', (e) => {
-      if (isPanning.current && lastPanPoint.current) {
-        const dx = e.clientX - lastPanPoint.current.x;
-        const dy = e.clientY - lastPanPoint.current.y;
-        
-        if (canvas.viewportTransform) {
-          canvas.viewportTransform[4] += dx;
-          canvas.viewportTransform[5] += dy;
-          canvas.requestRenderAll();
-          
-          // Trigger pan event for other components to react
-          canvas.fire('pan:moved', { dx, dy });
-          
-          // Update grid when panning
-          createGrid(canvas);
-        }
-        
-        lastPanPoint.current = { x: e.clientX, y: e.clientY };
-        e.preventDefault();
-      }
-    });
-
-    const endPanning = (e: MouseEvent) => {
-      if (isPanning.current) {
-        isPanning.current = false;
-        lastPanPoint.current = null;
-        container.style.cursor = 'default';
-        e.preventDefault();
-      }
-    };
-
-    container.addEventListener('mouseup', endPanning);
-    container.addEventListener('mouseleave', endPanning);
-  };
-
-  const setupZoomWithMouseWheel = (canvas: Canvas, container: HTMLDivElement) => {
-    container.addEventListener('wheel', (e) => {
-      if (e.ctrlKey) {
-        e.preventDefault();
-        
-        const delta = e.deltaY;
-        let zoom = canvas.getZoom();
-        
-        const mousePoint = new Point(e.offsetX, e.offsetY);
-        
-        zoom = delta > 0 ? zoom * 0.95 : zoom * 1.05;
-        
-        if (zoom > 20) zoom = 20;
-        if (zoom < 0.1) zoom = 0.1;
-        
-        canvas.zoomToPoint(mousePoint, zoom);
-        
-        // Trigger our custom zoom event
-        canvas.fire('zoom:changed');
-        canvas.renderAll();
-        
-        return false;
-      }
-    }, { passive: false });
-  };
-
-  const createGrid = (canvas: Canvas) => {
-    // Remove existing grid lines
-    const existingGrids = canvas.getObjects().filter(obj => obj.data?.type === 'grid');
-    existingGrids.forEach(grid => canvas.remove(grid));
-    
-    const gridSize = 20;
-    const zoom = canvas.getZoom();
-    
-    // Calculate how far beyond the visible canvas we need to draw
-    // to ensure grid covers entire viewable area when zoomed out
-    const extraGridFactor = 3; // Draw grid 3x larger than visible area
-    
-    const width = (canvas.width || 1000) * extraGridFactor;
-    const height = (canvas.height || 800) * extraGridFactor;
-    
-    // Calculate visible bounds and adjust grid center
-    const viewportCenterX = canvas.width! / 2;
-    const viewportCenterY = canvas.height! / 2;
-    
-    // Calculate adjusted grid origin to center it on the viewport
-    const gridOriginX = viewportCenterX - width / 2;
-    const gridOriginY = viewportCenterY - height / 2;
-    
-    // Calculate the number of grid lines needed
-    const linesX = Math.ceil(width / (gridSize * zoom));
-    const linesY = Math.ceil(height / (gridSize * zoom));
-    
-    // Calculate the offset to make sure grid lines align with the origin
-    const offsetX = (viewportCenterX - canvas.viewportTransform![4]) % (gridSize * zoom);
-    const offsetY = (viewportCenterY - canvas.viewportTransform![5]) % (gridSize * zoom);
-    
-    // Draw vertical lines
-    for (let i = 0; i <= linesX; i++) {
-      const lineX = gridOriginX + i * gridSize * zoom - offsetX;
-      const line = new Line([lineX, gridOriginY, lineX, gridOriginY + height], {
-        stroke: '#e0e0e0',
-        selectable: false,
-        evented: false,
-        excludeFromExport: true,
-        data: { type: 'grid' }
-      });
-      canvas.add(line);
-      canvas.sendObjectToBack(line);
-    }
-    
-    // Draw horizontal lines
-    for (let i = 0; i <= linesY; i++) {
-      const lineY = gridOriginY + i * gridSize * zoom - offsetY;
-      const line = new Line([gridOriginX, lineY, gridOriginX + width, lineY], {
-        stroke: '#e0e0e0',
-        selectable: false,
-        evented: false,
-        excludeFromExport: true,
-        data: { type: 'grid' }
-      });
-      canvas.add(line);
-      canvas.sendObjectToBack(line);
-    }
-    
-    canvas.renderAll();
-  };
-
-  const enableSnapToGrid = (canvas: Canvas) => {
-    const gridSize = 20;
-    
-    canvas.on('object:moving', (e) => {
-      if (!e.target) return;
-      
-      const evt = e.e as MouseEvent;
-      if (evt && evt.shiftKey) return;
-      
-      const target = e.target;
-      
-      target.set({
-        left: Math.round(target.left! / gridSize) * gridSize,
-        top: Math.round(target.top! / gridSize) * gridSize
-      });
-    });
-    
-    canvas.on('object:scaling', (e) => {
-      if (!e.target) return;
-      
-      const evt = e.e as MouseEvent;
-      if (evt && evt.shiftKey) return;
-      
-      const target = e.target;
-      const w = target.getScaledWidth();
-      const h = target.getScaledHeight();
-      
-      target.set({
-        scaleX: Math.round(w / gridSize) * gridSize / target.width!,
-        scaleY: Math.round(h / gridSize) * gridSize / target.height!
-      });
-    });
-  };
 
   return (
     <div 
