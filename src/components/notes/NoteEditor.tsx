@@ -373,6 +373,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
                 placeholder="Start writing..."
                 className="markdown-editor w-full h-full outline-none resize-none bg-transparent p-4"
                 onContextMenu={handleContextMenu}
+                style={{ overflowY: 'auto' }}
               />
             </ScrollArea>
           </EditorContextMenu>
@@ -411,6 +412,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
                   placeholder="Start writing..."
                   className="markdown-editor w-full h-full outline-none resize-none bg-transparent p-4"
                   onContextMenu={handleContextMenu}
+                  style={{ overflowY: 'auto' }}
                 />
               </ScrollArea>
             </EditorContextMenu>

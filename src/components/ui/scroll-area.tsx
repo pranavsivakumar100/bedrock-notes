@@ -22,6 +22,10 @@ const ScrollArea = React.forwardRef<
         "h-full w-full rounded-[inherit]",
         invisible && "invisible-scroll"
       )}
+      style={invisible ? { 
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none'
+      } : undefined}
     >
       {children}
     </ScrollAreaPrimitive.Viewport>
