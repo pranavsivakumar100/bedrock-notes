@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Canvas, Object as FabricObject, Group, Line, IText, Rect } from 'fabric';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -44,35 +43,73 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
   const handleDuplicate = () => {
     if (!canvas || !selectedElement) return;
     
-    selectedElement.clone((cloned: any) => {
-      // Position the clone slightly offset from the original
-      cloned.set({
-        left: selectedElement.left! + 20,
-        top: selectedElement.top! + 20,
-        evented: true,
-      });
-      
-      canvas.add(cloned);
-      canvas.setActiveObject(cloned);
+    const clonedObj = selectedElement.toObject();
+    
+    let newObj: FabricObject | null = null;
+    
+    const options = {
+      ...clonedObj,
+      left: (selectedElement.left || 0) + 20,
+      top: (selectedElement.top || 0) + 20,
+      evented: true,
+    };
+    
+    if (selectedElement.type === 'rect') {
+      newObj = new Rect(options);
+    } else if (selectedElement.type === 'circle') {
+      newObj = new (selectedElement.constructor as any)(options);
+    } else if (selectedElement.type === 'triangle') {
+      newObj = new (selectedElement.constructor as any)(options);
+    } else if (selectedElement.type === 'i-text') {
+      newObj = new IText((selectedElement as IText).text || '', options);
+    } else if (selectedElement.type === 'path') {
+      newObj = new (selectedElement.constructor as any)(options);
+    } else if (selectedElement.type === 'group') {
+      console.warn('Group cloning not fully implemented');
+      return;
+    } else {
+      try {
+        newObj = new (selectedElement.constructor as any)(options);
+      } catch (error) {
+        console.error('Failed to clone object:', error);
+        return;
+      }
+    }
+    
+    if (newObj) {
+      canvas.add(newObj);
+      canvas.setActiveObject(newObj);
       canvas.renderAll();
-      setSelectedElement(cloned);
-    });
+      setSelectedElement(newObj);
+    }
   };
   
   const handleBringForward = () => {
     if (!canvas || !selectedElement) return;
     
-    // Use bringObjectToFront instead of bringForward
-    canvas.bringToFront(selectedElement);
-    canvas.renderAll();
+    const objects = canvas.getObjects();
+    const index = objects.indexOf(selectedElement);
+    
+    if (index < objects.length - 1) {
+      objects.splice(index, 1);
+      objects.splice(index + 1, 0, selectedElement);
+      
+      canvas.renderAll();
+    }
   };
   
   const handleSendBackward = () => {
     if (!canvas || !selectedElement) return;
     
-    // Use sendObjectToBack instead of sendBackward
-    canvas.sendToBack(selectedElement);
-    canvas.renderAll();
+    const objects = canvas.getObjects();
+    const index = objects.indexOf(selectedElement);
+    
+    if (index > 0) {
+      objects.splice(index, 1);
+      objects.splice(index - 1, 0, selectedElement);
+      
+      canvas.renderAll();
+    }
   };
   
   const handleAlign = (alignment: string) => {
