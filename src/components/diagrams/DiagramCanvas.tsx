@@ -38,14 +38,16 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       backgroundColor: '#ffffff',
       selection: true,
       preserveObjectStacking: true,
-      // Initialize with default freeDrawingBrush
       isDrawingMode: false,
     });
     
-    // Initialize the freeDrawingBrush right after creation
-    if (canvas.freeDrawingBrush) {
+    // Make sure to properly initialize the drawing brush
+    if (!canvas.freeDrawingBrush) {
+      console.error("Free drawing brush not available");
+    } else {
       canvas.freeDrawingBrush.width = 2;
       canvas.freeDrawingBrush.color = '#000000';
+      console.log("Drawing brush initialized:", canvas.freeDrawingBrush);
     }
     
     canvas.customData = {};

@@ -69,37 +69,45 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
     if (canvas.freeDrawingBrush) {
       canvas.freeDrawingBrush.width = drawingWidth;
       canvas.freeDrawingBrush.color = drawingColor;
+      console.log("Updated brush:", canvas.freeDrawingBrush);
+    } else {
+      console.error("Free drawing brush not available in effect");
     }
     
     canvas.isDrawingMode = activeTool === 'draw' || activeTool === 'eraser';
+    console.log("Drawing mode:", canvas.isDrawingMode, "Active tool:", activeTool);
   }, [canvas, drawingWidth, drawingColor, activeTool]);
 
   const handleToolSelect = (tool: Tool) => {
     if (!canvas) return;
     
+    console.log("Selecting tool:", tool);
     setActiveTool(tool);
     
     if (tool === 'draw') {
-      canvas.isDrawingMode = true;
-      if (canvas.freeDrawingBrush) {
+      if (!canvas.freeDrawingBrush) {
+        console.error("Free drawing brush not available in handleToolSelect");
+      } else {
         canvas.freeDrawingBrush.width = drawingWidth;
         canvas.freeDrawingBrush.color = drawingColor;
       }
-    } else if (tool === 'eraser') {
       canvas.isDrawingMode = true;
+      console.log("Set drawing mode to:", canvas.isDrawingMode);
+    } else if (tool === 'eraser') {
       if (canvas.freeDrawingBrush) {
         canvas.freeDrawingBrush.width = drawingWidth * 2;
         canvas.freeDrawingBrush.color = '#ffffff';
       }
+      canvas.isDrawingMode = true;
     } else {
       canvas.isDrawingMode = false;
       canvas.selection = tool === 'select';
     }
     
+    canvas.off('mouse:down');
+    canvas.off('mouse:up');
+    
     if (tool === 'lineConnect' || tool === 'bezierConnect') {
-      canvas.off('mouse:down');
-      canvas.off('mouse:up');
-      
       canvas.on('mouse:down', (options) => {
         if (options.target) {
           canvas.customData = { ...canvas.customData, connectionStart: options.target };
@@ -112,9 +120,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
           canvas.customData = { ...canvas.customData, connectionStart: null };
         }
       });
-    } else {
-      canvas.off('mouse:down');
-      canvas.off('mouse:up');
     }
     
     canvas.discardActiveObject();
