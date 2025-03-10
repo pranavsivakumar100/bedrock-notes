@@ -26,11 +26,32 @@ html {
   bottom: 0;
   z-index: 50;
   overflow: hidden;
+  background-color: #ffffff; /* Ensure white background */
 }
 
 .diagram-editor-container > * {
   width: 100%;
   height: 100%;
+}
+
+/* Ensure canvas takes full width with no overflow */
+.diagram-editor-container canvas {
+  width: 100% !important;
+  height: 100% !important;
+  background-color: #ffffff !important;
+  display: block !important;
+}
+
+/* Fix for the diagram canvas container */
+.diagram-editor-container .flex-1.flex.flex-col.relative.h-full {
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+/* Fix for the diagram canvas container */
+.diagram-editor-container .flex-1.relative {
+  overflow: hidden;
+  background-color: #ffffff;
 }
 
 /* Invisible scrollbar styles for all browsers */
@@ -64,4 +85,3 @@ pre {
 }
 
 /* ... keep existing code */
-

@@ -207,7 +207,7 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
   return (
     <div 
       ref={containerRef} 
-      className="flex-1 w-full h-full overflow-hidden bg-gray-50 dark:bg-gray-900" 
+      className="flex-1 w-full h-full overflow-hidden bg-white" 
       style={{ position: 'absolute', left: 0, right: 0, bottom: 0, top: 0 }}
     >
       <canvas 
