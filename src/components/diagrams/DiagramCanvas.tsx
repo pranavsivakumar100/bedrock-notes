@@ -27,6 +27,14 @@ declare module 'fabric' {
   }
 }
 
+// Extend Canvas events to add our custom events
+declare module 'fabric' {
+  interface CanvasEvents {
+    'zoom:changed': any;
+    'pan:moved': any;
+  }
+}
+
 const DiagramCanvas: React.FC<DiagramCanvasProps> = ({ 
   setCanvas, 
   diagramId,
@@ -35,6 +43,8 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricCanvasRef = useRef<Canvas | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const isPanning = useRef<boolean>(false);
+  const lastPanPoint = useRef<{ x: number, y: number } | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
@@ -61,6 +71,7 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
     enableSnapToGrid(canvas);
 
     setupZoomWithMouseWheel(canvas, container);
+    setupPanning(canvas, container);
 
     if (diagramId && diagramId !== 'new') {
       try {
@@ -121,6 +132,47 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
       canvas.dispose();
     };
   }, [diagramId, setCanvas, setSelectedElement]);
+
+  const setupPanning = (canvas: Canvas, container: HTMLDivElement) => {
+    container.addEventListener('mousedown', (e) => {
+      if (e.ctrlKey) {
+        isPanning.current = true;
+        lastPanPoint.current = { x: e.clientX, y: e.clientY };
+        container.style.cursor = 'grabbing';
+        e.preventDefault();
+      }
+    });
+
+    container.addEventListener('mousemove', (e) => {
+      if (isPanning.current && lastPanPoint.current) {
+        const dx = e.clientX - lastPanPoint.current.x;
+        const dy = e.clientY - lastPanPoint.current.y;
+        
+        if (canvas.viewportTransform) {
+          canvas.viewportTransform[4] += dx;
+          canvas.viewportTransform[5] += dy;
+          canvas.renderAll();
+          
+          // Update grid when panning
+          createGrid(canvas);
+        }
+        
+        lastPanPoint.current = { x: e.clientX, y: e.clientY };
+        e.preventDefault();
+      }
+    });
+
+    const endPanning = () => {
+      if (isPanning.current) {
+        isPanning.current = false;
+        lastPanPoint.current = null;
+        container.style.cursor = 'default';
+      }
+    };
+
+    container.addEventListener('mouseup', endPanning);
+    container.addEventListener('mouseleave', endPanning);
+  };
 
   const setupZoomWithMouseWheel = (canvas: Canvas, container: HTMLDivElement) => {
     container.addEventListener('wheel', (e) => {
