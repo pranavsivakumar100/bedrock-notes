@@ -1,7 +1,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Canvas, util } from 'fabric';
+import { Canvas, util, Object as FabricObject } from 'fabric';
 import { 
   Database, 
   Server, 
@@ -191,7 +191,8 @@ const DiagramEditor: React.FC = () => {
     const activeObject = canvas.getActiveObject();
     if (!activeObject) return;
     
-    activeObject.clone((clonedObj: any) => {
+    // Use clone function with proper callback handling
+    activeObject.clone((clonedObj: FabricObject) => {
       localStorage.setItem('cs-diagram-clipboard', JSON.stringify(clonedObj.toJSON()));
       toast.success("Copied to clipboard");
     });
@@ -207,11 +208,12 @@ const DiagramEditor: React.FC = () => {
     }
     
     try {
-      fabric.util.enlivenObjects([JSON.parse(clipboard)]).then((objects: any[]) => {
+      // Import util from fabric to use enlivenObjects
+      util.enlivenObjects([JSON.parse(clipboard)]).then((objects: FabricObject[]) => {
         objects.forEach(obj => {
           obj.set({
-            left: obj.left + 20,
-            top: obj.top + 20,
+            left: obj.left! + 20,
+            top: obj.top! + 20,
           });
           canvas.add(obj);
           canvas.setActiveObject(obj);

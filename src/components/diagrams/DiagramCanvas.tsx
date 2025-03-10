@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { Canvas, Object as FabricObject, Line, util } from 'fabric';
+import { Canvas, Object as FabricObject, Line, util, Rect } from 'fabric';
 import { getDiagram } from '@/lib/diagram-storage';
 import { toast } from 'sonner';
 
@@ -193,7 +193,7 @@ const DiagramCanvas: React.FC<DiagramCanvasProps> = ({
     const top = (containerHeight - paperHeight) / 2;
     
     // Create "paper" rectangle
-    const paperRect = new fabric.Rect({
+    const paperRect = new Rect({
       left: left,
       top: top,
       width: paperWidth,
