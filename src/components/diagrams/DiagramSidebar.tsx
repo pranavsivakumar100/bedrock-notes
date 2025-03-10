@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Canvas, Object as FabricObject, Group, Line, IText, Rect, Circle, Triangle } from 'fabric';
+import { Canvas, Object as FabricObject, Group, Line, IText, Rect, Circle, Triangle, Ellipse, Path, Polygon } from 'fabric';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Palette,
@@ -26,7 +27,10 @@ import {
   ArrowRight as ArrowRightIcon,
   Circle as CircleIcon,
   Triangle as TriangleIcon,
-  Type
+  Type,
+  Hexagon,
+  Pentagon,
+  Diamond
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -324,11 +328,84 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         });
         break;
         
+      case 'square':
+        shape = new Rect({
+          left: centerX - 50,
+          top: centerY - 50,
+          width: 100,
+          height: 100,
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+          objectCaching: false,
+        });
+        break;
+        
+      case 'round-rectangle':
+        shape = new Rect({
+          left: centerX - 50,
+          top: centerY - 50,
+          width: 100,
+          height: 70,
+          rx: 10,
+          ry: 10,
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+          objectCaching: false,
+        });
+        break;
+        
+      case 'text-box':
+        shape = new Rect({
+          left: centerX - 60,
+          top: centerY - 30,
+          width: 120,
+          height: 60,
+          rx: 0,
+          ry: 0,
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+          objectCaching: false,
+        });
+        const text = new IText('Text', {
+          left: centerX,
+          top: centerY,
+          originX: 'center',
+          originY: 'center',
+          fill: '#333333',
+          fontSize: 16,
+          fontFamily: 'Arial',
+          objectCaching: false,
+        });
+        
+        canvas.add(shape);
+        canvas.add(text);
+        canvas.setActiveObject(text);
+        canvas.renderAll();
+        setSelectedElement(text);
+        toast.success(`Added text box`);
+        return;
+        
       case 'circle':
         shape = new Circle({
           left: centerX - 50,
           top: centerY - 50,
           radius: 50,
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+          objectCaching: false,
+        });
+        break;
+        
+      case 'ellipse':
+        shape = new Ellipse({
+          left: centerX - 60,
+          top: centerY - 40,
+          rx: 60,
+          ry: 40,
           fill: '#f0f0f0',
           stroke: '#333333',
           strokeWidth: 1,
@@ -349,6 +426,294 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         });
         break;
         
+      case 'right-triangle':
+        shape = new Polygon({
+          left: centerX - 50,
+          top: centerY - 50,
+          points: [
+            { x: 0, y: 0 },
+            { x: 100, y: 100 },
+            { x: 0, y: 100 }
+          ],
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+          objectCaching: false,
+        });
+        break;
+        
+      case 'diamond':
+        shape = new Polygon({
+          left: centerX - 50,
+          top: centerY - 50,
+          points: [
+            { x: 50, y: 0 },
+            { x: 100, y: 50 },
+            { x: 50, y: 100 },
+            { x: 0, y: 50 }
+          ],
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+          objectCaching: false,
+        });
+        break;
+        
+      case 'pentagon':
+        shape = new Polygon({
+          left: centerX - 50,
+          top: centerY - 50,
+          points: [
+            { x: 50, y: 0 },
+            { x: 100, y: 40 },
+            { x: 80, y: 100 },
+            { x: 20, y: 100 },
+            { x: 0, y: 40 }
+          ],
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+          objectCaching: false,
+        });
+        break;
+        
+      case 'hexagon':
+        shape = new Polygon({
+          left: centerX - 50,
+          top: centerY - 50,
+          points: [
+            { x: 25, y: 0 },
+            { x: 75, y: 0 },
+            { x: 100, y: 50 },
+            { x: 75, y: 100 },
+            { x: 25, y: 100 },
+            { x: 0, y: 50 }
+          ],
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+          objectCaching: false,
+        });
+        break;
+        
+      case 'octagon':
+        shape = new Polygon({
+          left: centerX - 50,
+          top: centerY - 50,
+          points: [
+            { x: 30, y: 0 },
+            { x: 70, y: 0 },
+            { x: 100, y: 30 },
+            { x: 100, y: 70 },
+            { x: 70, y: 100 },
+            { x: 30, y: 100 },
+            { x: 0, y: 70 },
+            { x: 0, y: 30 }
+          ],
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+          objectCaching: false,
+        });
+        break;
+        
+      case 'trapezoid':
+        shape = new Polygon({
+          left: centerX - 50,
+          top: centerY - 50,
+          points: [
+            { x: 20, y: 0 },
+            { x: 80, y: 0 },
+            { x: 100, y: 100 },
+            { x: 0, y: 100 }
+          ],
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+          objectCaching: false,
+        });
+        break;
+        
+      case 'parallelogram':
+        shape = new Polygon({
+          left: centerX - 50,
+          top: centerY - 50,
+          points: [
+            { x: 25, y: 0 },
+            { x: 100, y: 0 },
+            { x: 75, y: 100 },
+            { x: 0, y: 100 }
+          ],
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+          objectCaching: false,
+        });
+        break;
+        
+      case 'cylinder':
+        // Create group with rect and two ellipses
+        const cylinderRect = new Rect({
+          left: 0,
+          top: 15,
+          width: 80,
+          height: 70,
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+        });
+        
+        const topEllipse = new Ellipse({
+          left: 0,
+          top: 0,
+          rx: 40,
+          ry: 15,
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+        });
+        
+        const bottomEllipse = new Ellipse({
+          left: 0,
+          top: 70,
+          rx: 40,
+          ry: 15,
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+        });
+        
+        const cylinderGroup = new Group([cylinderRect, topEllipse, bottomEllipse], {
+          left: centerX - 40,
+          top: centerY - 50,
+          objectCaching: false,
+        });
+        
+        shape = cylinderGroup;
+        break;
+        
+      case 'document':
+        // Shape with folded corner
+        const points = [
+          { x: 0, y: 0 },
+          { x: 80, y: 0 },
+          { x: 100, y: 20 },
+          { x: 100, y: 100 },
+          { x: 0, y: 100 }
+        ];
+        
+        const documentShape = new Polygon({
+          points: points,
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+        });
+        
+        const foldLine = new Line([80, 0, 100, 20, 80, 20, 80, 0], {
+          stroke: '#333333',
+          strokeWidth: 1,
+          fill: '',
+        });
+        
+        const documentGroup = new Group([documentShape, foldLine], {
+          left: centerX - 50,
+          top: centerY - 50,
+          objectCaching: false,
+        });
+        
+        shape = documentGroup;
+        break;
+        
+      case 'cloud':
+        // Create cloud path
+        const cloudPath = 'M25,60 Q10,60 10,50 Q10,35 25,35 Q25,10 50,10 Q80,10 80,35 Q95,35 95,50 Q95,60 80,60 Z';
+        shape = new Path(cloudPath, {
+          left: centerX - 50,
+          top: centerY - 35,
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+          scaleX: 1,
+          scaleY: 1,
+          objectCaching: false,
+        });
+        break;
+        
+      case 'speech-bubble':
+        // Create speech bubble path
+        const bubblePath = 'M10,0 Q0,0 0,10 L0,70 Q0,80 10,80 L50,80 L60,100 L70,80 L90,80 Q100,80 100,70 L100,10 Q100,0 90,0 Z';
+        shape = new Path(bubblePath, {
+          left: centerX - 50,
+          top: centerY - 50,
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+          scaleX: 1,
+          scaleY: 1,
+          objectCaching: false,
+        });
+        break;
+        
+      case 'note':
+        // Create note with folded corner
+        const notePath = 'M0,0 L70,0 L70,70 L85,55 L85,100 L0,100 Z';
+        shape = new Path(notePath, {
+          left: centerX - 42.5,
+          top: centerY - 50,
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+          scaleX: 1,
+          scaleY: 1,
+          objectCaching: false,
+        });
+        break;
+        
+      case 'person':
+        // Create simple stick figure
+        const head = new Circle({
+          radius: 15,
+          left: 0,
+          top: 0,
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+        });
+        
+        const body = new Line([15, 30, 15, 70], {
+          stroke: '#333333',
+          strokeWidth: 2,
+        });
+        
+        const leftArm = new Line([15, 40, 0, 55], {
+          stroke: '#333333',
+          strokeWidth: 2,
+        });
+        
+        const rightArm = new Line([15, 40, 30, 55], {
+          stroke: '#333333',
+          strokeWidth: 2,
+        });
+        
+        const leftLeg = new Line([15, 70, 0, 100], {
+          stroke: '#333333',
+          strokeWidth: 2,
+        });
+        
+        const rightLeg = new Line([15, 70, 30, 100], {
+          stroke: '#333333',
+          strokeWidth: 2,
+        });
+        
+        const personGroup = new Group([head, body, leftArm, rightArm, leftLeg, rightLeg], {
+          left: centerX - 20,
+          top: centerY - 50,
+          objectCaching: false,
+        });
+        
+        shape = personGroup;
+        break;
+        
       case 'arrow':
         shape = new Line([centerX - 50, centerY, centerX + 50, centerY], {
           stroke: '#333333',
@@ -360,6 +725,47 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
         (shape as any).strokeLineJoin = 'round';
         (shape as any).arrow = true;
         (shape as any).arrowHead = 'end';
+        
+        // Add arrowhead
+        const arrowHead = new Triangle({
+          width: 16,
+          height: 16,
+          left: centerX + 50,
+          top: centerY,
+          angle: 90,
+          fill: '#333333',
+          originX: 'center',
+          originY: 'center',
+        });
+        
+        // Group arrow with arrowhead
+        const arrowGroup = new Group([shape, arrowHead], {
+          left: centerX - 50,
+          top: centerY - 8,
+          objectCaching: false,
+        });
+        
+        shape = arrowGroup;
+        break;
+        
+      case 'line':
+        shape = new Line([centerX - 50, centerY, centerX + 50, centerY], {
+          stroke: '#333333',
+          strokeWidth: 2,
+          objectCaching: false,
+        });
+        break;
+        
+      case 'curved-line':
+        const path = new Path('M 0 0 Q 50 -50 100 0', {
+          fill: '',
+          stroke: '#333333',
+          strokeWidth: 2,
+          left: centerX - 50,
+          top: centerY,
+          objectCaching: false,
+        });
+        shape = path;
         break;
         
       case 'text':
@@ -428,31 +834,247 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
                   General
                 </AccordionTrigger>
                 <AccordionContent className="pt-0 pb-1">
-                  <div className="grid grid-cols-3 gap-1 px-2">
+                  <div className="grid grid-cols-5 gap-1 px-2">
+                    {/* First row */}
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center"
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
                       onClick={() => handleAddShape('rectangle')}
                     >
-                      <SquareIcon className="h-6 w-6" />
+                      <div className="border border-foreground w-full h-full"></div>
                     </Button>
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center"
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('round-rectangle')}
+                    >
+                      <div className="border border-foreground w-full h-full rounded-md"></div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('text')}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-xs">Text</span>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('text-box')}
+                    >
+                      <div className="border border-foreground w-full h-2/3 flex items-center justify-center">
+                        <span className="text-[8px]">Text</span>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('ellipse')}
+                    >
+                      <div className="border border-foreground w-full h-full rounded-full"></div>
+                    </Button>
+                    
+                    {/* Second row */}
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('square')}
+                    >
+                      <div className="border border-foreground w-full h-full"></div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
                       onClick={() => handleAddShape('circle')}
                     >
-                      <CircleIcon className="h-6 w-6" />
+                      <div className="border border-foreground w-full h-full rounded-full"></div>
                     </Button>
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      className="h-10 w-full aspect-square flex items-center justify-center"
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('rectangle')}
+                    >
+                      <div className="border border-foreground w-full h-3/5"></div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon"
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('diamond')}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="border border-foreground w-4/5 h-4/5" style={{ transform: 'rotate(45deg)' }}></div>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('parallelogram')}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <div className="border border-foreground w-full h-4/5" style={{ transform: 'skew(-15deg)' }}></div>
+                      </div>
+                    </Button>
+                    
+                    {/* Third row */}
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('hexagon')}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg viewBox="0 0 100 100" className="w-full h-full">
+                          <polygon points="25,0 75,0 100,50 75,100 25,100 0,50" fill="none" stroke="currentColor" />
+                        </svg>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
                       onClick={() => handleAddShape('triangle')}
                     >
-                      <TriangleIcon className="h-6 w-6" />
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg viewBox="0 0 100 100" className="w-full h-full">
+                          <polygon points="50,10 90,90 10,90" fill="none" stroke="currentColor" />
+                        </svg>
+                      </div>
                     </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('cylinder')}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg viewBox="0 0 100 100" className="w-full h-full">
+                          <ellipse cx="50" cy="20" rx="30" ry="10" fill="none" stroke="currentColor" />
+                          <ellipse cx="50" cy="80" rx="30" ry="10" fill="none" stroke="currentColor" />
+                          <line x1="20" y1="20" x2="20" y2="80" stroke="currentColor" />
+                          <line x1="80" y1="20" x2="80" y2="80" stroke="currentColor" />
+                        </svg>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('cloud')}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg viewBox="0 0 100 100" className="w-full h-full">
+                          <path d="M25,60 Q10,60 10,50 Q10,35 25,35 Q25,10 50,10 Q80,10 80,35 Q95,35 95,50 Q95,60 80,60 Z" fill="none" stroke="currentColor" />
+                        </svg>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('speech-bubble')}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg viewBox="0 0 100 100" className="w-full h-full">
+                          <path d="M10,10 Q0,10 0,20 L0,70 Q0,80 10,80 L50,80 L60,100 L70,80 L90,80 Q100,80 100,70 L100,20 Q100,10 90,10 Z" fill="none" stroke="currentColor" />
+                        </svg>
+                      </div>
+                    </Button>
+                    
+                    {/* Fourth row */}
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('document')}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg viewBox="0 0 100 100" className="w-full h-full">
+                          <path d="M10,10 L70,10 L90,30 L90,90 L10,90 Z" fill="none" stroke="currentColor" />
+                          <path d="M70,10 L70,30 L90,30" fill="none" stroke="currentColor" />
+                        </svg>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('note')}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg viewBox="0 0 100 100" className="w-full h-full">
+                          <path d="M10,10 L70,10 L70,70 L90,50 L90,90 L10,90 Z" fill="none" stroke="currentColor" />
+                        </svg>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('person')}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg viewBox="0 0 100 100" className="w-full h-full">
+                          <circle cx="50" cy="25" r="15" fill="none" stroke="currentColor" />
+                          <line x1="50" y1="40" x2="50" y2="75" stroke="currentColor" />
+                          <line x1="30" y1="55" x2="70" y2="55" stroke="currentColor" />
+                          <line x1="35" y1="90" x2="50" y2="75" stroke="currentColor" />
+                          <line x1="65" y1="90" x2="50" y2="75" stroke="currentColor" />
+                        </svg>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('arrow')}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg viewBox="0 0 100 50" className="w-full h-full">
+                          <line x1="10" y1="25" x2="80" y2="25" stroke="currentColor" strokeWidth="2" />
+                          <polygon points="80,25 70,15 70,35" fill="currentColor" />
+                        </svg>
+                      </div>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('curved-line')}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg viewBox="0 0 100 50" className="w-full h-full">
+                          <path d="M10,40 Q50,0 90,40" fill="none" stroke="currentColor" strokeWidth="2" />
+                        </svg>
+                      </div>
+                    </Button>
+                    
+                    {/* Fifth row */}
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square flex items-center justify-center p-1"
+                      onClick={() => handleAddShape('line')}
+                    >
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg viewBox="0 0 100 50" className="w-full h-full">
+                          <line x1="10" y1="25" x2="90" y2="25" stroke="currentColor" strokeWidth="2" />
+                        </svg>
+                      </div>
+                    </Button>
+                    
+                    {/* Add more shapes as needed */}
                   </div>
                 </AccordionContent>
               </AccordionItem>
