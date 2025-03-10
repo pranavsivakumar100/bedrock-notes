@@ -24,6 +24,7 @@ import {
   Download,
   Trash2,
   PanelLeft,
+  PanelRight,
   ArrowLeft,
   Layers,
   Undo,
@@ -357,7 +358,7 @@ const DiagramEditor: React.FC = () => {
             className="h-8 gap-1"
             onClick={toggleSidebar}
           >
-            <PanelLeft className="h-4 w-4 mr-1" />
+            <PanelRight className="h-4 w-4 mr-1" />
             {sidebarOpen ? 'Hide' : 'Show'} Tools
           </Button>
           
@@ -411,24 +412,7 @@ const DiagramEditor: React.FC = () => {
         direction="horizontal" 
         className="flex-1 h-[calc(100vh-48px)] relative"
       >
-        {sidebarOpen && (
-          <>
-            <ResizablePanel 
-              defaultSize={20} 
-              minSize={15}
-              maxSize={40}
-              className="border-r border-border/40"
-            >
-              <DiagramSidebar 
-                canvas={canvas} 
-                selectedElement={selectedElement} 
-                setSelectedElement={setSelectedElement}
-              />
-            </ResizablePanel>
-            <ResizableHandle withHandle />
-          </>
-        )}
-        
+        {/* Canvas Panel (First) */}
         <ResizablePanel defaultSize={sidebarOpen ? 80 : 100}>
           <div className="flex-1 flex flex-col relative h-full">
             <DiagramToolbar canvas={canvas} />
@@ -441,6 +425,25 @@ const DiagramEditor: React.FC = () => {
             </div>
           </div>
         </ResizablePanel>
+        
+        {/* Sidebar Panel (Second) */}
+        {sidebarOpen && (
+          <>
+            <ResizableHandle withHandle />
+            <ResizablePanel 
+              defaultSize={20} 
+              minSize={15}
+              maxSize={40}
+              className="border-l border-border/40"
+            >
+              <DiagramSidebar 
+                canvas={canvas} 
+                selectedElement={selectedElement} 
+                setSelectedElement={setSelectedElement}
+              />
+            </ResizablePanel>
+          </>
+        )}
       </ResizablePanelGroup>
       
       <Dialog open={confirmDelete} onOpenChange={setConfirmDelete}>
