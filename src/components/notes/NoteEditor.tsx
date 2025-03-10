@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Check } from 'lucide-react';
@@ -9,7 +8,7 @@ import { addNote, getNotes, updateNote } from '@/lib/storage';
 import EditorHeader from './EditorHeader';
 import EditorArea from './EditorArea';
 import useEditorFormatting from '@/hooks/useEditorFormatting';
-import { getTags } from '@/lib/tags-storage';
+import { getTags, updateTagsForNote } from '@/lib/tags-storage';
 
 interface NoteEditorProps {
   noteId?: string;
@@ -23,9 +22,12 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
   const [isSaving, setIsSaving] = useState(false);
   
   // Load tags to display in the header
-  const tags = getTags();
+  const [tags, setTags] = useState(getTags());
   
   useEffect(() => {
+    // Refresh tags when component mounts
+    setTags(getTags());
+    
     if (noteId && noteId !== 'new') {
       const notes = getNotes();
       const foundNote = notes.find(n => n.id === noteId);
@@ -68,6 +70,10 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
         });
         
         setNote(newNote);
+        
+        // Also update tags-notes relationship
+        updateTagsForNote(newNote.id, note.tags);
+        
         navigate(`/editor/${newNote.id}`, { replace: true });
       } else if (note) {
         const updatedNote = {
@@ -78,6 +84,9 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
         
         const savedNote = updateNote(updatedNote) as Note;
         setNote(savedNote);
+        
+        // Also update tags-notes relationship
+        updateTagsForNote(savedNote.id, savedNote.tags);
       }
       
       setIsSaving(false);
@@ -123,6 +132,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ noteId }) => {
     // Only update in storage if it's not a new note
     if (note.id !== 'new') {
       updateNote(updatedNote);
+      // Update the tags for this note in the tags storage
+      updateTagsForNote(note.id, updatedTags);
     }
     
     toast.success(hasTag ? "Tag removed from note" : "Tag added to note");
