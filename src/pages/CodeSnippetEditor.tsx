@@ -1,13 +1,15 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Play } from 'lucide-react';
+import { Play, Save } from 'lucide-react';
 import { CodeExecutionResult } from '@/lib/types';
+import { toast } from 'sonner';
+import Prism from 'prismjs';
 
 const CodeSnippetEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,6 +19,20 @@ const CodeSnippetEditor: React.FC = () => {
   const [language, setLanguage] = useState('javascript');
   const [code, setCode] = useState(isNew ? '' : 'function example() {\n  console.log("Hello from Bedrock!");\n}\n\nexample();');
   const [result, setResult] = useState<CodeExecutionResult | null>(null);
+  const editorRef = useRef<HTMLTextAreaElement>(null);
+  
+  useEffect(() => {
+    // Apply line numbers and adjust textarea height
+    if (editorRef.current) {
+      editorRef.current.style.height = 'auto';
+      editorRef.current.style.height = `${editorRef.current.scrollHeight}px`;
+    }
+  }, [code]);
+
+  const handleSave = () => {
+    // This would save to a database in a real app
+    toast.success("Code snippet saved successfully");
+  };
 
   const handleRunCode = () => {
     if (language === 'javascript' || language === 'typescript') {
@@ -67,6 +83,7 @@ const CodeSnippetEditor: React.FC = () => {
         output: `Running ${language} code is not supported in the browser. This would be handled by a backend service in a production environment.`, 
         isError: false 
       });
+      toast.info("Backend execution is not available in this preview");
     }
   };
 
@@ -108,7 +125,11 @@ const CodeSnippetEditor: React.FC = () => {
           </Select>
         </div>
         
-        <div className="flex items-end">
+        <div className="flex items-end gap-2 justify-end">
+          <Button onClick={handleSave} variant="outline" className="gap-2">
+            <Save className="h-4 w-4" />
+            Save
+          </Button>
           <Button onClick={handleRunCode} className="gap-2">
             <Play className="h-4 w-4" />
             Run Code
@@ -119,22 +140,28 @@ const CodeSnippetEditor: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="flex flex-col">
           <Label htmlFor="code-editor" className="mb-2">Code</Label>
-          <textarea
-            id="code-editor"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            className="font-mono text-sm flex-1 p-4 rounded-md border min-h-[300px] bg-muted/50"
-            placeholder="Write your code here..."
-          />
+          <div className="font-mono text-sm flex-1 p-0 rounded-md border min-h-[300px] bg-[#1f2937] overflow-hidden">
+            <div className="p-4 relative h-full">
+              <textarea
+                ref={editorRef}
+                id="code-editor"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                className="font-mono text-sm flex-1 p-0 resize-none absolute inset-0 w-full h-full bg-transparent text-gray-300 border-0 focus:ring-0 outline-none"
+                placeholder="Write your code here..."
+                spellCheck="false"
+              />
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-col">
           <Label className="mb-2">Output</Label>
-          <Card className="flex-1">
+          <Card className="flex-1 border-[#374151] bg-[#1f2937]">
             <CardContent className="p-0">
               <pre 
                 className={`font-mono text-sm p-4 overflow-auto min-h-[300px] ${
-                  result?.isError ? 'text-destructive' : 'text-foreground'
+                  result?.isError ? 'text-red-400' : 'text-gray-300'
                 }`}
               >
                 {result ? result.output : 'Code output will appear here after running'}

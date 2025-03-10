@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
   Select, 
@@ -11,6 +11,26 @@ import {
 import { Play, Copy, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import Prism from 'prismjs';
+
+// Import Prism core styles
+import 'prismjs/themes/prism.css';
+// Import additional languages
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-typescript';
+import 'prismjs/components/prism-python';
+import 'prismjs/components/prism-java';
+import 'prismjs/components/prism-c';
+import 'prismjs/components/prism-cpp';
+import 'prismjs/components/prism-csharp';
+import 'prismjs/components/prism-ruby';
+import 'prismjs/components/prism-go';
+import 'prismjs/components/prism-rust';
+import 'prismjs/components/prism-markup'; // HTML
+import 'prismjs/components/prism-css';
+import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-bash';
+import 'prismjs/components/prism-sql';
 
 interface CodeSnippetProps {
   code: string;
@@ -36,6 +56,25 @@ const supportedLanguages = [
   { value: 'sql', label: 'SQL' },
 ];
 
+// Map markdown language identifiers to Prism language classes
+const languageMap: Record<string, string> = {
+  javascript: 'language-javascript',
+  typescript: 'language-typescript',
+  python: 'language-python',
+  java: 'language-java',
+  c: 'language-c',
+  cpp: 'language-cpp',
+  csharp: 'language-csharp',
+  ruby: 'language-ruby',
+  go: 'language-go',
+  rust: 'language-rust',
+  html: 'language-html',
+  css: 'language-css',
+  json: 'language-json',
+  bash: 'language-bash',
+  sql: 'language-sql',
+};
+
 const CodeSnippet: React.FC<CodeSnippetProps> = ({ 
   code, 
   language,
@@ -45,6 +84,13 @@ const CodeSnippet: React.FC<CodeSnippetProps> = ({
   const [isRunning, setIsRunning] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState(language || 'javascript');
+  const codeRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (codeRef.current) {
+      Prism.highlightElement(codeRef.current);
+    }
+  }, [code, selectedLanguage]);
 
   const handleLanguageChange = (value: string) => {
     setSelectedLanguage(value);
@@ -92,7 +138,6 @@ const CodeSnippet: React.FC<CodeSnippetProps> = ({
         }
       } else {
         // For other languages, we would need a backend service
-        // For now, we'll just display a message
         setOutput(`Running ${selectedLanguage} code requires a backend service which is not yet implemented.`);
         toast.info("Backend execution is not available in this preview");
       }
@@ -109,15 +154,15 @@ const CodeSnippet: React.FC<CodeSnippetProps> = ({
   };
 
   return (
-    <div className="rounded-lg overflow-hidden border border-border/50 my-4">
-      <div className="bg-muted/50 px-4 py-2 flex items-center justify-between">
+    <div className="rounded-lg overflow-hidden border border-border/50 my-4 bg-[#1f2937] shadow-lg">
+      <div className="bg-[#111827] px-4 py-2 flex items-center justify-between border-b border-[#374151]">
         <Select value={selectedLanguage} onValueChange={handleLanguageChange}>
-          <SelectTrigger className="w-40 h-8">
+          <SelectTrigger className="w-40 h-8 bg-[#1f2937] border-[#374151] text-gray-300">
             <SelectValue placeholder="Select language" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-[#1f2937] border-[#374151]">
             {supportedLanguages.map(lang => (
-              <SelectItem key={lang.value} value={lang.value}>
+              <SelectItem key={lang.value} value={lang.value} className="text-gray-300 focus:bg-[#374151] focus:text-white">
                 {lang.label}
               </SelectItem>
             ))}
@@ -128,7 +173,7 @@ const CodeSnippet: React.FC<CodeSnippetProps> = ({
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-8 w-8" 
+            className="h-8 w-8 text-gray-300 hover:text-white hover:bg-[#374151]" 
             onClick={copyCode}
           >
             {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -140,7 +185,7 @@ const CodeSnippet: React.FC<CodeSnippetProps> = ({
               size="sm" 
               onClick={runCode} 
               disabled={isRunning}
-              className="h-8"
+              className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700"
             >
               <Play className="h-3.5 w-3.5 mr-1" />
               {isRunning ? 'Running...' : 'Run'}
@@ -149,17 +194,21 @@ const CodeSnippet: React.FC<CodeSnippetProps> = ({
         </div>
       </div>
       
-      <pre className={cn(
-        "p-4 overflow-auto text-sm font-mono", 
-        (selectedLanguage === 'javascript' || selectedLanguage === 'typescript') && "rounded-t-none rounded-b-lg"
-      )}>
-        <code>{code}</code>
-      </pre>
+      <div className="p-4 overflow-auto max-h-[500px] text-[#e2e8f0]">
+        <pre className="!bg-transparent !p-0 !m-0 !overflow-visible">
+          <code 
+            ref={codeRef}
+            className={cn(languageMap[selectedLanguage] || 'language-plaintext')}
+          >
+            {code}
+          </code>
+        </pre>
+      </div>
       
       {output !== null && (
-        <div className="border-t border-border/50 bg-background/50">
-          <div className="px-4 py-2 text-sm font-medium">Output</div>
-          <pre className="p-4 overflow-auto max-h-40 text-sm font-mono bg-black/5 dark:bg-white/5">
+        <div className="border-t border-[#374151] bg-[#111827]">
+          <div className="px-4 py-2 text-sm font-medium text-gray-300">Output</div>
+          <pre className="p-4 overflow-auto max-h-60 text-sm font-mono text-gray-300">
             {output || 'No output'}
           </pre>
         </div>
