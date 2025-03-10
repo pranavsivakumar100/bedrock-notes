@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Canvas, Object as FabricObject, Group, Line, IText, Rect } from 'fabric';
+import { Canvas, Object as FabricObject, Group, Line, IText, Rect, Circle, Triangle } from 'fabric';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Palette,
@@ -40,6 +40,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { toast } from 'sonner';
 
 interface DiagramSidebarProps {
   canvas: Canvas | null;
@@ -296,6 +297,94 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
   const dimensions = getObjectDimensions();
   const position = getObjectPosition();
   
+  const handleAddShape = (shapeType: string) => {
+    if (!canvas) {
+      toast.error("Canvas not initialized");
+      return;
+    }
+    
+    let shape: FabricObject | null = null;
+    const centerX = canvas.getWidth() / 2;
+    const centerY = canvas.getHeight() / 2;
+    
+    switch (shapeType) {
+      case 'rectangle':
+        shape = new Rect({
+          left: centerX - 50,
+          top: centerY - 50,
+          width: 100,
+          height: 100,
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+          objectCaching: false,
+        });
+        break;
+        
+      case 'circle':
+        shape = new Circle({
+          left: centerX - 50,
+          top: centerY - 50,
+          radius: 50,
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+          objectCaching: false,
+        });
+        break;
+        
+      case 'triangle':
+        shape = new Triangle({
+          left: centerX - 50,
+          top: centerY - 50,
+          width: 100,
+          height: 100,
+          fill: '#f0f0f0',
+          stroke: '#333333',
+          strokeWidth: 1,
+          objectCaching: false,
+        });
+        break;
+        
+      case 'arrow':
+        shape = new Line([centerX - 50, centerY, centerX + 50, centerY], {
+          stroke: '#333333',
+          strokeWidth: 2,
+          objectCaching: false,
+        });
+        
+        (shape as any).strokeLineCap = 'round';
+        (shape as any).strokeLineJoin = 'round';
+        (shape as any).arrow = true;
+        (shape as any).arrowHead = 'end';
+        break;
+        
+      case 'text':
+        shape = new IText('Text', {
+          left: centerX - 50,
+          top: centerY - 25,
+          fill: '#333333',
+          fontSize: 20,
+          fontFamily: 'Arial',
+          objectCaching: false,
+        });
+        break;
+        
+      default:
+        toast.error("Unknown shape type");
+        return;
+    }
+    
+    if (shape) {
+      canvas.add(shape);
+      canvas.setActiveObject(shape);
+      canvas.renderAll();
+      setSelectedElement(shape);
+      
+      toast.success(`Added ${shapeType}`);
+    }
+  };
+  
   return (
     <div className="w-full h-full border-l border-border/40 flex flex-col bg-background">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
@@ -337,13 +426,28 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
                 </AccordionTrigger>
                 <AccordionContent className="pt-0 pb-1">
                   <div className="grid grid-cols-3 gap-1 px-2">
-                    <Button variant="outline" size="icon" className="h-10 w-full aspect-square">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square"
+                      onClick={() => handleAddShape('rectangle')}
+                    >
                       <SquareIcon className="h-6 w-6" />
                     </Button>
-                    <Button variant="outline" size="icon" className="h-10 w-full aspect-square">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square"
+                      onClick={() => handleAddShape('circle')}
+                    >
                       <div className="rounded-full border-2 h-6 w-6"></div>
                     </Button>
-                    <Button variant="outline" size="icon" className="h-10 w-full aspect-square">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square"
+                      onClick={() => handleAddShape('triangle')}
+                    >
                       <div className="h-6 w-6 border-2 border-primary rotate-45"></div>
                     </Button>
                   </div>
@@ -356,13 +460,28 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
                 </AccordionTrigger>
                 <AccordionContent className="pt-0 pb-1">
                   <div className="grid grid-cols-3 gap-1 px-2">
-                    <Button variant="outline" size="icon" className="h-10 w-full aspect-square">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square"
+                      onClick={() => handleAddShape('rectangle')}
+                    >
                       <SquareIcon className="h-6 w-6" />
                     </Button>
-                    <Button variant="outline" size="icon" className="h-10 w-full aspect-square">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square"
+                      onClick={() => handleAddShape('circle')}
+                    >
                       <div className="rounded-full border-2 h-6 w-6"></div>
                     </Button>
-                    <Button variant="outline" size="icon" className="h-10 w-full aspect-square">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square"
+                      onClick={() => handleAddShape('triangle')}
+                    >
                       <div className="rotate-180 w-0 h-0 border-l-[12px] border-l-transparent border-b-[20px] border-b-current border-r-[12px] border-r-transparent"></div>
                     </Button>
                   </div>
@@ -375,7 +494,12 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
                 </AccordionTrigger>
                 <AccordionContent className="pt-0 pb-1">
                   <div className="grid grid-cols-3 gap-1 px-2">
-                    <Button variant="outline" size="icon" className="h-10 w-full aspect-square">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square"
+                      onClick={() => handleAddShape('arrow')}
+                    >
                       <ArrowRightIcon className="h-6 w-6" />
                     </Button>
                   </div>
@@ -388,7 +512,12 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
                 </AccordionTrigger>
                 <AccordionContent className="pt-0 pb-1">
                   <div className="grid grid-cols-3 gap-1 px-2">
-                    <Button variant="outline" size="icon" className="h-10 w-full aspect-square">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square"
+                      onClick={() => handleAddShape('rectangle')}
+                    >
                       <div className="w-6 h-6 border-2 rounded-sm flex items-center justify-center">
                         <div className="w-4 h-4 border-b-2 border-r-2 rotate-45"></div>
                       </div>
@@ -403,7 +532,12 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
                 </AccordionTrigger>
                 <AccordionContent className="pt-0 pb-1">
                   <div className="grid grid-cols-3 gap-1 px-2">
-                    <Button variant="outline" size="icon" className="h-10 w-full aspect-square">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square"
+                      onClick={() => handleAddShape('triangle')}
+                    >
                       <div className="h-6 w-6 border-2 rotate-45"></div>
                     </Button>
                   </div>
@@ -416,7 +550,12 @@ const DiagramSidebar: React.FC<DiagramSidebarProps> = ({
                 </AccordionTrigger>
                 <AccordionContent className="pt-0 pb-1">
                   <div className="grid grid-cols-3 gap-1 px-2">
-                    <Button variant="outline" size="icon" className="h-10 w-full aspect-square">
+                    <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-10 w-full aspect-square"
+                      onClick={() => handleAddShape('text')}
+                    >
                       <div className="h-6 w-6 border-2 flex flex-col">
                         <div className="border-b h-1/3 w-full"></div>
                       </div>
