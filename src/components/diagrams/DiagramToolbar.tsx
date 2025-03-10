@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Canvas, Rect, Circle as FabricCircle, Triangle as FabricTriangle, Path, IText, Group, Line, util as fabricUtil } from 'fabric';
 import { 
@@ -79,7 +78,6 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
   const [connectionStyle, setConnectionStyle] = useState<ConnectionStyle>('straight');
   const [zoomPercent, setZoomPercent] = useState(100);
   
-  // Use the canvas history hook for undo/redo
   const { undo: handleHistoryUndo, redo: handleHistoryRedo } = useCanvasHistory(canvas);
 
   const handleToolSelect = (tool: Tool) => {
@@ -543,13 +541,13 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
 
   return (
     <div className="border-b border-border/40 bg-background/80 backdrop-blur-sm">
-      <div className="flex items-center px-1 py-0.5">
-        <div className="flex items-center gap-0.5 mr-2">
+      <div className="flex items-center px-2 py-1">
+        <div className="flex items-center gap-1 mr-2">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleZoom('out')}>
-                  <ZoomOut className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => handleZoom('out')}>
+                  <ZoomOut className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -558,13 +556,13 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
             </Tooltip>
           </TooltipProvider>
           
-          <div className="min-w-[48px] text-xs text-center">{zoomPercent}%</div>
+          <div className="min-w-[48px] text-sm text-center">{zoomPercent}%</div>
           
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleZoom('in')}>
-                  <ZoomIn className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => handleZoom('in')}>
+                  <ZoomIn className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -576,12 +574,12 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         
         <Separator orientation="vertical" className="h-8 mx-1" />
         
-        <div className="flex items-center gap-0.5 mr-2">
+        <div className="flex items-center gap-1 mr-2">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleUndo}>
-                  <UndoIcon className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-10 w-10" onClick={handleUndo}>
+                  <UndoIcon className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -593,8 +591,8 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleRedo}>
-                  <RedoIcon className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-10 w-10" onClick={handleRedo}>
+                  <RedoIcon className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -606,12 +604,12 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         
         <Separator orientation="vertical" className="h-8 mx-1" />
         
-        <div className="flex items-center gap-0.5 mr-2">
+        <div className="flex items-center gap-1 mr-2">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleDelete}>
-                  <Trash2 className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-10 w-10" onClick={handleDelete}>
+                  <Trash2 className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -623,8 +621,8 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCopy}>
-                  <Copy className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-10 w-10" onClick={handleCopy}>
+                  <Copy className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -636,8 +634,8 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleCut}>
-                  <Scissors className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-10 w-10" onClick={handleCut}>
+                  <Scissors className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -649,7 +647,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         
         <Separator orientation="vertical" className="h-8 mx-1" />
         
-        <div className="flex items-center gap-0.5 mr-2">
+        <div className="flex items-center gap-1 mr-2">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -657,9 +655,9 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
                   pressed={activeTool === 'select'}
                   onPressedChange={() => handleToolSelect('select')}
                   aria-label="Select tool"
-                  className="h-8 w-8 data-[state=on]:bg-accent"
+                  className="h-10 w-10 data-[state=on]:bg-accent"
                 >
-                  <MousePointer className="h-4 w-4" />
+                  <MousePointer className="h-5 w-5" />
                 </Toggle>
               </TooltipTrigger>
               <TooltipContent>
@@ -675,9 +673,9 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
                   pressed={activeTool === 'draw'}
                   onPressedChange={() => handleToolSelect('draw')}
                   aria-label="Draw tool"
-                  className="h-8 w-8 data-[state=on]:bg-accent"
+                  className="h-10 w-10 data-[state=on]:bg-accent"
                 >
-                  <Pencil className="h-4 w-4" />
+                  <Pencil className="h-5 w-5" />
                 </Toggle>
               </TooltipTrigger>
               <TooltipContent>
@@ -693,9 +691,9 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
                   pressed={activeTool === 'text'}
                   onPressedChange={() => handleAddShape('text')}
                   aria-label="Text tool"
-                  className="h-8 w-8 data-[state=on]:bg-accent"
+                  className="h-10 w-10 data-[state=on]:bg-accent"
                 >
-                  <Type className="h-4 w-4" />
+                  <Type className="h-5 w-5" />
                 </Toggle>
               </TooltipTrigger>
               <TooltipContent>
@@ -707,7 +705,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         
         <Separator orientation="vertical" className="h-8 mx-1" />
         
-        <div className="flex items-center gap-0.5 mr-2">
+        <div className="flex items-center gap-1 mr-2">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -715,9 +713,9 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
                   pressed={activeTool === 'lineConnect'}
                   onPressedChange={() => handleToolSelect('lineConnect')}
                   aria-label="Connect tool"
-                  className="h-8 w-8 data-[state=on]:bg-accent"
+                  className="h-10 w-10 data-[state=on]:bg-accent"
                 >
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="h-5 w-5" />
                 </Toggle>
               </TooltipTrigger>
               <TooltipContent>
@@ -733,9 +731,9 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
                   pressed={activeTool === 'bezierConnect'}
                   onPressedChange={() => handleToolSelect('bezierConnect')}
                   aria-label="Bezier Connect tool"
-                  className="h-8 w-8 data-[state=on]:bg-accent"
+                  className="h-10 w-10 data-[state=on]:bg-accent"
                 >
-                  <GitBranch className="h-4 w-4" />
+                  <GitBranch className="h-5 w-5" />
                 </Toggle>
               </TooltipTrigger>
               <TooltipContent>
@@ -747,12 +745,12 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
         
         <Separator orientation="vertical" className="h-8 mx-1" />
         
-        <div className="flex items-center gap-0.5 mr-2">
+        <div className="flex items-center gap-1 mr-2">
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleAddShape('square')}>
-                  <Square className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => handleAddShape('square')}>
+                  <Square className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -764,8 +762,8 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleAddShape('circle')}>
-                  <CircleIcon className="h-4 w-4" />
+                <Button variant="ghost" size="icon" className="h-10 w-10" onClick={() => handleAddShape('circle')}>
+                  <CircleIcon className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
@@ -776,8 +774,8 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
           
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <Shapes className="h-4 w-4" />
+              <Button variant="ghost" size="icon" className="h-10 w-10">
+                <Shapes className="h-5 w-5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -802,7 +800,7 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
               id="stroke-color"
               value={drawingColor}
               onChange={handleColorChange}
-              className="w-6 h-6 border-0"
+              className="w-8 h-8 border-0"
             />
           </div>
           
@@ -813,15 +811,15 @@ const DiagramToolbar: React.FC<DiagramToolbarProps> = ({ canvas }) => {
               id="fill-color"
               value={fill === 'transparent' ? '#ffffff' : fill}
               onChange={handleFillChange}
-              className="w-6 h-6 border-0"
+              className="w-8 h-8 border-0"
             />
             <Toggle
               pressed={fill === 'transparent'}
               onPressedChange={() => setFill(fill === 'transparent' ? '#ffffff' : 'transparent')}
               aria-label="Toggle transparent fill"
-              className="h-7 w-7"
+              className="h-8 w-8"
             >
-              <BoxSelect className="h-4 w-4" />
+              <BoxSelect className="h-5 w-5" />
             </Toggle>
           </div>
         </div>
