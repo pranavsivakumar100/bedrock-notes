@@ -71,7 +71,7 @@ const Index: React.FC = () => {
         <div className="bg-muted/30 border rounded-lg p-6 mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <h2 className="text-xl font-semibold mb-2">Welcome to CodeChime Notes</h2>
+              <h2 className="text-xl font-semibold mb-2">Welcome to Bedrock Notes</h2>
               <p className="text-muted-foreground max-w-xl">
                 Sign in to save your notes, create folders, and access your content from anywhere.
               </p>
