@@ -86,7 +86,7 @@ const Index: React.FC = () => {
       
       <div className="mb-8">
         <h1 className="text-4xl font-bold tracking-tight text-foreground mb-4">
-          Welcome to CodeChime Notes
+          Welcome to Bedrock Notes
         </h1>
         <p className="text-xl text-muted-foreground max-w-3xl">
           Your all-in-one platform for computer science notes, code snippets, and technical diagrams.
